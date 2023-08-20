@@ -1,0 +1,11 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "files.associations": {
+        "*.vsml": "xml"
+    },
+    "cSpell.words": [
+        "lavfi",
+        "lxml",
+        "vsml"
+    ]
+}
