@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="vsml" type="vsmlType"/>
+	<xs:complexType name="vsmlType">
+		<xs:sequence>
+			<xs:element type="metaType" name="meta" minOccurs="0" maxOccurs="1"/>
+			<xs:element type="contentType" name="cont" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="metaType">
+		<xs:sequence>
+			<xs:element type="styleType" name="style" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="styleType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="src" use="optional"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:group name="contentGroup">
+		<xs:choice>
+			<xs:element type="wrapType" name="wrp"/>
+			<xs:element type="wrapType" name="seq"/>
+			<xs:element type="wrapType" name="prl"/>
+			<xs:element type="wrapType" name="layer"/>
+			<xs:element type="wrapType" name="rect"/>
+			<xs:element type="sourceType" name="vid"/>
+			<xs:element type="sourceType" name="aud"/>
+			<xs:element type="sourceType" name="img"/>
+			<xs:element type="textType" name="txt"/>
+		</xs:choice>
+	</xs:group>
+	<xs:complexType name="contentType">
+		<xs:sequence>
+			<xs:group ref="contentGroup" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="style" use="optional"/>
+		<xs:attribute type="xs:string" name="class" use="optional"/>
+		<xs:attribute type="xs:string" name="id" use="optional"/>
+		<xs:attribute type="xs:string" name="resolution" use="required"/>
+		<xs:attribute type="xs:integer" name="fps" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="wrapType">
+		<xs:sequence>
+			<xs:group ref="contentGroup" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="style" use="optional"/>
+		<xs:attribute type="xs:string" name="class" use="optional"/>
+		<xs:attribute type="xs:string" name="id" use="optional"/>
+	</xs:complexType>
+	<xs:complexType name="sourceType">
+		<xs:attribute type="xs:string" name="style" use="optional"/>
+		<xs:attribute type="xs:string" name="class" use="optional"/>
+		<xs:attribute type="xs:string" name="id" use="optional"/>
+		<xs:attribute type="xs:string" name="src" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="textType" mixed="true">
+		<xs:sequence>
+			<xs:element name="br" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="style" use="optional"/>
+		<xs:attribute type="xs:string" name="class" use="optional"/>
+		<xs:attribute type="xs:string" name="id" use="optional"/>
+	</xs:complexType>
+</xs:schema>
