@@ -1,9 +1,12 @@
 from args import get_args
 from perser import parsing_vsml
 from converter import convert_video
-import os
 
 def main():
+    """
+    VSMLのメイン関数。受け取ったファイルからVSMLオブジェクトを生成し、それを元に動画を出力する。
+    """
+
     ## コマンド引数を受け取る
     args = get_args()
 

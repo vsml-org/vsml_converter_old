@@ -42,7 +42,7 @@ class SourceContent(VSMLContent):
     type: SourceContentType
     src: str
 
-    def __init__(self, vsml_element: _Element, vsml_dir: str) -> None:
+    def __init__(self, vsml_element: _Element, root_path: str) -> None:
         super().__init__(vsml_element)
         source_path = vsml_element.get('src', None)
         if source_path is None:
@@ -65,7 +65,7 @@ class SourceContent(VSMLContent):
                 case _:
                     raise Exception()
             # srcの保持
-            self.src = vsml_dir + source_path
+            self.src = root_path + source_path
 
     @staticmethod
     def __txt_convert(vsml_content: _Element) -> str:
@@ -80,10 +80,10 @@ class VSML:
     resolution: str
     fps: str
     content: Optional[VSMLContent]
-    vsml_dir: str
+    root_path: str
 
-    def __init__(self, vsml: _Element, vsml_dir: str):
-        self.vsml_dir = vsml_dir
+    def __init__(self, vsml: _Element, root_path: str):
+        self.root_path = root_path
         children = list(vsml)
 
         # metaデータの操作
@@ -93,7 +93,7 @@ class VSML:
             for style in meta:
                 src_path = style.get('src', None)
                 if src_path:
-                    with open(vsml_dir + src_path, 'r') as style_src:
+                    with open(root_path + src_path, 'r') as style_src:
                         style_data_str += style_src.read()
                 else:
                     if style.text:
@@ -115,6 +115,6 @@ class VSML:
                 if vsml_content_child is not None and vsml_content_child.type != SourceContentType.INVALID:
                     vsml_content.items.append(vsml_content_child)
         else:
-            vsml_content = SourceContent(vsml_element, self.vsml_dir)
+            vsml_content = SourceContent(vsml_element, self.root_path)
         return vsml_content
     

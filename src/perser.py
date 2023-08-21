@@ -1,22 +1,87 @@
-from os.path import dirname
-from lxml.etree import fromstring, XML, XMLSchema, XMLParser
+from os import path
+import requests
+from lxml import etree
 from vsml import VSML
+from utils import get_text_encoding
 
-CONFIG_FILE = dirname(dirname(__file__)) + '/config/vsml.xsd'
+CONFIG_FILE = 'http://vsml.pigeons.house/config/vsml.xsd'
+
+def formatting_xml(xml_text: str) -> str:
+    """
+    etreeで読み込むためにXMLのテキストから<?xmlから始まる行を削除する。
+
+    Parameters
+    ----------
+    xml_text : str
+        XMLテキスト
+    
+    Returns
+    -------
+    formatted_xml_text : str
+        整形したXMLテキスト
+    """
+
+    vsml_head, vsml_content = xml_text.split('\n', 1)
+    if '<?xml' in vsml_head:
+        return vsml_content
+    return xml_text
+
+def get_parser_with_xsd() -> etree.XMLParser:
+    """
+    独自XSDファイルを読み込んだetreeのparserオブジェクトを返す
+
+    Returns
+    -------
+    parser : XMLParser
+        XSD情報を持った、XMLのparser
+    """
+
+    xsd_text = formatting_xml(requests.get(CONFIG_FILE).text)
+    schema_root = etree.XML(xsd_text, None)
+    schema = etree.XMLSchema(schema_root)
+    return etree.XMLParser(schema = schema, remove_comments=True, remove_blank_text=True)
+
+def get_vsml_text(filename: str) -> str:
+    """
+    受け取ったVSMLファイルのパスを開き、テキスト情報を返す。
+
+    Parameters
+    ----------
+    filename : str
+        VSMLファイルのパス
+    
+    Returns
+    -------
+    vsml_text : str
+        VSMLファイルの整形されたテキスト情報
+    """
+
+    encoding = get_text_encoding(filename)
+    with open(filename, 'r', encoding=encoding) as f:
+        vsml_text = f.read()
+    return formatting_xml(vsml_text)
 
 def parsing_vsml(filename: str) -> VSML:
-    with open(CONFIG_FILE, 'r') as f:
-        next(f)
-        xsd_str = f.read()
-    schema_root = XML(xsd_str, None)
-    schema = XMLSchema(schema_root)
-    parser = XMLParser(schema = schema, remove_comments=True, remove_blank_text=True)
+    """
+    受け取ったVSMLファイルのパスを開きVSMLクラスのオブジェクトにする。
 
-    with open(filename, 'r') as f:
-        next(f)
-        vsml_str = f.read()
-    vsml_root = fromstring(vsml_str, parser)
+    Parameters
+    ----------
+    filename : str
+        VSMLファイルのパス
+    
+    Returns
+    -------
+    vsml_object : VSML
+        読み込んだファイルから生成したVSMLオブジェクト
+    """
 
-    vsml_dir = dirname(filename) + '/'
+    # 入力されたvsmlの読み込み(xsdでのバリデーション付き)
+    parser = get_parser_with_xsd()
+    vsml_text = get_vsml_text(filename)
+    vsml_element = etree.fromstring(vsml_text, parser)
 
-    return VSML(vsml_root, vsml_dir)
+    # vsmlファイルからの相対パスを想定するため、vsmlのルートパスを取得
+    vsml_root_path = path.dirname(filename) + '/'
+
+    return VSML(vsml_element, vsml_root_path)
