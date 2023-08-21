@@ -1,10 +1,7 @@
-from lxml.etree import fromstring, tostring, XML, XMLSchema, XMLParser, _Element
-import argparse
-import ffmpeg
-import os
 import re
 from typing import Optional, Any
 from enum import Enum
+from lxml.etree import tostring, _Element
 
 class SortType(Enum):
     SEQUENCE = 'sequence'
@@ -121,59 +118,3 @@ class VSML:
             vsml_content = SourceContent(vsml_element, self.vsml_dir)
         return vsml_content
     
-def init_parser():
-    parser = argparse.ArgumentParser(description='command line tool to struct video from xml')
-    parser.add_argument(
-        'filename',
-        metavar='filename',
-        type=str,
-        help='file name to convert xml',
-    )
-    parser.add_argument(
-        '-o',
-        '--output',
-        metavar='output_path',
-        type=str,
-        help='path to output video',
-    )
-    return parser
-
-def parsing_vsml(filename: str) -> VSML:
-    with open('./config/vsml.xsd', 'r') as f:
-        next(f)
-        xsd_str = f.read()
-    schema_root = XML(xsd_str, None)
-    schema = XMLSchema(schema_root)
-    parser = XMLParser(schema = schema, remove_comments=True, remove_blank_text=True)
-
-    with open(filename, 'r') as f:
-        next(f)
-        vsml_str = f.read()
-    vsml_root = fromstring(vsml_str, parser)
-
-    vsml_dir = str(os.path.dirname(filename)) + '/'
-
-    return VSML(vsml_root, vsml_dir)
-
-def struct_video(vsml_data: VSML, out_filename: Optional[str]):
-    if out_filename is None:
-        out_filename = 'video.mp4'
-    process = (
-        ffmpeg.input(f'color=r={vsml_data.fps}:s={vsml_data.resolution}:d=1', f='lavfi')
-            .output(out_filename)
-    )
-    process.run()
-
-def main():
-    ## コマンド引数を受け取る
-    parser = init_parser()
-    args = parser.parse_args()
-
-    ## ファイルのVSMLを解析
-    vsml_data = parsing_vsml(args.filename)
-
-    ## 解析したデータをもとにffmpegで動画を構築
-    struct_video(vsml_data, args.output)
-
-if __name__ == '__main__':
-    main()
