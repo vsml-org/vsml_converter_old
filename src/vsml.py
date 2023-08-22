@@ -1,5 +1,5 @@
 import re
-from typing import Optional, Any
+from typing import Optional, Union
 from enum import Enum
 from lxml.etree import tostring, _Element
 
@@ -15,7 +15,7 @@ class SourceContentType(Enum):
 
 class VSMLContent:
     tag_name: str
-    type: Any
+    type: Union[SortType, SourceContentType]
 
     def __init__(self, vsml_element: _Element) -> None:
         self.tag_name = vsml_element.tag
@@ -84,7 +84,7 @@ class VSML:
     def __init__(self, vsml: _Element, root_path: str):
         # meta, contentの取得
         children = list(vsml)
-        metaElement, contentElement = children if len(children) > 1 else None, children[0]
+        metaElement, contentElement = (None, children[0]) if len(children) == 1 else children
 
         # metaデータの操作
         style_data_str = ''
