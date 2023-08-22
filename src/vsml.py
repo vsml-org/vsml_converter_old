@@ -12,7 +12,6 @@ class SourceContentType(Enum):
     AUDIO = 'audio'
     IMAGE = 'image'
     TEXT = 'text'
-    INVALID = 'invalid'
 
 class VSMLContent:
     tag_name: str
@@ -28,7 +27,7 @@ class WrapContent(VSMLContent):
     def __init__(self, vsml_element: _Element) -> None:
         super().__init__(vsml_element)
         # typeの決定
-        match vsml_element.tag:
+        match self.tag_name:
             case 'cont' | 'seq' | 'wrp':
                 self.type = SortType.SEQUENCE
             case 'prl' | 'rect' | 'layer':
@@ -45,17 +44,10 @@ class SourceContent(VSMLContent):
     def __init__(self, vsml_element: _Element, root_path: str) -> None:
         super().__init__(vsml_element)
         source_path = vsml_element.get('src', None)
-        if source_path is None:
-            if vsml_element.tag != 'txt':
-                self.type = SourceContentType.INVALID
-                return
+        # srcがある場合(txt以外)
+        if source_path:
             # typeの決定
-            self.type = SourceContentType.TEXT
-            # srcの保持
-            self.src = self.__txt_convert(vsml_element)
-        else:
-            # typeの決定
-            match vsml_element.tag:
+            match self.tag_name:
                 case 'vid':
                     self.type = SourceContentType.VIDEO
                 case 'aud':
@@ -66,9 +58,17 @@ class SourceContent(VSMLContent):
                     raise Exception()
             # srcの保持
             self.src = root_path + source_path
+        # srcがない場合(txtのみ)
+        elif self.tag_name == 'txt':
+            # typeの決定
+            self.type = SourceContentType.TEXT
+            # srcの保持
+            self.src = self.__get_text_source(vsml_element)
+        else:
+            raise Exception()
 
     @staticmethod
-    def __txt_convert(vsml_content: _Element) -> str:
+    def __get_text_source(vsml_content: _Element) -> str:
         txt_child = tostring(vsml_content, method='c14n2').decode()
         txt_child = re.sub(r'^.*?<txt.*?>', '', txt_child)
         txt_child = re.sub(r'</txt>', '', txt_child)
@@ -79,42 +79,51 @@ class SourceContent(VSMLContent):
 class VSML:
     resolution: str
     fps: str
-    content: Optional[VSMLContent]
-    root_path: str
+    content: VSMLContent
 
     def __init__(self, vsml: _Element, root_path: str):
-        self.root_path = root_path
+        # meta, contentの取得
         children = list(vsml)
+        metaElement, contentElement = children if len(children) > 1 else None, children[0]
 
         # metaデータの操作
         style_data_str = ''
-        if len(children) > 1:
-            meta = children[0]
-            for style in meta:
-                src_path = style.get('src', None)
+        if metaElement:
+            for styleElement in metaElement:
+                src_path = styleElement.get('src', None)
                 if src_path:
                     with open(root_path + src_path, 'r') as style_src:
                         style_data_str += style_src.read()
                 else:
-                    if style.text:
-                        style_data_str += style.text
+                    if styleElement.text:
+                        style_data_str += styleElement.text
 
         # contentデータの操作
-        contentElement = children[-1]
         self.resolution = contentElement.attrib['resolution']
         self.fps = contentElement.attrib['fps']
-        self.content = self.__convert_element(contentElement)
+        content = element_to_content(contentElement, root_path)
+        if content is None:
+            raise Exception()
+        self.content = content
 
-    def __convert_element(self, vsml_element: _Element) -> Optional[VSMLContent]:
-        vsml_content: Optional[VSMLContent]
-        vsml_element_children = list(vsml_element)
-        if len(vsml_element_children) > 0 and vsml_element.tag != 'txt':
-            vsml_content = WrapContent(vsml_element)
-            for vsml_element_child in vsml_element_children:
-                vsml_content_child = self.__convert_element(vsml_element_child)
-                if vsml_content_child is not None and vsml_content_child.type != SourceContentType.INVALID:
-                    vsml_content.items.append(vsml_content_child)
-        else:
-            vsml_content = SourceContent(vsml_element, self.root_path)
-        return vsml_content
-    
+def element_to_content(vsml_element: _Element, root_path: str) -> Optional[VSMLContent]:
+    # 子要素の取得
+    vsml_element_children = list(vsml_element)
+
+    # vsml_elementがSourceContentの場合
+    if len(vsml_element_children) == 0 or vsml_element.tag == 'txt':
+        vsml_content = SourceContent(vsml_element, root_path)
+    # vsml_elementがWrapContentの場合
+    else:
+        vsml_content = WrapContent(vsml_element)
+        for vsml_element_child in vsml_element_children:
+            # 子要素を再帰的にこの関数にわたす
+            vsml_content_child = element_to_content(vsml_element_child, root_path)
+            # 無効なタグ以外はitemsに追加する
+            if vsml_content_child:
+                vsml_content.items.append(vsml_content_child)
+        # itemsが存在しないWrapContentは無効なタグとする
+        if not vsml_content.items:
+            return None
+
+    return vsml_content
