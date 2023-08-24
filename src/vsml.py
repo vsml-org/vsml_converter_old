@@ -100,7 +100,7 @@ class VSML:
 
         # metaデータの操作
         style_data_str = ''
-        if metaElement:
+        if metaElement is not None:
             for styleElement in metaElement:
                 src_path = styleElement.get('src', None)
                 if src_path:
