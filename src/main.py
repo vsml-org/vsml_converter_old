@@ -1,5 +1,5 @@
 from args import get_args
-from perser import parsing_vsml
+from xml_parser import parsing_vsml
 from converter import convert_video
 
 def main():
