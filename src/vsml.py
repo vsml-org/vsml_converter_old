@@ -76,9 +76,21 @@ class SourceContent(VSMLContent):
         txt_child = re.sub(r'<br></br>', '\n', txt_child)
         return txt_child.strip()
 
+class WidthHeight:
+    width: int
+    height: int
+
+    def __init__(self, w: int, h: int) -> None:
+        self.width = w
+        self.height = h        
+
+    @classmethod
+    def from_str(cls, x_str: str):
+        return cls(*map(int, x_str.split('x')))
+
 class VSML:
-    resolution: str
-    fps: str
+    resolution: WidthHeight
+    fps: int
     content: VSMLContent
 
     def __init__(self, vsml: _Element, root_path: str):
@@ -99,8 +111,8 @@ class VSML:
                         style_data_str += styleElement.text
 
         # contentデータの操作
-        self.resolution = contentElement.attrib['resolution']
-        self.fps = contentElement.attrib['fps']
+        self.resolution = WidthHeight.from_str(contentElement.attrib['resolution'])
+        self.fps = int(contentElement.attrib['fps'])
         content = element_to_content(contentElement, root_path)
         if content is None:
             raise Exception()
