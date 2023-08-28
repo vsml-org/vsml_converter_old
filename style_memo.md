@@ -105,6 +105,9 @@
 ### position
 - position
 
+### box-shadow
+- box-shadow
+
 ### opacity
 - opacity
 
