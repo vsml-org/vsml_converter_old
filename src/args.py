@@ -15,6 +15,16 @@ def init_parser():
         type=str,
         help='path to output video',
     )
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='debug mode',
+    )
+    parser.add_argument(
+        '--overwrite',
+        action='store_true',
+        help='allow overwrite output file',
+    )
     return parser
 
 def get_args() -> Namespace:

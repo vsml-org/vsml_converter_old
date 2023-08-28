@@ -88,6 +88,9 @@ class WidthHeight:
     def from_str(cls, x_str: str):
         return cls(*map(int, x_str.split('x')))
 
+    def get_str(self) -> str:
+        return f'{self.width}x{self.height}'
+
 class VSML:
     resolution: WidthHeight
     fps: int

@@ -14,7 +14,7 @@ def main():
     vsml_data = parsing_vsml(args.filename)
 
     ## 解析したデータをもとにffmpegで動画を構築
-    convert_video(vsml_data, args.output)
+    convert_video(vsml_data, args.output, args.debug, args.overwrite)
 
 if __name__ == '__main__':
     main()
