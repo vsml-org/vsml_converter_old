@@ -2,6 +2,7 @@ import re
 from typing import Optional, Union
 from enum import Enum
 from lxml.etree import tostring, _Element
+from utils import WidthHeight
 
 class SortType(Enum):
     SEQUENCE = 'sequence'
@@ -13,24 +14,33 @@ class SourceContentType(Enum):
     IMAGE = 'image'
     TEXT = 'text'
 
+# TODO: paramをちゃんと拡張する
 class VSMLContent:
     tag_name: str
+    param: str
     type: Union[SortType, SourceContentType]
 
     def __init__(self, vsml_element: _Element) -> None:
+        self.param = ''
         self.tag_name = vsml_element.tag
 
 class WrapContent(VSMLContent):
     type: SortType
     items: list[VSMLContent]
     
+    def __str__(self) -> str:
+        item_str = ',\n'.join([str(item) for item in self.items])
+        return f'type: {self.type}\nitems: [\n{item_str}\n]'
+
     def __init__(self, vsml_element: _Element) -> None:
         super().__init__(vsml_element)
         # typeの決定
         match self.tag_name:
-            case 'cont' | 'seq' | 'wrp':
+            case 'cont' | 'seq' | 'wrp' | 'rect':
                 self.type = SortType.SEQUENCE
-            case 'prl' | 'rect' | 'layer':
+                if self.tag_name == 'rect':
+                    self.param = 'gray'
+            case 'prl' | 'layer':
                 self.type = SortType.PARALLEL
             case _:
                 raise Exception()
@@ -40,6 +50,9 @@ class WrapContent(VSMLContent):
 class SourceContent(VSMLContent):
     type: SourceContentType
     src: str
+
+    def __str__(self) -> str:
+        return f'type: {self.type} src: {self.src}'
 
     def __init__(self, vsml_element: _Element, root_path: str) -> None:
         super().__init__(vsml_element)
@@ -73,23 +86,8 @@ class SourceContent(VSMLContent):
         txt_child = re.sub(r'^.*?<txt.*?>', '', txt_child)
         txt_child = re.sub(r'</txt>', '', txt_child)
         txt_child = re.sub(r'\n\s*?', '', txt_child)
-        txt_child = re.sub(r'<br></br>', '\n', txt_child)
+        txt_child = re.sub(r'<br></br>', '\\n', txt_child)
         return txt_child.strip()
-
-class WidthHeight:
-    width: int
-    height: int
-
-    def __init__(self, w: int, h: int) -> None:
-        self.width = w
-        self.height = h        
-
-    @classmethod
-    def from_str(cls, x_str: str):
-        return cls(*map(int, x_str.split('x')))
-
-    def get_str(self) -> str:
-        return f'{self.width}x{self.height}'
 
 class VSML:
     resolution: WidthHeight
@@ -138,7 +136,7 @@ def element_to_content(vsml_element: _Element, root_path: str) -> Optional[VSMLC
             if vsml_content_child:
                 vsml_content.items.append(vsml_content_child)
         # itemsが存在しないWrapContentは無効なタグとする
-        if not vsml_content.items:
-            return None
+        # if not vsml_content.items:
+        #     return None
 
     return vsml_content

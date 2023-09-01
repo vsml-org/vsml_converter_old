@@ -13,7 +13,7 @@ def create_process(vsml_content: VSMLContent, resolution: WidthHeight, fps: int,
         processes = []
         for item in vsml_content.items:
             processes.append(create_process(item, resolution, fps, debug_mode))
-        process = create_wrap_process(processes, vsml_content.type, debug_mode)
+        process = create_wrap_process(processes, resolution, vsml_content.type, vsml_content.param, debug_mode)
     else:
         raise Exception()
 
@@ -28,6 +28,8 @@ def convert_video(vsml_data: VSML, out_filename: Optional[str], debug_mode: bool
 
     process = create_process(vsml_data.content, vsml_data.resolution, vsml_data.fps, debug_mode)
     if process is None:
+        raise Exception()
+    if process.length is None:
         raise Exception()
     match (process.video, process.audio):
         case None, None:

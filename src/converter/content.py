@@ -1,13 +1,21 @@
 import ffmpeg
 from typing import Optional
-from vsml import SourceContent, SourceContentType, WidthHeight
+from vsml import SourceContent, SourceContentType
 from .schemas import Process
+from .utils import get_transparent_process
+from utils import WidthHeight, Position
 
 def create_source_process(vsml_content: SourceContent, resolution: WidthHeight, debug_mode: bool = False) -> Optional[Process]:
     match vsml_content.type:
         case SourceContentType.IMAGE:
+            meta = ffmpeg.probe(vsml_content.src)
+            transparent_process = get_transparent_process(resolution.get_str())
             source = ffmpeg.input(vsml_content.src, loop=1).video.filter('setsar', '1/1')
-            process = Process(source, None, None)
+            source = ffmpeg.overlay(transparent_process, source)
+            process = Process(
+                source, None, None,
+                WidthHeight(meta['streams'][0]['width'], meta['streams'][0]['width']), Position(0, 0)
+            )
 
         case SourceContentType.AUDIO:
             isMono = False
@@ -26,18 +34,22 @@ def create_source_process(vsml_content: SourceContent, resolution: WidthHeight, 
             if duration is not None:
                 duration = float(duration)
 
-            process = Process(None, source, duration)
+            process = Process(None, source, duration, None, None)
 
         case SourceContentType.VIDEO:
+            existVideo = False
             existAudio = False
             isMono = False
 
             meta = ffmpeg.probe(vsml_content.src)
             for stream in meta.get('streams', []):
+                if stream.get('codec_type') == 'video':
+                    existVideo = True
                 if stream.get('codec_type') == 'audio':
                     existAudio = True
                     isMono = stream.get('channel_layout') == 'stereo'
-                    break
+            if not existVideo:
+                raise Exception()
 
             source = ffmpeg.input(vsml_content.src)
             source_audio = source.audio if existAudio else None
@@ -48,22 +60,33 @@ def create_source_process(vsml_content: SourceContent, resolution: WidthHeight, 
             if duration is not None:
                 duration = float(duration)
 
-            process = Process(source.video, source_audio, duration)
+            video_process = None
+            if source.video is not None:
+                transparent_process = get_transparent_process(resolution.get_str())
+                video_process = ffmpeg.overlay(transparent_process, source.video)
+                video_process = ffmpeg.trim(video_process, start=0, end=duration)
+
+            process = Process(
+                video_process, source_audio, duration,
+                WidthHeight(meta['streams'][0]['width'], meta['streams'][0]['width']), Position(0, 0)
+            )
 
         case SourceContentType.TEXT:
-            # TODO: テキスト対応
-            process = None
-            # process = ffmpeg.input('color=c=0x000000@0.0', f='lavfi')
-            # process = ffmpeg.filter(process, 'drawtext', text=vsml_content.src)
+            transparent_process = get_transparent_process(resolution.get_str())
+            video_process = ffmpeg.drawtext(
+                transparent_process, text=vsml_content.src,
+                fontfile='/mnt/c/Windows/Fonts/msgothic.ttc', fontsize=80, fontcolor='white'
+            )
+            # TODO: WidthHeightの計算を見直す
+            row_str_list = vsml_content.src.split('\n')
+            col_count = max(map(len, row_str_list))
+            row_count = len(row_str_list)
+            print(vsml_content)
+            print(col_count)
+            print(row_count)
+            process = Process(video_process, None, None, WidthHeight(80 * col_count, 80 * row_count), Position(0, 0))
+
         case _:
             raise Exception()
-
-    if process is not None:
-        video_process_item = process.video
-        if video_process_item is not None:
-            # TODO: ↓ここ透過画像とのconcatにしたいな
-            video_process_item = ffmpeg.filter(video_process_item, 'pad', w=f'iw+{resolution.width}', h=f'ih+{resolution.height}')
-            video_process_item = ffmpeg.crop(video_process_item, x=0, y=0, width=resolution.width, height=resolution.height)
-        process.video = video_process_item
 
     return process
