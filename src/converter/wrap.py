@@ -95,7 +95,8 @@ def create_sequence_process(processes: list[Process], resolution: WidthHeight, p
             box_process = ffmpeg.drawbox(
                 get_transparent_process(resolution.get_str()),
                 process_start_position.x, process_start_position.y,
-                process_size.width, process_size.height, 'red', 'fill'
+                process_size.width, process_size.height, 'red', 'fill',
+                replace=1
             )
             video_process = ffmpeg.overlay(box_process, video_process)
 
@@ -189,7 +190,8 @@ def create_parallel_process(processes: list[Process], resolution: WidthHeight, p
             box_process = ffmpeg.drawbox(
                 get_transparent_process(resolution.get_str()),
                 process_start_position.x, process_start_position.y,
-                process_size.width, process_size.height, 'red', 'fill'
+                process_size.width, process_size.height, 'red', 'fill',
+                replace=1
             )
             video_process = ffmpeg.overlay(box_process, video_process)
 
