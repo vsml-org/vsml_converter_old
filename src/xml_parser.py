@@ -1,4 +1,5 @@
 from os import path
+import re
 import requests
 from lxml import etree
 from vsml import VSML
@@ -21,10 +22,16 @@ def formatting_xml(xml_text: str) -> str:
         整形したXMLテキスト
     """
 
+    formatted_text = xml_text
     vsml_head, vsml_content = xml_text.split('\n', 1)
+
     if '<?xml' in vsml_head:
-        return vsml_content
-    return xml_text
+        formatted_text = vsml_content
+
+    formatted_text = formatted_text.strip()
+    formatted_text = re.sub(r'\n\s*', r'\n', formatted_text)
+
+    return formatted_text
 
 def get_parser_with_xsd() -> etree.XMLParser:
     """
