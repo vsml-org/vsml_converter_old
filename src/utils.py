@@ -2,23 +2,16 @@ import re
 from chardet import UniversalDetector
 from typing import Optional
 
-def get_text_encoding(filename: str) -> Optional[str]:
-    with open(filename, 'rb') as file:
-        detector = UniversalDetector()
-        for line in file:
-            detector.feed(line)
-            if detector.done:
-                break
-    detector.close()
-    encoding = detector.result['encoding']
-    if encoding == 'SHIFT_JIS':
-        encoding = 'CP932'
-    return encoding
+class VSMLManager:
+    root_path: str
 
-def remove_indent(text: str) -> str:
-    formatted_text = text.strip()
-    formatted_text = re.sub(r'\n\s*', r'\n', formatted_text)
-    return formatted_text
+    @staticmethod
+    def set_root_path(root_path: str):
+        VSMLManager.root_path = root_path
+
+    @staticmethod
+    def get_root_path() -> str:
+        return VSMLManager.root_path
 
 class Position:
     x: int
@@ -42,3 +35,21 @@ class WidthHeight:
 
     def get_str(self) -> str:
         return f'{self.width}x{self.height}'
+
+def get_text_encoding(filename: str) -> Optional[str]:
+    with open(filename, 'rb') as file:
+        detector = UniversalDetector()
+        for line in file:
+            detector.feed(line)
+            if detector.done:
+                break
+    detector.close()
+    encoding = detector.result['encoding']
+    if encoding == 'SHIFT_JIS':
+        encoding = 'CP932'
+    return encoding
+
+def remove_indent(text: str) -> str:
+    formatted_text = text.strip()
+    formatted_text = re.sub(r'\n\s*', r'\n', formatted_text)
+    return formatted_text

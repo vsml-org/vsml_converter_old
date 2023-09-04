@@ -2,7 +2,7 @@ import re
 from typing import Optional, Union
 from enum import Enum
 from lxml.etree import tostring, _Element
-from utils import WidthHeight
+from utils import WidthHeight, VSMLManager
 
 class SortType(Enum):
     SEQUENCE = 'sequence'
@@ -54,7 +54,7 @@ class SourceContent(VSMLContent):
     def __str__(self) -> str:
         return f'type: {self.type} src: {self.src}'
 
-    def __init__(self, vsml_element: _Element, root_path: str) -> None:
+    def __init__(self, vsml_element: _Element) -> None:
         super().__init__(vsml_element)
         source_path = vsml_element.get('src', None)
         # srcがある場合(txt以外)
@@ -70,7 +70,7 @@ class SourceContent(VSMLContent):
                 case _:
                     raise Exception()
             # srcの保持
-            self.src = root_path + source_path
+            self.src = VSMLManager.get_root_path() + source_path
         # srcがない場合(txtのみ)
         elif self.tag_name == 'txt':
             # typeの決定
@@ -94,7 +94,7 @@ class VSML:
     fps: int
     content: VSMLContent
 
-    def __init__(self, vsml: _Element, root_path: str):
+    def __init__(self, vsml: _Element):
         # meta, contentの取得
         children = list(vsml)
         metaElement, contentElement = (None, children[0]) if len(children) == 1 else children
@@ -105,7 +105,7 @@ class VSML:
             for styleElement in metaElement:
                 src_path = styleElement.get('src', None)
                 if src_path:
-                    with open(root_path + src_path, 'r') as style_src:
+                    with open(VSMLManager.get_root_path() + src_path, 'r') as style_src:
                         style_data_str += style_src.read()
                 else:
                     if styleElement.text:
@@ -114,24 +114,24 @@ class VSML:
         # contentデータの操作
         self.resolution = WidthHeight.from_str(contentElement.attrib['resolution'])
         self.fps = int(contentElement.attrib['fps'])
-        content = element_to_content(contentElement, root_path)
+        content = element_to_content(contentElement)
         if content is None:
             raise Exception()
         self.content = content
 
-def element_to_content(vsml_element: _Element, root_path: str) -> Optional[VSMLContent]:
+def element_to_content(vsml_element: _Element) -> Optional[VSMLContent]:
     # 子要素の取得
     vsml_element_children = list(vsml_element)
 
     # vsml_elementがSourceContentの場合
     if len(vsml_element_children) == 0 or vsml_element.tag == 'txt':
-        vsml_content = SourceContent(vsml_element, root_path)
+        vsml_content = SourceContent(vsml_element)
     # vsml_elementがWrapContentの場合
     else:
         vsml_content = WrapContent(vsml_element)
         for vsml_element_child in vsml_element_children:
             # 子要素を再帰的にこの関数にわたす
-            vsml_content_child = element_to_content(vsml_element_child, root_path)
+            vsml_content_child = element_to_content(vsml_element_child)
             # 無効なタグ以外はitemsに追加する
             if vsml_content_child:
                 vsml_content.items.append(vsml_content_child)

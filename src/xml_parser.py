@@ -2,7 +2,7 @@ from os import path
 import requests
 from lxml import etree
 from vsml import VSML
-from utils import get_text_encoding, remove_indent
+from utils import get_text_encoding, remove_indent, VSMLManager
 
 CONFIG_FILE = 'http://vsml.pigeons.house/config/vsml.xsd'
 
@@ -85,6 +85,6 @@ def parsing_vsml(filename: str) -> VSML:
     vsml_element = etree.fromstring(vsml_text, parser)
 
     # vsmlファイルからの相対パスを想定するため、vsmlのルートパスを取得
-    vsml_root_path = path.dirname(filename) + '/'
+    VSMLManager.set_root_path(path.dirname(filename) + '/')
 
-    return VSML(vsml_element, vsml_root_path)
+    return VSML(vsml_element)
