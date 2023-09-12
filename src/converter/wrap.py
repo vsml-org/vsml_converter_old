@@ -1,55 +1,26 @@
 import ffmpeg
 from typing import Optional
-from vsml import SortType
-from utils import WidthHeight, Position
+from vsml import SortType, VSMLContent
+from utils import VSMLManager
 from .schemas import Process
 from .utils import get_transparent_process
 
-def create_sequence_process(processes: list[Process], resolution: WidthHeight, param: str, debug_mode: bool = False) -> Optional[Process]:
-    whole_length = 0
-    is_no_length = True
-    process_start_position = Position(0, 0)
-    process_end_position = Position(0, 0)
-    process_size = None
+def create_sequence_process(processes: list[Process], vsml_content: VSMLContent, debug_mode: bool = False) -> Process:
     video_process = None
     audio_process = None
 
-    for process_item in processes:
-        # processがNoneの場合スキップ
-        if process_item is None:
-            processes.pop(process_item)
-            continue
-
-        if not (process_item.size is None or process_item.start_position is None):
-            process_start_position.x = min(process_start_position.x, process_item.start_position.x)
-            process_start_position.y = min(process_start_position.y, process_item.start_position.y)
-            process_end_position.x = max(
-                process_end_position.x,
-                process_item.start_position.x+process_item.size.width
-            )
-            process_end_position.y = max(
-                process_end_position.y,
-                process_item.start_position.y+process_item.size.height
-            )
-
-        if process_item.length is not None:
-            is_no_length = False
-            # 長さのあるProcessの合計値を算出
-            whole_length += process_item.length
-
-    if is_no_length:
-        video_process = processes[0].video
-        audio_process = processes[0].audio
-    else:
+    if vsml_content.duration:
         video_margin = 0
         audio_margin = 0
         for process_item in processes:
-            if process_item.length is None:
+            if process_item is None:
+                continue
+            if process_item.duration is None:
                 continue
             ## 映像の結合
             # 映像がない場合、時間マージンを加算する(後でtpadで足す)
             if process_item.video is None:
-                video_margin += process_item.length
+                video_margin += process_item.duration
             # 映像がある場合、マージンをつけつつ、映像を結合する(ベースの映像がなければそのストリームを使う)
             else:
                 if video_margin:
@@ -63,7 +34,7 @@ def create_sequence_process(processes: list[Process], resolution: WidthHeight, p
             ## 音声の結合
             # 音声がない場合、時間マージンを加算する(後でadelayで足す)
             if process_item.audio is None:
-                audio_margin += process_item.length
+                audio_margin += process_item.duration
             # 音声がある場合、マージンをつけつつ、音声を結合する(ベースの音声がなければそのストリームを使う)
             else:
                 if audio_margin:
@@ -79,70 +50,50 @@ def create_sequence_process(processes: list[Process], resolution: WidthHeight, p
             video_process = ffmpeg.filter(video_process, 'tpad', stop_duration=video_margin)
         if audio_margin and audio_process:
             audio_process = ffmpeg.filter(audio_process, 'apad', pad_dur=audio_margin)
-
-    if whole_length == 0:
-        whole_length = None
-
-    if process_start_position == Position(0, 0) and process_end_position == Position(0, 0):
-        process_start_position = None
     else:
-        process_size = WidthHeight(
-            process_end_position.x - process_start_position.x,
-            process_end_position.y - process_start_position.y
-        )
-        # TODO: 色指定なども考える
-        if param:
-            box_process = ffmpeg.drawbox(
-                get_transparent_process(resolution.get_str()),
-                process_start_position.x, process_start_position.y,
-                process_size.width, process_size.height, 'red', 'fill',
-                replace=1
-            )
-            video_process = ffmpeg.overlay(box_process, video_process)
+        video_process = processes[0].video
+        audio_process = processes[0].audio
 
     # Processにまとめてreturn
-    if video_process is None and audio_process is None:
-        process = None
-    else:
-        process = Process(video_process, audio_process, whole_length, process_size, process_start_position)
+    return Process(video_process, audio_process, vsml_content.duration, vsml_content.resolution, vsml_content.start_position)
 
-    return process
-
-def create_parallel_process(processes: list[Process], resolution: WidthHeight, param: str, debug_mode: bool = False) -> Optional[Process]:
-    video_max_length = 0.0
-    audio_max_length = 0.0
+def create_parallel_process(processes: list[Process], vsml_content: VSMLContent, debug_mode: bool = False) -> Process:
     video_process = None
     audio_process = None
-    process_start_position = Position(0, 0)
-    process_end_position = Position(0, 0)
-    process_size = None
 
-    # max_lengthを計算
-    for process_item in processes:
-        # processがNoneの場合スキップ(ついでにリストから削除)
-        if process_item is None:
-            processes.pop(process_item)
-            continue
-        if not (process_item.size is None or process_item.start_position is None):
-            process_start_position.x = min(process_start_position.x, process_item.start_position.x)
-            process_start_position.y = min(process_start_position.y, process_item.start_position.y)
-            process_end_position.x = max(
-                process_end_position.x,
-                process_item.start_position.x+process_item.size.width
-            )
-            process_end_position.y = max(
-                process_end_position.y,
-                process_item.start_position.y+process_item.size.height
-            )
+    # 動画または音声を含む場合
+    if vsml_content.duration:
+        video_max_length = 0.0
+        audio_max_length = 0.0
+        for process in processes:
+            # 映像の合成
+            if process.video:
+                if process.duration:
+                    video_max_length = min(vsml_content.duration, max(video_max_length, process.duration))
+                else:
+                    # 静止画系の処理
+                    process.video = ffmpeg.trim(process.video, start=0, end=vsml_content.duration)
+                    video_max_length = vsml_content.duration
 
-        if process_item.length is not None:
-            if process_item.video is not None:
-                video_max_length = max(video_max_length, process_item.length)
-            if process_item.audio is not None:
-                audio_max_length = max(audio_max_length, process_item.length)
-    max_length = max(video_max_length, audio_max_length)
-
-    if max_length == 0:
+                if video_process is None:
+                    video_process = process.video
+                else:
+                    video_process = ffmpeg.overlay(video_process, process.video)
+            # 音声の合成
+            if process.audio:
+                if audio_process is None:
+                    audio_process = process.audio
+                else:
+                    audio_process = ffmpeg.filter([audio_process, process.audio], 'amix')
+                if process.duration:
+                        audio_max_length = min(vsml_content.duration, max(audio_max_length, process.duration))
+        # 長さが足りていないときに要素を伸ばす
+        if vsml_content.duration > video_max_length and video_process:
+            video_process = ffmpeg.filter(video_process, 'tpad', stop_duration=audio_max_length-video_max_length)
+        if vsml_content.duration > audio_max_length and audio_process:
+            audio_process = ffmpeg.filter(audio_process, 'apad', pad_dur=video_max_length-audio_max_length)
+    # 静止画系のみの場合
+    else:
         for process_item in processes:
             process_item.video = ffmpeg.trim(process_item.video, start=0, end=1)
             if video_process is None:
@@ -150,68 +101,36 @@ def create_parallel_process(processes: list[Process], resolution: WidthHeight, p
             else:
                 video_process = ffmpeg.overlay(video_process, process_item.video)
         video_process = ffmpeg.filter(video_process, 'loop', loop=-1)
-    else:
-        for process_item in processes:
-            # 映像の合成
-            if process_item.video is not None:
-                if process_item.length is None:
-                    process_item.video = ffmpeg.trim(process_item.video, start=0, end=max_length)
-                    video_max_length = max_length
-                if video_process is None:
-                    video_process = process_item.video
-                else:
-                    video_process = ffmpeg.overlay(video_process, process_item.video)
-            # 音声の合成
-            if process_item.audio is not None:
-                if audio_process is None:
-                    audio_process = process_item.audio
-                else:
-                    audio_process = ffmpeg.filter([audio_process, process_item.audio], 'amix')
-
-        if video_max_length > audio_max_length:
-            if audio_process:
-                audio_process = ffmpeg.filter(audio_process, 'apad', pad_dur=video_max_length-audio_max_length)
-        elif video_max_length < audio_max_length:
-            if video_process:
-                video_process = ffmpeg.filter(video_process, 'tpad', stop_duration=audio_max_length-video_max_length)
-
-    if max_length == 0:
-        max_length = None
-
-    if process_start_position == Position(0, 0) and process_end_position == Position(0, 0):
-        process_start_position = None
-    else:
-        process_size = WidthHeight(
-            process_end_position.x - process_start_position.x,
-            process_end_position.y - process_start_position.y
-        )
-        # TODO: 色指定なども考える
-        if param:
-            box_process = ffmpeg.drawbox(
-                get_transparent_process(resolution.get_str()),
-                process_start_position.x, process_start_position.y,
-                process_size.width, process_size.height, 'red', 'fill',
-                replace=1
-            )
-            video_process = ffmpeg.overlay(box_process, video_process)
 
     # Processにまとめてreturn
-    if video_process is None and audio_process is None:
-        process = None
-    else:
-        process = Process(video_process, audio_process, max_length, process_size, process_start_position)
-    return process
+    return Process(video_process, audio_process, vsml_content.duration, vsml_content.resolution, vsml_content.start_position)
 
-def create_wrap_process(processes: list[Process], resolution: WidthHeight, type: SortType, param: str, debug_mode: bool = False) -> Optional[Process]:
+def create_wrap_process(processes: list[Process], vsml_content: VSMLContent, debug_mode: bool = False) -> Optional[Process]:
     match len(processes):
         case 0:
             process = None
         case _:
-            match type:
+            match vsml_content.type:
                 case SortType.SEQUENCE:
-                    process = create_sequence_process(processes, resolution, param, debug_mode)
+                    process = create_sequence_process(processes, vsml_content, debug_mode)
                 case SortType.PARALLEL:
-                    process = create_parallel_process(processes, resolution, param, debug_mode)
+                    process = create_parallel_process(processes, vsml_content, debug_mode)
                 case _:
                     raise Exception()
+    
+    if vsml_content.start_position and vsml_content.resolution and vsml_content.background_color:
+        box_process = ffmpeg.drawbox(
+            get_transparent_process(VSMLManager.get_root_resolution().get_str()),
+            vsml_content.start_position.x, vsml_content.start_position.y,
+            vsml_content.resolution.width, vsml_content.resolution.height, vsml_content.background_color, 'fill',
+            replace=1
+        )
+        if process:
+            if process.video:
+                process.video = ffmpeg.overlay(box_process, process.video, shortest=1)
+            else:
+                process.video = box_process
+        else:
+            process = Process(box_process, None, vsml_content.duration, vsml_content.resolution, vsml_content.start_position)
+
     return process

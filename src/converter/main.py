@@ -6,14 +6,16 @@ from .content import create_source_process
 from .wrap import create_wrap_process
 from .schemas import Process
 
-def create_process(vsml_content: VSMLContent, resolution: WidthHeight, fps: int, debug_mode: bool = False) -> Optional[Process]:
+def create_process(vsml_content: VSMLContent, debug_mode: bool = False) -> Optional[Process]:
     if isinstance(vsml_content, SourceContent):
-        process = create_source_process(vsml_content, resolution, debug_mode)
+        process = create_source_process(vsml_content, debug_mode)
     elif isinstance(vsml_content, WrapContent):
-        processes = []
+        child_processes = []
         for item in vsml_content.items:
-            processes.append(create_process(item, resolution, fps, debug_mode))
-        process = create_wrap_process(processes, resolution, vsml_content.type, vsml_content.param, debug_mode)
+            child_process = create_process(item, debug_mode)
+            if child_process:
+                child_processes.append(child_process)
+        process = create_wrap_process(child_processes, vsml_content, debug_mode)
     else:
         raise Exception()
 
@@ -26,10 +28,10 @@ def create_process(vsml_content: VSMLContent, resolution: WidthHeight, fps: int,
 def convert_video(vsml_data: VSML, out_filename: Optional[str], debug_mode: bool, overwrite: bool):
     out_filename = 'video.mp4' if out_filename is None else out_filename
 
-    process = create_process(vsml_data.content, vsml_data.resolution, vsml_data.fps, debug_mode)
+    process = create_process(vsml_data.content, debug_mode)
     if process is None:
         raise Exception()
-    if process.length is None:
+    if process.duration is None:
         raise Exception()
     match (process.video, process.audio):
         case None, None:
@@ -43,6 +45,7 @@ def convert_video(vsml_data: VSML, out_filename: Optional[str], debug_mode: bool
     process = ffmpeg.output(process, out_filename, r=vsml_data.fps)
 
     if debug_mode:
+        print(vsml_data.content)
         ffmpeg.view(process)
         time.sleep(0.1)
         print(f'\n[[[command args]]]\n{ffmpeg.compile(process)}')

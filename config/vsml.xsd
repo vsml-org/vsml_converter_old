@@ -25,7 +25,7 @@
 			<xs:element type="wrapType" name="seq"/>
 			<xs:element type="wrapType" name="prl"/>
 			<xs:element type="wrapType" name="layer"/>
-			<xs:element type="wrapType" name="rect"/>
+			<xs:element type="rectType" name="rect"/>
 			<xs:element type="sourceType" name="vid"/>
 			<xs:element type="sourceType" name="aud"/>
 			<xs:element type="sourceType" name="img"/>
@@ -49,6 +49,15 @@
 		<xs:attribute type="xs:string" name="style" use="optional"/>
 		<xs:attribute type="xs:string" name="class" use="optional"/>
 		<xs:attribute type="xs:string" name="id" use="optional"/>
+	</xs:complexType>
+	<xs:complexType name="rectType">
+		<xs:sequence>
+			<xs:group ref="contentGroup" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="style" use="optional"/>
+		<xs:attribute type="xs:string" name="class" use="optional"/>
+		<xs:attribute type="xs:string" name="id" use="optional"/>
+		<xs:attribute type="xs:string" name="color" use="optional"/>
 	</xs:complexType>
 	<xs:complexType name="sourceType">
 		<xs:attribute type="xs:string" name="style" use="optional"/>

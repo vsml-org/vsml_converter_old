@@ -6,6 +6,6 @@ from utils import WidthHeight, Position
 class Process:
     video: Any
     audio: Any
-    length: Optional[float]
-    size: Optional[WidthHeight]
+    duration: Optional[float]
+    resolution: Optional[WidthHeight]
     start_position: Optional[Position]
