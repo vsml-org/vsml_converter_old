@@ -4,6 +4,7 @@ from enum import Enum
 from lxml.etree import tostring, _Element
 from utils import WidthHeight, VSMLManager, AudioSystem, Position
 import ffmpeg
+from vss import convert_vss_dict
 
 WRAP_TAG = ['cont', 'wrp', 'seq', 'prl', 'rect', 'layer']
 CONTENT_TAG = ['vid', 'aud', 'img', 'txt']
@@ -186,6 +187,7 @@ class SourceContent(VSMLContent):
 class VSML:
     fps: int
     content: VSMLContent
+    style_tree: dict[str, dict[str, str]] = {}
 
     def __init__(self, vsml: _Element):
         # meta, contentの取得
@@ -193,16 +195,15 @@ class VSML:
         metaElement, contentElement = (None, children[0]) if len(children) == 1 else children
 
         # metaデータの操作
-        style_data_str = ''
         if metaElement is not None:
             for styleElement in metaElement:
                 src_path = styleElement.get('src', None)
                 if src_path:
                     with open(VSMLManager.get_root_path() + src_path, 'r') as style_src:
-                        style_data_str += style_src.read()
+                        self.style_tree = self.style_tree | convert_vss_dict(style_src.read())
                 else:
                     if styleElement.text:
-                        style_data_str += styleElement.text
+                        self.style_tree = self.style_tree | convert_vss_dict(styleElement.text)
 
         # contentデータの操作
         VSMLManager.set_root_resolution(WidthHeight.from_str(contentElement.attrib['resolution']))
