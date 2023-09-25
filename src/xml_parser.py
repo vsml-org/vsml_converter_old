@@ -2,7 +2,7 @@ from os import path
 import requests
 from lxml import etree
 from vsml import VSML
-from utils import get_text_encoding, remove_indent, VSMLManager
+from utils import get_text_encoding, VSMLManager
 
 CONFIG_FILE = 'http://vsml.pigeons.house/config/vsml.xsd'
 
@@ -27,7 +27,7 @@ def formatting_xml(xml_text: str) -> str:
     if '<?xml' in vsml_head:
         formatted_text = vsml_content
 
-    return remove_indent(formatted_text)
+    return formatted_text
 
 def get_parser_with_xsd() -> etree.XMLParser:
     """

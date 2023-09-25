@@ -71,8 +71,3 @@ def get_text_encoding(filename: str) -> Optional[str]:
     if encoding == 'SHIFT_JIS':
         encoding = 'CP932'
     return encoding
-
-def remove_indent(text: str) -> str:
-    formatted_text = text.strip()
-    formatted_text = re.sub(r'\n\s*', r'\n', formatted_text)
-    return formatted_text
