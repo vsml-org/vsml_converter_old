@@ -5,6 +5,7 @@ from vsml import VSML
 from utils import get_text_encoding, VSMLManager
 
 CONFIG_FILE = 'http://vsml.pigeons.house/config/vsml.xsd'
+OFFLINE_CONFIG_FILE = './config/vsml.xsd'
 
 def formatting_xml(xml_text: str) -> str:
     """
@@ -29,7 +30,7 @@ def formatting_xml(xml_text: str) -> str:
 
     return formatted_text
 
-def get_parser_with_xsd() -> etree.XMLParser:
+def get_parser_with_xsd(is_offline: bool) -> etree.XMLParser:
     """
     独自XSDファイルを読み込んだetreeのparserオブジェクトを返す
 
@@ -39,7 +40,11 @@ def get_parser_with_xsd() -> etree.XMLParser:
         XSD情報を持った、XMLのparser
     """
 
-    xsd_text = formatting_xml(requests.get(CONFIG_FILE).text)
+    if is_offline:
+        with open(OFFLINE_CONFIG_FILE, 'r') as f:
+            xsd_text = formatting_xml(f.read())
+    else:
+        xsd_text = formatting_xml(requests.get(CONFIG_FILE).text)
     schema_root = etree.XML(xsd_text, None)
     schema = etree.XMLSchema(schema_root)
     return etree.XMLParser(schema = schema, remove_comments=True, remove_blank_text=True)
@@ -64,7 +69,7 @@ def get_vsml_text(filename: str) -> str:
         vsml_text = f.read()
     return formatting_xml(vsml_text)
 
-def parsing_vsml(filename: str) -> VSML:
+def parsing_vsml(filename: str, is_offline: bool) -> VSML:
     """
     受け取ったVSMLファイルのパスを開きVSMLクラスのオブジェクトにする。
 
@@ -80,7 +85,7 @@ def parsing_vsml(filename: str) -> VSML:
     """
 
     # 入力されたvsmlの読み込み(xsdでのバリデーション付き)
-    parser = get_parser_with_xsd()
+    parser = get_parser_with_xsd(is_offline)
     vsml_text = get_vsml_text(filename)
     vsml_element = etree.fromstring(vsml_text, parser)
 

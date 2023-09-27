@@ -25,6 +25,11 @@ def init_parser():
         action='store_true',
         help='allow overwrite output file',
     )
+    parser.add_argument(
+        '--offline',
+        action='store_true',
+        help='offline mode',
+    )
     return parser
 
 def get_args() -> Namespace:
