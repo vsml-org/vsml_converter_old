@@ -3,18 +3,9 @@ from typing import Optional
 from lxml.etree import _Element
 
 import definition
-from content import (
-    SourceContent,
-    VSMLContent,
-    WrapContent,
-    get_source_value,
-)
+from content import SourceContent, VSMLContent, WrapContent, get_source_value
 from style import Style, pickup_style
-from utils import (
-    TagInfoTree,
-    VSMLManager,
-    WidthHeight,
-)
+from utils import TagInfoTree, VSMLManager, WidthHeight
 from vss import convert_vss_dict
 
 
@@ -51,15 +42,15 @@ def element_to_style(
     style_tree = {}
     for styleElement in meta_element:
         src_path = styleElement.get("src", None)
-        if src_path:
+        if src_path is None:
+            if styleElement.text is not None:
+                style_tree |= convert_vss_dict(styleElement.text)
+        else:
             with open(
                 VSMLManager.get_root_path() + src_path,
                 "r",
             ) as style_src:
                 style_tree |= convert_vss_dict(style_src.read())
-        else:
-            if styleElement.text:
-                style_tree |= convert_vss_dict(styleElement.text)
 
     return style_tree
 

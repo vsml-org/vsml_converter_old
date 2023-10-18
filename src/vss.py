@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import re
 
-from definition.vss import (
-    STYLE_VALUE_PATTERN,
-)
+from definition.vss import STYLE_VALUE_PATTERN
 
 SELECTOR_PATTERN = r"(\.|#)?[a-zA-Z0-9_\-]+"
 PROPERTY_PATTERN = r"[a-z\-]+"
@@ -52,7 +50,7 @@ def convert_vss_dict(
 
         for prop_text in properties_text.split(";"):
             prop_text = prop_text.strip()
-            if not prop_text:
+            if len(prop_text) == 0:
                 continue
             prop, value = [s.strip() for s in prop_text.split(":", 1)]
             properties[prop] = value

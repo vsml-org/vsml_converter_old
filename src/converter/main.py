@@ -3,16 +3,10 @@ from typing import Optional
 
 import ffmpeg
 
-from content import (
-    SourceContent,
-    VSMLContent,
-    WrapContent,
-)
+from content import SourceContent, VSMLContent, WrapContent
 from vsml import VSML
 
-from .content import (
-    create_source_process,
-)
+from .content import create_source_process
 from .schemas import Process
 from .wrap import create_wrap_process
 
@@ -30,7 +24,7 @@ def create_process(
         child_processes = []
         for item in vsml_content.items:
             child_process = create_process(item, debug_mode)
-            if child_process:
+            if child_process is not None:
                 child_processes.append(child_process)
         process = create_wrap_process(
             child_processes,

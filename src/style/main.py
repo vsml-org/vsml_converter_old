@@ -67,37 +67,23 @@ class Style:
         attrib: _Attrib,
     ) -> None:
         # inheriting
-        if parent_param:
-            self.audio_system = (
-                parent_param.audio_system
-                if parent_param.audio_system
-                else None
-            )
-            self.font_color = (
-                parent_param.font_color if parent_param.font_color else None
-            )
-            self.font_border_color = (
-                parent_param.font_border_color
-                if parent_param.font_border_color
-                else None
-            )
-            self.font_border_width = (
-                parent_param.font_border_width
-                if parent_param.font_border_width
-                else None
-            )
-            self.font_family = (
-                parent_param.font_family if parent_param.font_family else None
-            )
-            self.font_size = (
-                parent_param.font_size if parent_param.font_size else None
-            )
-            self.font_weight = (
-                parent_param.font_weight if parent_param.font_weight else None
-            )
-            self.font_style = (
-                parent_param.font_style if parent_param.font_style else None
-            )
+        if parent_param is not None:
+            if parent_param.audio_system is not None:
+                self.audio_system = parent_param.audio_system
+            if parent_param.font_color is not None:
+                self.font_color = parent_param.font_color
+            if parent_param.font_border_color is not None:
+                self.font_border_color = parent_param.font_border_color
+            if parent_param.font_border_width is not None:
+                self.font_border_width = parent_param.font_border_width
+            if parent_param.font_family is not None:
+                self.font_family = parent_param.font_family
+            if parent_param.font_size is not None:
+                self.font_size = parent_param.font_size
+            if parent_param.font_weight is not None:
+                self.font_weight = parent_param.font_weight
+            if parent_param.font_style is not None:
+                self.font_style = parent_param.font_style
 
         match tag_name:
             case "cont":
@@ -134,7 +120,7 @@ class Style:
                         if self.audio_system == AudioSystem.MONAURAL
                         else audio_system
                     )
-                if object_length:
+                if object_length is not None:
                     self.object_length = TimeValue("{}s".format(object_length))
             case "aud":
                 meta = ffmpeg.probe(source_value)
@@ -155,7 +141,7 @@ class Style:
                     if self.audio_system == AudioSystem.MONAURAL
                     else audio_system
                 )
-                if object_length:
+                if object_length is not None:
                     self.object_length = TimeValue("{}s".format(object_length))
             case "img":
                 meta = ffmpeg.probe(source_value)
@@ -335,7 +321,7 @@ class Style:
         match tag_name:
             case "rect":
                 background_color = attrib.get("color")
-                if background_color:
+                if background_color is not None:
                     self.background_color = Color(background_color)
             case _:
                 pass
