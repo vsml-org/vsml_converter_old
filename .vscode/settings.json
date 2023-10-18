@@ -102,5 +102,6 @@
     "python.analysis.diagnosticMode": "workspace",
     "black-formatter.args": [
         "--line-length=79"
-    ]
+    ],
+    "editor.formatOnSave": true
 }
