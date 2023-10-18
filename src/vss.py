@@ -42,8 +42,10 @@ def convert_vss_dict(vss_text: str) -> dict[str, dict[str, str]]:
 
     # propertyごとのvalueのvalidate
     for selector, style in vss_object.items():
+        copy_style = style.copy()
         for property, value in style.items():
-            if re.fullmatch(STYLE_VALUE_PATTERN[property], value, re.IGNORECASE) is None:
-                del vss_object[selector][property]
+            if re.fullmatch(STYLE_VALUE_PATTERN.get(property, ""), value, re.IGNORECASE) is None:
+                del copy_style[property]
+        vss_object[selector] = copy_style
 
     return vss_object

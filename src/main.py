@@ -13,8 +13,14 @@ def main():
     ## ファイルのVSMLを解析
     vsml_data = parsing_vsml(args.filename, args.offline)
 
+    print(vsml_data.content)
+    exit()
+
     ## 解析したデータをもとにffmpegで動画を構築
     convert_video(vsml_data, args.output, args.debug, args.overwrite)
 
 if __name__ == '__main__':
     main()
+
+'''
+'''

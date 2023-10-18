@@ -255,6 +255,9 @@ class Style:
             if meta_video is not None and meta_audio is not None:
                 break
         return (duration, meta_video, meta_audio)
+    
+    def __repr__(self) -> str:
+        return str(vars(self))
 
 def pickup_style(
         style_tree: dict[str, dict[str, str]], tag_name: str,

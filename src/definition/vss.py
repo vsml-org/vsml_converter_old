@@ -43,26 +43,46 @@ COLOR_LIST = [
     'yellow', 'yellowgreen'
 ]
 
+SECOND_PATTERN = f"{regex.REAL_NUMBER_PATTERN}s"
+FRAME_PATTERN = f"{regex.REAL_NUMBER_PATTERN}f"
+
+PIXEL_PATTERN = f"{regex.REAL_NUMBER_PATTERN}px"
+RESOLUTION_WIDTH_PATTERN = f"{regex.REAL_NUMBER_PATTERN}rw"
+RESOLUTION_HEIGHT_PATTERN = f"{regex.REAL_NUMBER_PATTERN}rh"
+RESOLUTION_MIN_PATTERN = f"{regex.REAL_NUMBER_PATTERN}rmin"
+RESOLUTION_MAX_PATTERN = f"{regex.REAL_NUMBER_PATTERN}rmax"
+
+PERCENT_PATTERN = f"{regex.REAL_NUMBER_PATTERN}%"
+
+TIME_PATTERN = f"({SECOND_PATTERN}|{FRAME_PATTERN}|{PERCENT_PATTERN})"
+GRAPHIC_PATTERN = f"({PIXEL_PATTERN}|{RESOLUTION_WIDTH_PATTERN}|{RESOLUTION_HEIGHT_PATTERN}|{RESOLUTION_MIN_PATTERN}|{RESOLUTION_MAX_PATTERN}|{PERCENT_PATTERN})"
+
+HEX_COLOR_PATTERN = f"#({regex.HEX_PATTERN}{{3}}|{regex.HEX_PATTERN}{{4}}|{regex.HEX_PATTERN}{{6}}|{regex.HEX_PATTERN}{{8}})"
+RGB_COLOR_PATTERN = fr"rgb\(\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*\)"
+RGBA_COLOR_PATTERN = fr"rgba\(\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*\)"
+PURE_COLOR_PATTERN = '|'.join(COLOR_LIST)
+COLOR_PATTERN = f"({PURE_COLOR_PATTERN}|{HEX_COLOR_PATTERN}|{RGB_COLOR_PATTERN}|{RGBA_COLOR_PATTERN})"
+
 STYLE_VALUE_PATTERN = {
-    "object-length": f"(fit|source|{regex.TIME_PATTERN})",
+    "object-length": f"(fit|source|{TIME_PATTERN})",
     "source-loop": "(true|false)",
-    "playback-speed": f"{regex.PERCENT_PATTERN}",
-    "time-margin": fr"{regex.TIME_PATTERN}(\s+{regex.TIME_PATTERN})?",
-    "time-margin-start": regex.TIME_PATTERN,
-    "time-margin-end": regex.TIME_PATTERN,
-    "time-padding": fr"{regex.TIME_PATTERN}(\s+{regex.TIME_PATTERN})?",
-    "time-padding-start": regex.TIME_PATTERN,
-    "time-padding-end": regex.TIME_PATTERN,
+    "playback-speed": f"{PERCENT_PATTERN}",
+    "time-margin": fr"{TIME_PATTERN}(\s+{TIME_PATTERN})?",
+    "time-margin-start": TIME_PATTERN,
+    "time-margin-end": TIME_PATTERN,
+    "time-padding": fr"{TIME_PATTERN}(\s+{TIME_PATTERN})?",
+    "time-padding-start": TIME_PATTERN,
+    "time-padding-end": TIME_PATTERN,
     "order": "(sequence|parallel)",
     "layer": "(single|multi)",
-    "opacity": f"({regex.REAL_NUMBER_PATTERN}|{regex.PERCENT_PATTERN})",
-    "width": regex.GRAPHIC_PATTERN,
+    "opacity": f"({regex.REAL_NUMBER_PATTERN}|{PERCENT_PATTERN})",
+    "width": GRAPHIC_PATTERN,
     "min-width": "",
     "max-width": "",
-    "height": regex.GRAPHIC_PATTERN,
+    "height": GRAPHIC_PATTERN,
     "min-height": "",
     "max-height": "",
-    "background-color": regex.COLOR_PATTERN,
+    "background-color": COLOR_PATTERN,
     "object-fit": "",
     "chroma-key": "",
     "magnification": "",
@@ -98,16 +118,16 @@ STYLE_VALUE_PATTERN = {
     "align-content": "",
     "justify-content": "",
     "align-items": "",
-    "margin": fr"{regex.GRAPHIC_PATTERN}(\s+{regex.GRAPHIC_PATTERN}){{0,3}}",
-    "margin-top": regex.GRAPHIC_PATTERN,
-    "margin-left": regex.GRAPHIC_PATTERN,
-    "margin-bottom": regex.GRAPHIC_PATTERN,
-    "margin-right": regex.GRAPHIC_PATTERN,
-    "padding": fr"{regex.GRAPHIC_PATTERN}(\s+{regex.GRAPHIC_PATTERN}){{0,3}}",
-    "padding-top": regex.GRAPHIC_PATTERN,
-    "padding-left": regex.GRAPHIC_PATTERN,
-    "padding-bottom": regex.GRAPHIC_PATTERN,
-    "padding-right": regex.GRAPHIC_PATTERN,
+    "margin": fr"{GRAPHIC_PATTERN}(\s+{GRAPHIC_PATTERN}){{0,3}}",
+    "margin-top": GRAPHIC_PATTERN,
+    "margin-left": GRAPHIC_PATTERN,
+    "margin-bottom": GRAPHIC_PATTERN,
+    "margin-right": GRAPHIC_PATTERN,
+    "padding": fr"{GRAPHIC_PATTERN}(\s+{GRAPHIC_PATTERN}){{0,3}}",
+    "padding-top": GRAPHIC_PATTERN,
+    "padding-left": GRAPHIC_PATTERN,
+    "padding-bottom": GRAPHIC_PATTERN,
+    "padding-right": GRAPHIC_PATTERN,
     "border-radius": "",
     "border-bottom-left-radius": "",
     "border-bottom-right-radius": "",
@@ -115,15 +135,15 @@ STYLE_VALUE_PATTERN = {
     "border-top-right-radius": "",
     "visibility": "",
     "box-shadow": "",
-    "audio-volume": regex.PERCENT_PATTERN,
+    "audio-volume": PERCENT_PATTERN,
     "audio-system": "(monaural|stereo)",
-    "font-color": regex.COLOR_PATTERN,
-    "font-border": fr"({regex.COLOR_PATTERN}\s+{regex.PIXEL_PATTERN}|{regex.PIXEL_PATTERN}\s+{regex.COLOR_PATTERN})",
-    "font-border-color": regex.COLOR_PATTERN,
-    "font-border-width": regex.PIXEL_PATTERN,
+    "font-color": COLOR_PATTERN,
+    "font-border": fr"({COLOR_PATTERN}\s+{PIXEL_PATTERN}|{PIXEL_PATTERN}\s+{COLOR_PATTERN})",
+    "font-border-color": COLOR_PATTERN,
+    "font-border-width": PIXEL_PATTERN,
     "font": "",
     "font-family": ".+",
-    "font-size": regex.GRAPHIC_PATTERN,
+    "font-size": GRAPHIC_PATTERN,
     "font-stretch": "",
     "font-style": "(normal|italic)",
     "font-weight": "(normal|bold)",

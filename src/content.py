@@ -40,13 +40,13 @@ class WrapContent(VSMLContent):
         self.items = []
     
     def __repr__(self) -> str:
-        print(self.tag_name)
         items_str = "["
         for item in self.items:
-            items_str += item.__repr__() + "\n"
+            items_str += item.__repr__() + ","
+        items_str = items_str[:-1]
         items_str += "]"
 
-        return f"{{'tag_name': '{self.tag_name}' 'style': {self.style} 'items': {items_str}}}"
+        return f"{{'tag_name': '{self.tag_name}', 'style': {self.style}, 'items': {items_str}}}"
 
 class SourceContent(VSMLContent):
     src_path: str

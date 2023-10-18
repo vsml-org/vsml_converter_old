@@ -2,16 +2,54 @@ import re
 from enum import Enum, auto
 from definition import COLOR_LIST
 
-class ReprEnum(Enum):
-    def __repr__(self) -> str:
-        return f"'{self.__name__}.{self.name}'"
+class Order(Enum):
+    SEQUENCE = auto()
+    PARALLEL = auto()
 
-class TimeUnit(ReprEnum):
+    def __str__(self) -> str:
+        return f"'{self.name}'"
+
+    def __repr__(self) -> str:
+        return f"'{self.name}'"
+
+class AudioSystem(Enum):
+    MONAURAL = auto()
+    STEREO = auto()
+
+    def __str__(self) -> str:
+        return f"'{self.name}'"
+
+    def __repr__(self) -> str:
+        return f"'{self.name}'"
+
+class TimeUnit(Enum):
     PERCENT = auto()
     FRAME = auto()
     SECOND = auto()
 
-class GraphicUnit(ReprEnum):
+    def __str__(self) -> str:
+        match self.name:
+            case self.PERCENT.name:
+                return '%'
+            case self.FRAME.name:
+                return 'f'
+            case self.SECOND.name:
+                return 's'
+            case _:
+                return ''
+
+    def __repr__(self) -> str:
+        match self.name:
+            case self.PERCENT.name:
+                return '%'
+            case self.FRAME.name:
+                return 'f'
+            case self.SECOND.name:
+                return 's'
+            case _:
+                return ''
+
+class GraphicUnit(Enum):
     PERCENT = auto()
     PIXEL = auto()
     RESOLUTION_WIDTH = auto()
@@ -19,24 +57,50 @@ class GraphicUnit(ReprEnum):
     RESOLUTION_MIN = auto()
     RESOLUTION_MAX = auto()
 
-class Order(ReprEnum):
-    SEQUENCE = auto()
-    PARALLEL = auto()
+    def __str__(self) -> str:
+        match self.name:
+            case self.PERCENT.name:
+                return '%'
+            case self.PIXEL.name:
+                return 'px'
+            case self.RESOLUTION_WIDTH.name:
+                return 'rw'
+            case self.RESOLUTION_HEIGHT.name:
+                return 'rh'
+            case self.RESOLUTION_MIN.name:
+                return 'rmin'
+            case self.RESOLUTION_MAX.name:
+                return 'rmax'
+            case _:
+                return ''
 
-class ColorType(ReprEnum):
+    def __repr__(self) -> str:
+        match self.name:
+            case self.PERCENT.name:
+                return '%'
+            case self.PIXEL.name:
+                return 'px'
+            case self.RESOLUTION_WIDTH.name:
+                return 'rw'
+            case self.RESOLUTION_HEIGHT.name:
+                return 'rh'
+            case self.RESOLUTION_MIN.name:
+                return 'rmin'
+            case self.RESOLUTION_MAX.name:
+                return 'rmax'
+            case _:
+                return ''
+
+class ColorType(Enum):
     PURE = auto()
     HEX = auto()
 
-class AudioSystem(ReprEnum):
-    MONAURAL = auto()
-    STEREO = auto()
-
-class TimeValue():
+class TimeValue:
     value: float
     unit: TimeUnit
 
     def __init__(self, val: str) -> None:
-        match val[-1]:
+        match val[-1:]:
             case 's':
                 self.unit = TimeUnit.SECOND
             case 'f':
@@ -47,31 +111,43 @@ class TimeValue():
                 raise ValueError()
         self.value = float(val[:-1])
 
-class GraphicValue():
+    def __str__(self) -> str:
+        return f"'{self.value}{self.unit}'"
+
+    def __repr__(self) -> str:
+        return f"'{self.value}{self.unit}'"
+
+class GraphicValue:
     value: float
     unit: GraphicUnit
 
     def __init__(self, val: str) -> None:
-        if val[-2] == 'px':
+        if val[-2:] == 'px':
             self.unit = GraphicUnit.PIXEL
             self.value = float(val[:-2])
-        elif val[-2] == 'rw':
+        elif val[-2:] == 'rw':
             self.unit = GraphicUnit.RESOLUTION_WIDTH
             self.value = float(val[:-2])
-        elif val[-2] == 'rh':
+        elif val[-2:] == 'rh':
             self.unit = GraphicUnit.RESOLUTION_HEIGHT
             self.value = float(val[:-2])
-        elif val[-4] == 'rmin':
+        elif val[-4:] == 'rmin':
             self.unit = GraphicUnit.RESOLUTION_MIN
             self.value = float(val[:-4])
-        elif val[-4] == 'rmax':
+        elif val[-4:] == 'rmax':
             self.unit = GraphicUnit.RESOLUTION_MAX
             self.value = float(val[:-4])
-        elif val[-1] == '%':
+        elif val[-1:] == '%':
             self.unit = GraphicUnit.PERCENT
             self.value = float(val[:-1])
         else:
             raise ValueError()
+
+    def __str__(self) -> str:
+        return f"'{self.value}{self.unit}'"
+
+    def __repr__(self) -> str:
+        return f"'{self.value}{self.unit}'"
 
 class Color:
     value: str
@@ -105,3 +181,9 @@ class Color:
                 self.value = f"#{format(r, 'x').zfill(2)}{format(g, 'x').zfill(2)}{format(b, 'x').zfill(2)}{format(a, 'x').zfill(2)}"
         else:
             raise ValueError()
+
+    def __str__(self) -> str:
+        return f"'{self.value}'"
+
+    def __repr__(self) -> str:
+        return f"'{self.value}'"
