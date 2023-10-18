@@ -21,7 +21,7 @@ def create_source_process(
         case SourceType.TEXT:
             pass
         case _:
-            pass
+            raise Exception()
 
     return Process(
         video_process,

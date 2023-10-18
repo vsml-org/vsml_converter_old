@@ -106,6 +106,8 @@ class SourceContent(VSMLContent):
                 self.type = SourceType.AUDIO
             case "txt":
                 self.type = SourceType.TEXT
+            case _:
+                raise Exception()
 
     def __repr__(self) -> str:
         return str(vars(self))
