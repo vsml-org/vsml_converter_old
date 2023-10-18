@@ -1,12 +1,9 @@
 import re
 
-from lxml.etree import (
-    _Element,
-    tostring,
-)
+from lxml.etree import _Element, tostring
 
 from style import Style
-from utils import VSMLManager
+from utils import SourceType, VSMLManager
 
 
 def get_source_value(
@@ -89,6 +86,7 @@ class WrapContent(VSMLContent):
 
 
 class SourceContent(VSMLContent):
+    type: SourceType
     src_path: str
 
     def __init__(
@@ -99,6 +97,15 @@ class SourceContent(VSMLContent):
     ) -> None:
         super().__init__(vsml_element.tag, style)
         self.src_path = src_path
+        match vsml_element.tag:
+            case "img":
+                self.type = SourceType.IMAGE
+            case "vid":
+                self.type = SourceType.VIDEO
+            case "aud":
+                self.type = SourceType.AUDIO
+            case "txt":
+                self.type = SourceType.TEXT
 
     def __repr__(self) -> str:
         return str(vars(self))

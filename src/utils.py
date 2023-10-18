@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum, auto
 from typing import Optional
 
 
@@ -64,3 +65,10 @@ class WidthHeight:
 
     def get_str(self) -> str:
         return "{}x{}".format(self.width, self.height)
+
+
+class SourceType(Enum):
+    IMAGE = auto()
+    VIDEO = auto()
+    AUDIO = auto()
+    TEXT = auto()
