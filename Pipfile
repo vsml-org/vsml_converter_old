@@ -9,8 +9,10 @@ pyinstaller = "*"
 lxml = "*"
 black = "*"
 isort = "*"
+flake8 = "*"
 
 [dev-packages]
+pre-commit = "*"
 
 [requires]
 python_version = "3.10"

@@ -3,9 +3,18 @@ from typing import Optional
 from lxml.etree import _Element
 
 import definition
-from content import SourceContent, VSMLContent, WrapContent, get_source_value
+from content import (
+    SourceContent,
+    VSMLContent,
+    WrapContent,
+    get_source_value,
+)
 from style import Style, pickup_style
-from utils import TagInfoTree, VSMLManager, WidthHeight
+from utils import (
+    TagInfoTree,
+    VSMLManager,
+    WidthHeight,
+)
 from vss import convert_vss_dict
 
 
@@ -36,12 +45,17 @@ class VSML:
         self.content = content
 
 
-def element_to_style(meta_element: _Element) -> dict[str, dict[str, str]]:
+def element_to_style(
+    meta_element: _Element,
+) -> dict[str, dict[str, str]]:
     style_tree = {}
     for styleElement in meta_element:
         src_path = styleElement.get("src", None)
         if src_path:
-            with open(VSMLManager.get_root_path() + src_path, "r") as style_src:
+            with open(
+                VSMLManager.get_root_path() + src_path,
+                "r",
+            ) as style_src:
                 style_tree |= convert_vss_dict(style_src.read())
         else:
             if styleElement.text:
@@ -70,23 +84,44 @@ def element_to_content(
 
     # styleの取得
     picked_up_style_tree = pickup_style(
-        style_tree, tag_name, classes_name, id_name, parent_info_tree
+        style_tree,
+        tag_name,
+        classes_name,
+        id_name,
+        parent_info_tree,
     )
     style = Style(
-        tag_name, parent_param, source_value, picked_up_style_tree, vsml_element.attrib
+        tag_name,
+        parent_param,
+        source_value,
+        picked_up_style_tree,
+        vsml_element.attrib,
     )
 
     # vsml_elementがSourceContentの場合
     if tag_name in definition.CONTENT_TAG:
-        vsml_content = SourceContent(vsml_element, source_value, style)
+        vsml_content = SourceContent(
+            vsml_element,
+            source_value,
+            style,
+        )
     # vsml_elementがWrapContentの場合
     elif tag_name in definition.WRAP_TAG:
         vsml_content = WrapContent(vsml_element, style)
-        tag_info_tree = TagInfoTree(tag_name, classes_name, id_name, parent_info_tree)
+        tag_info_tree = TagInfoTree(
+            tag_name,
+            classes_name,
+            id_name,
+            parent_info_tree,
+        )
         for vsml_element_child in vsml_element_children:
             vsml_content.items.append(
                 element_to_content(
-                    vsml_element_child, style_tree, tag_info_tree, style, count + 1
+                    vsml_element_child,
+                    style_tree,
+                    tag_info_tree,
+                    style,
+                    count + 1,
                 )
             )
     else:

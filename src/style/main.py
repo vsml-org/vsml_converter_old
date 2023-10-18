@@ -21,11 +21,17 @@ from .styling_parser import (
     pixel_parser,
     time_parser,
 )
-from .types import AudioSystem, Color, GraphicValue, Order, TimeValue
+from .types import (
+    AudioSystem,
+    Color,
+    GraphicValue,
+    Order,
+    TimeValue,
+)
 
 
 class Style:
-    ## style param
+    # style param
     # time param
     object_length: TimeValue
     time_margin_start: TimeValue
@@ -69,7 +75,9 @@ class Style:
         # inheriting
         if parent_param:
             self.audio_system = (
-                parent_param.audio_system if parent_param.audio_system else None
+                parent_param.audio_system
+                if parent_param.audio_system
+                else None
             )
             self.font_color = (
                 parent_param.font_color if parent_param.font_color else None
@@ -87,7 +95,9 @@ class Style:
             self.font_family = (
                 parent_param.font_family if parent_param.font_family else None
             )
-            self.font_size = parent_param.font_size if parent_param.font_size else None
+            self.font_size = (
+                parent_param.font_size if parent_param.font_size else None
+            )
             self.font_weight = (
                 parent_param.font_weight if parent_param.font_weight else None
             )
@@ -110,7 +120,11 @@ class Style:
                 self.order = Order.PARALLEL
             case "vid":
                 meta = ffmpeg.probe(source_value)
-                object_length, meta_video, meta_audio = self._get_info_from_meta(meta)
+                (
+                    object_length,
+                    meta_video,
+                    meta_audio,
+                ) = self._get_info_from_meta(meta)
                 if meta_video is None:
                     raise Exception()
                 self.width = meta_video["width"]
@@ -127,10 +141,14 @@ class Style:
                         else audio_system
                     )
                 if object_length:
-                    self.object_length = TimeValue(f"{object_length}s")
+                    self.object_length = TimeValue("{}s".format(object_length))
             case "aud":
                 meta = ffmpeg.probe(source_value)
-                object_length, meta_video, meta_audio = self._get_info_from_meta(meta)
+                (
+                    object_length,
+                    meta_video,
+                    meta_audio,
+                ) = self._get_info_from_meta(meta)
                 if meta_audio is None:
                     raise Exception()
                 audio_system = (
@@ -144,17 +162,25 @@ class Style:
                     else audio_system
                 )
                 if object_length:
-                    self.object_length = TimeValue(f"{object_length}s")
+                    self.object_length = TimeValue("{}s".format(object_length))
             case "img":
                 meta = ffmpeg.probe(source_value)
-                object_length, meta_video, meta_audio = self._get_info_from_meta(meta)
+                (
+                    object_length,
+                    meta_video,
+                    meta_audio,
+                ) = self._get_info_from_meta(meta)
                 if meta_video is None:
                     raise Exception()
                 self.width = meta_video["width"]
                 self.height = meta_video["height"]
             case "txt":
-                self.font_color = self.font_color if self.font_color else Color("white")
-                self.font_family = self.font_family if self.font_family else "MS Gothic"
+                self.font_color = (
+                    self.font_color if self.font_color else Color("white")
+                )
+                self.font_family = (
+                    self.font_family if self.font_family else "MS Gothic"
+                )
                 self.font_size = (
                     self.font_size if self.font_size else GraphicValue("30px")
                 )
@@ -162,35 +188,65 @@ class Style:
                 raise Exception()
 
         # set styling_sheet param
-        for param, value in style_tree.items():
+        for (
+            param,
+            value,
+        ) in style_tree.items():
             match param:
                 case "object-length":
                     parse_value = time_parser(value)
-                    if isinstance(parse_value, TimeValue):
+                    if isinstance(
+                        parse_value,
+                        TimeValue,
+                    ):
                         self.object_length = parse_value
                 case "time-margin":
                     parse_value = double_time_parser(value)
-                    if isinstance(parse_value, tuple):
-                        self.time_margin_start, self.time_margin_end = parse_value
+                    if isinstance(
+                        parse_value,
+                        tuple,
+                    ):
+                        (
+                            self.time_margin_start,
+                            self.time_margin_end,
+                        ) = parse_value
                 case "time-margin-start":
                     parse_value = time_parser(value)
-                    if isinstance(parse_value, TimeValue):
+                    if isinstance(
+                        parse_value,
+                        TimeValue,
+                    ):
                         self.time_margin_start = parse_value
                 case "time-margin-end":
                     parse_value = time_parser(value)
-                    if isinstance(parse_value, TimeValue):
+                    if isinstance(
+                        parse_value,
+                        TimeValue,
+                    ):
                         self.time_margin_end = parse_value
                 case "time-padding":
                     parse_value = double_time_parser(value)
-                    if isinstance(parse_value, tuple):
-                        self.time_padding_start, self.time_padding_end = parse_value
+                    if isinstance(
+                        parse_value,
+                        tuple,
+                    ):
+                        (
+                            self.time_padding_start,
+                            self.time_padding_end,
+                        ) = parse_value
                 case "time-padding-start":
                     parse_value = time_parser(value)
-                    if isinstance(parse_value, TimeValue):
+                    if isinstance(
+                        parse_value,
+                        TimeValue,
+                    ):
                         self.time_padding_start = parse_value
                 case "time-padding-end":
                     parse_value = time_parser(value)
-                    if isinstance(parse_value, TimeValue):
+                    if isinstance(
+                        parse_value,
+                        TimeValue,
+                    ):
                         self.time_padding_end = parse_value
                 case "order":
                     parse_value = order_parser(value)
@@ -273,7 +329,10 @@ class Style:
                 case "font-border":
                     parse_value = color_and_pixel_parser(value)
                     if parse_value is not None:
-                        self.font_border_color, self.font_border_width = parse_value
+                        (
+                            self.font_border_color,
+                            self.font_border_width,
+                        ) = parse_value
                 case "font-border-color":
                     parse_value = color_parser(value)
                     if parse_value is not None:
@@ -310,7 +369,7 @@ class Style:
 
     def _get_info_from_meta(
         self, meta: dict
-    ) -> tuple[Optional[str], Optional[dict], Optional[dict]]:
+    ) -> tuple[Optional[str], Optional[dict], Optional[dict],]:
         duration = meta.get("format", {}).get("duration", None)
         meta_video = None
         meta_audio = None
@@ -324,7 +383,11 @@ class Style:
                 continue
             if meta_video is not None and meta_audio is not None:
                 break
-        return (duration, meta_video, meta_audio)
+        return (
+            duration,
+            meta_video,
+            meta_audio,
+        )
 
     def __repr__(self) -> str:
         return str(vars(self))
@@ -338,7 +401,10 @@ def pickup_style(
     parent_info_tree: Optional[TagInfoTree] = None,
 ) -> dict[str, str]:
     picked_up_style = {}
-    for selectors, style in style_tree.items():
+    for (
+        selectors,
+        style,
+    ) in style_tree.items():
         checking_selector = selectors.split(" ")
         checking_selector.reverse()
         target_selector = checking_selector.pop(0)

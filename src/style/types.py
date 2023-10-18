@@ -9,10 +9,10 @@ class Order(Enum):
     PARALLEL = auto()
 
     def __str__(self) -> str:
-        return f"'{self.name}'"
+        return "'{}'".format(self.name)
 
     def __repr__(self) -> str:
-        return f"'{self.name}'"
+        return "'{}'".format(self.name)
 
 
 class AudioSystem(Enum):
@@ -20,10 +20,10 @@ class AudioSystem(Enum):
     STEREO = auto()
 
     def __str__(self) -> str:
-        return f"'{self.name}'"
+        return "'{}'".format(self.name)
 
     def __repr__(self) -> str:
-        return f"'{self.name}'"
+        return "'{}'".format(self.name)
 
 
 class TimeUnit(Enum):
@@ -119,10 +119,10 @@ class TimeValue:
         self.value = float(val[:-1])
 
     def __str__(self) -> str:
-        return f"'{self.value}{self.unit}'"
+        return "'{}{}'".format(self.value, self.unit)
 
     def __repr__(self) -> str:
-        return f"'{self.value}{self.unit}'"
+        return "'{}{}'".format(self.value, self.unit)
 
 
 class GraphicValue:
@@ -152,10 +152,10 @@ class GraphicValue:
             raise ValueError()
 
     def __str__(self) -> str:
-        return f"'{self.value}{self.unit}'"
+        return "'{}{}'".format(self.value, self.unit)
 
     def __repr__(self) -> str:
-        return f"'{self.value}{self.unit}'"
+        return "'{}{}'".format(self.value, self.unit)
 
 
 class Color:
@@ -171,30 +171,47 @@ class Color:
             hex_val = val[1:]
             match len(hex_val):
                 case 3:
-                    self.value = f"#{hex_val[0]}{hex_val[0]}{hex_val[1]}{hex_val[1]}{hex_val[2]}{hex_val[2]}"
+                    self.value = "#{0}{0}{1}{1}{2}{2}".format(
+                        hex_val[0], hex_val[1], hex_val[2]
+                    )
                 case 4:
-                    self.value = f"#{hex_val[0]}{hex_val[0]}{hex_val[1]}{hex_val[1]}{hex_val[2]}{hex_val[2]}{hex_val[3]}{hex_val[3]}"
+                    self.value = "#{0}{0}{1}{1}{2}{2}{3}{3}".format(
+                        hex_val[0], hex_val[1], hex_val[2], hex_val[3]
+                    )
                 case 6 | 8:
                     self.value = val
         elif val[:4] == "rgb(":
             self.type = ColorType.HEX
-            find_val = re.findall(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*\)", val)
+            find_val = re.findall(
+                r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*\)",
+                val,
+            )
             if len(find_val) > 0:
                 r, g, b = find_val[0]
-                self.value = f"#{format(r, 'x').zfill(2)}{format(g, 'x').zfill(2)}{format(b, 'x').zfill(2)}"
+                self.value = "#{}{}{}".format(
+                    format(r, "x").zfill(2),
+                    format(g, "x").zfill(2),
+                    format(b, "x").zfill(2),
+                )
         elif val[:5] == "rgba(":
             self.type = ColorType.HEX
             find_val = re.findall(
-                r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*,(\d+)\s*\)", val
+                r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*,(\d+)\s*\)",
+                val,
             )
             if len(find_val) > 0:
                 r, g, b, a = find_val[0]
-                self.value = f"#{format(r, 'x').zfill(2)}{format(g, 'x').zfill(2)}{format(b, 'x').zfill(2)}{format(a, 'x').zfill(2)}"
+                self.value = "#{}{}{}{}".format(
+                    format(r, "x").zfill(2),
+                    format(g, "x").zfill(2),
+                    format(b, "x").zfill(2),
+                    format(a, "x").zfill(2),
+                )
         else:
             raise ValueError()
 
     def __str__(self) -> str:
-        return f"'{self.value}'"
+        return "'{}'".format(self.value)
 
     def __repr__(self) -> str:
-        return f"'{self.value}'"
+        return "'{}'".format(self.value)

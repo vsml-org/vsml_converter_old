@@ -25,7 +25,9 @@ class VSMLManager:
         return VSMLManager.root_path
 
     @staticmethod
-    def set_root_resolution(resolution: WidthHeight):
+    def set_root_resolution(
+        resolution: WidthHeight,
+    ):
         VSMLManager.root_resolution = resolution
 
     @staticmethod
@@ -42,7 +44,7 @@ class Position:
         self.y = y
 
     def __repr__(self) -> str:
-        return f"'Position({self.x}, {self.y})'"
+        return "'Position({}, {})'".format(self.x, self.y)
 
 
 class WidthHeight:
@@ -54,11 +56,11 @@ class WidthHeight:
         self.height = h
 
     def __repr__(self) -> str:
-        return f"'WidthHeight({self.width}, {self.height})'"
+        return "'WidthHeight({}, {})'".format(self.width, self.height)
 
     @classmethod
     def from_str(cls, x_str: str):
         return cls(*map(int, x_str.split("x")))
 
     def get_str(self) -> str:
-        return f"{self.width}x{self.height}"
+        return "{}x{}".format(self.width, self.height)

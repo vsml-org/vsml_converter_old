@@ -241,39 +241,59 @@ COLOR_LIST = [
     "yellowgreen",
 ]
 
-SECOND_PATTERN = f"{regex.REAL_NUMBER_PATTERN}s"
-FRAME_PATTERN = f"{regex.REAL_NUMBER_PATTERN}f"
+SECOND_PATTERN = "{}s".format(regex.REAL_NUMBER_PATTERN)
+FRAME_PATTERN = "{}f".format(regex.REAL_NUMBER_PATTERN)
 
-PIXEL_PATTERN = f"{regex.REAL_NUMBER_PATTERN}px"
-RESOLUTION_WIDTH_PATTERN = f"{regex.REAL_NUMBER_PATTERN}rw"
-RESOLUTION_HEIGHT_PATTERN = f"{regex.REAL_NUMBER_PATTERN}rh"
-RESOLUTION_MIN_PATTERN = f"{regex.REAL_NUMBER_PATTERN}rmin"
-RESOLUTION_MAX_PATTERN = f"{regex.REAL_NUMBER_PATTERN}rmax"
+PIXEL_PATTERN = "{}px".format(regex.REAL_NUMBER_PATTERN)
+RESOLUTION_WIDTH_PATTERN = "{}rw".format(regex.REAL_NUMBER_PATTERN)
+RESOLUTION_HEIGHT_PATTERN = "{}rh".format(regex.REAL_NUMBER_PATTERN)
+RESOLUTION_MIN_PATTERN = "{}rmin".format(regex.REAL_NUMBER_PATTERN)
+RESOLUTION_MAX_PATTERN = "{}rmax".format(regex.REAL_NUMBER_PATTERN)
 
-PERCENT_PATTERN = f"{regex.REAL_NUMBER_PATTERN}%"
+PERCENT_PATTERN = "{}%".format(regex.REAL_NUMBER_PATTERN)
 
-TIME_PATTERN = f"({SECOND_PATTERN}|{FRAME_PATTERN}|{PERCENT_PATTERN})"
-GRAPHIC_PATTERN = f"({PIXEL_PATTERN}|{RESOLUTION_WIDTH_PATTERN}|{RESOLUTION_HEIGHT_PATTERN}|{RESOLUTION_MIN_PATTERN}|{RESOLUTION_MAX_PATTERN}|{PERCENT_PATTERN})"
+TIME_PATTERN = "({}|{}|{})".format(
+    SECOND_PATTERN, FRAME_PATTERN, PERCENT_PATTERN
+)
+GRAPHIC_PATTERN = "({}|{}|{}|{}|{}|{})".format(
+    PIXEL_PATTERN,
+    RESOLUTION_WIDTH_PATTERN,
+    RESOLUTION_HEIGHT_PATTERN,
+    RESOLUTION_MIN_PATTERN,
+    RESOLUTION_MAX_PATTERN,
+    PERCENT_PATTERN,
+)
 
-HEX_COLOR_PATTERN = f"#({regex.HEX_PATTERN}{{3}}|{regex.HEX_PATTERN}{{4}}|{regex.HEX_PATTERN}{{6}}|{regex.HEX_PATTERN}{{8}})"
-RGB_COLOR_PATTERN = rf"rgb\(\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*\)"
-RGBA_COLOR_PATTERN = rf"rgba\(\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*,\s*{regex.REAL_NUMBER_PATTERN}\s*\)"
+HEX_COLOR_PATTERN = "#({0}{{3}}|{0}{{4}}|{0}{{6}}|{0}{{8}})".format(
+    regex.HEX_PATTERN
+)
+RGB_COLOR_PATTERN = r"rgb\(\s*{0}\s*,\s*{0}\s*,\s*{0}\s*\)".format(
+    regex.REAL_NUMBER_PATTERN
+)
+RGBA_COLOR_PATTERN = r"rgba\(\s*{0}\s*,\s*{0}\s*,\s*{0}\s*,\s*{0}\s*\)".format(
+    regex.REAL_NUMBER_PATTERN
+)
 PURE_COLOR_PATTERN = "|".join(COLOR_LIST)
-COLOR_PATTERN = f"({PURE_COLOR_PATTERN}|{HEX_COLOR_PATTERN}|{RGB_COLOR_PATTERN}|{RGBA_COLOR_PATTERN})"
+COLOR_PATTERN = "({}|{}|{}|{})".format(
+    PURE_COLOR_PATTERN,
+    HEX_COLOR_PATTERN,
+    RGB_COLOR_PATTERN,
+    RGBA_COLOR_PATTERN,
+)
 
 STYLE_VALUE_PATTERN = {
-    "object-length": f"(fit|source|{TIME_PATTERN})",
+    "object-length": "(fit|source|{})".format(TIME_PATTERN),
     "source-loop": "(true|false)",
-    "playback-speed": f"{PERCENT_PATTERN}",
-    "time-margin": rf"{TIME_PATTERN}(\s+{TIME_PATTERN})?",
+    "playback-speed": PERCENT_PATTERN,
+    "time-margin": r"{0}(\s+{0})?".format(TIME_PATTERN),
     "time-margin-start": TIME_PATTERN,
     "time-margin-end": TIME_PATTERN,
-    "time-padding": rf"{TIME_PATTERN}(\s+{TIME_PATTERN})?",
+    "time-padding": r"{0}(\s+{0})?".format(TIME_PATTERN),
     "time-padding-start": TIME_PATTERN,
     "time-padding-end": TIME_PATTERN,
     "order": "(sequence|parallel)",
     "layer": "(single|multi)",
-    "opacity": f"({regex.REAL_NUMBER_PATTERN}|{PERCENT_PATTERN})",
+    "opacity": "({}|{})".format(regex.REAL_NUMBER_PATTERN, PERCENT_PATTERN),
     "width": GRAPHIC_PATTERN,
     "min-width": "",
     "max-width": "",
@@ -316,12 +336,12 @@ STYLE_VALUE_PATTERN = {
     "align-content": "",
     "justify-content": "",
     "align-items": "",
-    "margin": rf"{GRAPHIC_PATTERN}(\s+{GRAPHIC_PATTERN}){{0,3}}",
+    "margin": r"{0}(\s+{0}){{0,3}}".format(GRAPHIC_PATTERN),
     "margin-top": GRAPHIC_PATTERN,
     "margin-left": GRAPHIC_PATTERN,
     "margin-bottom": GRAPHIC_PATTERN,
     "margin-right": GRAPHIC_PATTERN,
-    "padding": rf"{GRAPHIC_PATTERN}(\s+{GRAPHIC_PATTERN}){{0,3}}",
+    "padding": r"{0}(\s+{0}){{0,3}}".format(GRAPHIC_PATTERN),
     "padding-top": GRAPHIC_PATTERN,
     "padding-left": GRAPHIC_PATTERN,
     "padding-bottom": GRAPHIC_PATTERN,
@@ -336,7 +356,9 @@ STYLE_VALUE_PATTERN = {
     "audio-volume": PERCENT_PATTERN,
     "audio-system": "(monaural|stereo)",
     "font-color": COLOR_PATTERN,
-    "font-border": rf"({COLOR_PATTERN}\s+{PIXEL_PATTERN}|{PIXEL_PATTERN}\s+{COLOR_PATTERN})",
+    "font-border": r"({0}\s+{1}|{1}\s+{0})".format(
+        COLOR_PATTERN, PIXEL_PATTERN
+    ),
     "font-border-color": COLOR_PATTERN,
     "font-border-width": PIXEL_PATTERN,
     "font": "",

@@ -1,12 +1,17 @@
 import re
 
-from lxml.etree import _Element, tostring
+from lxml.etree import (
+    _Element,
+    tostring,
+)
 
 from style import Style
 from utils import VSMLManager
 
 
-def get_source_value(vsml_element: _Element) -> str:
+def get_source_value(
+    vsml_element: _Element,
+) -> str:
     tag_name = vsml_element.tag
     match tag_name:
         case "vid" | "aud" | "img":
@@ -15,11 +20,30 @@ def get_source_value(vsml_element: _Element) -> str:
                 raise Exception()
             return VSMLManager.get_root_path() + src_path
         case "txt":
-            txt_child = tostring(vsml_element, method="c14n2").decode()
-            txt_child = re.sub(r"^.*?<txt.*?>", "", txt_child)
-            txt_child = re.sub(r"</txt>", "", txt_child)
-            txt_child = re.sub(r"\n\s*?", "", txt_child)
-            txt_child = re.sub(r"<br></br>", "\\n", txt_child)
+            txt_child = tostring(
+                vsml_element,
+                method="c14n2",
+            ).decode()
+            txt_child = re.sub(
+                r"^.*?<txt.*?>",
+                "",
+                txt_child,
+            )
+            txt_child = re.sub(
+                r"</txt>",
+                "",
+                txt_child,
+            )
+            txt_child = re.sub(
+                r"\n\s*?",
+                "",
+                txt_child,
+            )
+            txt_child = re.sub(
+                r"<br></br>",
+                "\\n",
+                txt_child,
+            )
             return txt_child.strip()
         case _:
             raise Exception()
@@ -29,7 +53,11 @@ class VSMLContent:
     tag_name: str
     style: Style
 
-    def __init__(self, tag_name: str, style: Style) -> None:
+    def __init__(
+        self,
+        tag_name: str,
+        style: Style,
+    ) -> None:
         self.tag_name = tag_name
         self.style = style
 
@@ -40,7 +68,11 @@ class VSMLContent:
 class WrapContent(VSMLContent):
     items: list[VSMLContent]
 
-    def __init__(self, vsml_element: _Element, style: Style) -> None:
+    def __init__(
+        self,
+        vsml_element: _Element,
+        style: Style,
+    ) -> None:
         super().__init__(vsml_element.tag, style)
         self.items = []
 
@@ -51,13 +83,20 @@ class WrapContent(VSMLContent):
         items_str = items_str[:-1]
         items_str += "]"
 
-        return f"{{'tag_name': '{self.tag_name}', 'style': {self.style}, 'items': {items_str}}}"
+        return "{{'tag_name': '{}', 'style': {}, 'items': {}}}".format(
+            self.tag_name, self.style, items_str
+        )
 
 
 class SourceContent(VSMLContent):
     src_path: str
 
-    def __init__(self, vsml_element: _Element, src_path: str, style: Style) -> None:
+    def __init__(
+        self,
+        vsml_element: _Element,
+        src_path: str,
+        style: Style,
+    ) -> None:
         super().__init__(vsml_element.tag, style)
         self.src_path = src_path
 

@@ -1,8 +1,13 @@
-from argparse import ArgumentParser, Namespace
+from argparse import (
+    ArgumentParser,
+    Namespace,
+)
 
 
 def init_parser():
-    parser = ArgumentParser(description="command line tool to struct video from xml")
+    parser = ArgumentParser(
+        description="command line tool to struct video from xml"
+    )
     parser.add_argument(
         "filename",
         metavar="filename",

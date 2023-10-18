@@ -12,7 +12,9 @@ CONFIG_FILE = "http://vsml.pigeons.house/config/vsml.xsd"
 OFFLINE_CONFIG_FILE = "./config/vsml.xsd"
 
 
-def get_text_encoding(filename: str) -> Optional[str]:
+def get_text_encoding(
+    filename: str,
+) -> Optional[str]:
     with open(filename, "rb") as file:
         detector = UniversalDetector()
         for line in file:
@@ -26,7 +28,9 @@ def get_text_encoding(filename: str) -> Optional[str]:
     return encoding
 
 
-def formatting_xml(xml_text: str) -> str:
+def formatting_xml(
+    xml_text: str,
+) -> str:
     """
     etreeで読み込むためにXMLのテキストから<?xmlから始まる行を削除する。
 
@@ -42,7 +46,10 @@ def formatting_xml(xml_text: str) -> str:
     """
 
     formatted_text = xml_text
-    vsml_head, vsml_content = xml_text.split("\n", 1)
+    (
+        vsml_head,
+        vsml_content,
+    ) = xml_text.split("\n", 1)
 
     if "<?xml" in vsml_head:
         formatted_text = vsml_content
@@ -50,7 +57,9 @@ def formatting_xml(xml_text: str) -> str:
     return formatted_text
 
 
-def get_parser_with_xsd(is_offline: bool) -> etree.XMLParser:
+def get_parser_with_xsd(
+    is_offline: bool,
+) -> etree.XMLParser:
     """
     独自XSDファイルを読み込んだetreeのparserオブジェクトを返す
 
@@ -67,10 +76,16 @@ def get_parser_with_xsd(is_offline: bool) -> etree.XMLParser:
         xsd_text = formatting_xml(requests.get(CONFIG_FILE).text)
     schema_root = etree.XML(xsd_text, None)
     schema = etree.XMLSchema(schema_root)
-    return etree.XMLParser(schema=schema, remove_comments=True, remove_blank_text=True)
+    return etree.XMLParser(
+        schema=schema,
+        remove_comments=True,
+        remove_blank_text=True,
+    )
 
 
-def get_vsml_text(filename: str) -> str:
+def get_vsml_text(
+    filename: str,
+) -> str:
     """
     受け取ったVSMLファイルのパスを開き、テキスト情報を返す。
 
@@ -86,7 +101,11 @@ def get_vsml_text(filename: str) -> str:
     """
 
     encoding = get_text_encoding(filename)
-    with open(filename, "r", encoding=encoding) as f:
+    with open(
+        filename,
+        "r",
+        encoding=encoding,
+    ) as f:
         vsml_text = f.read()
     return formatting_xml(vsml_text)
 
