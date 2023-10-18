@@ -92,5 +92,6 @@
         "vsml",
         "whitesmoke",
         "yellowgreen"
-    ]
+    ],
+    "editor.defaultFormatter": "ms-python.black-formatter"
 }
