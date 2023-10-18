@@ -1,7 +1,8 @@
 import ffmpeg
 import time
 from typing import Optional
-from vsml import VSML, VSMLContent, SourceContent, WrapContent, WidthHeight
+from vsml import VSML, VSMLContent
+from content import VSMLContent, SourceContent, WrapContent
 from .content import create_source_process
 from .wrap import create_wrap_process
 from .schemas import Process
@@ -20,7 +21,7 @@ def create_process(vsml_content: VSMLContent, debug_mode: bool = False) -> Optio
         raise Exception()
 
     if debug_mode:
-        print(f'[new call detected]\ntype: {vsml_content.type}')
+        # print(f'[new call detected]\ntype: {vsml_content.type}')
         print(process)
 
     return process

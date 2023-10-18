@@ -1,5 +1,6 @@
 from __future__ import annotations
 import re
+from definition.vss import STYLE_VALUE_PATTERN
 
 SELECTOR_PATTERN = r'(\.|#)?[a-zA-Z0-9_\-]+'
 PROPERTY_PATTERN = r'[a-z\-]+'
@@ -38,5 +39,11 @@ def convert_vss_dict(vss_text: str) -> dict[str, dict[str, str]]:
 
         for selector in selectors_text.split(','):
             vss_object[re.sub(r'\s+', ' ', selector.strip())] = properties
+
+    # propertyごとのvalueのvalidate
+    for selector, style in vss_object.items():
+        for property, value in style.items():
+            if re.fullmatch(STYLE_VALUE_PATTERN[property], value, re.IGNORECASE) is None:
+                del vss_object[selector][property]
 
     return vss_object

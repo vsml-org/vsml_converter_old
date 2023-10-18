@@ -1,7 +1,14 @@
-import re
+from __future__ import annotations
+from dataclasses import dataclass
 from chardet import UniversalDetector
 from typing import Optional
-from enum import Enum, auto
+
+@dataclass
+class TagInfoTree:
+    tag_name: str
+    class_name: list[str]
+    id_name: Optional[str]
+    parent: Optional[TagInfoTree]
 
 class Position:
     x: int
@@ -51,13 +58,6 @@ class VSMLManager:
     @staticmethod
     def get_root_resolution() -> WidthHeight:
         return VSMLManager.root_resolution
-
-class AudioSystem(Enum):
-    MONAURAL = auto()
-    STEREO = auto()
-
-    def __repr__(self) -> str:
-        return f"'AudioSystem.{self.name}'"
 
 def get_text_encoding(filename: str) -> Optional[str]:
     with open(filename, 'rb') as file:
