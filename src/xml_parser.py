@@ -1,26 +1,30 @@
-from chardet import UniversalDetector
 from os import path
 from typing import Optional
-import requests
-from lxml import etree
-from vsml import VSML
-from utils import VSMLManager
 
-CONFIG_FILE = 'http://vsml.pigeons.house/config/vsml.xsd'
-OFFLINE_CONFIG_FILE = './config/vsml.xsd'
+import requests
+from chardet import UniversalDetector
+from lxml import etree
+
+from utils import VSMLManager
+from vsml import VSML
+
+CONFIG_FILE = "http://vsml.pigeons.house/config/vsml.xsd"
+OFFLINE_CONFIG_FILE = "./config/vsml.xsd"
+
 
 def get_text_encoding(filename: str) -> Optional[str]:
-    with open(filename, 'rb') as file:
+    with open(filename, "rb") as file:
         detector = UniversalDetector()
         for line in file:
             detector.feed(line)
             if detector.done:
                 break
     detector.close()
-    encoding = detector.result['encoding']
-    if encoding == 'SHIFT_JIS':
-        encoding = 'CP932'
+    encoding = detector.result["encoding"]
+    if encoding == "SHIFT_JIS":
+        encoding = "CP932"
     return encoding
+
 
 def formatting_xml(xml_text: str) -> str:
     """
@@ -30,7 +34,7 @@ def formatting_xml(xml_text: str) -> str:
     ----------
     xml_text : str
         XMLテキスト
-    
+
     Returns
     -------
     formatted_xml_text : str
@@ -38,12 +42,13 @@ def formatting_xml(xml_text: str) -> str:
     """
 
     formatted_text = xml_text
-    vsml_head, vsml_content = xml_text.split('\n', 1)
+    vsml_head, vsml_content = xml_text.split("\n", 1)
 
-    if '<?xml' in vsml_head:
+    if "<?xml" in vsml_head:
         formatted_text = vsml_content
 
     return formatted_text
+
 
 def get_parser_with_xsd(is_offline: bool) -> etree.XMLParser:
     """
@@ -56,13 +61,14 @@ def get_parser_with_xsd(is_offline: bool) -> etree.XMLParser:
     """
 
     if is_offline:
-        with open(OFFLINE_CONFIG_FILE, 'r') as f:
+        with open(OFFLINE_CONFIG_FILE, "r") as f:
             xsd_text = formatting_xml(f.read())
     else:
         xsd_text = formatting_xml(requests.get(CONFIG_FILE).text)
     schema_root = etree.XML(xsd_text, None)
     schema = etree.XMLSchema(schema_root)
-    return etree.XMLParser(schema = schema, remove_comments=True, remove_blank_text=True)
+    return etree.XMLParser(schema=schema, remove_comments=True, remove_blank_text=True)
+
 
 def get_vsml_text(filename: str) -> str:
     """
@@ -72,7 +78,7 @@ def get_vsml_text(filename: str) -> str:
     ----------
     filename : str
         VSMLファイルのパス
-    
+
     Returns
     -------
     vsml_text : str
@@ -80,9 +86,10 @@ def get_vsml_text(filename: str) -> str:
     """
 
     encoding = get_text_encoding(filename)
-    with open(filename, 'r', encoding=encoding) as f:
+    with open(filename, "r", encoding=encoding) as f:
         vsml_text = f.read()
     return formatting_xml(vsml_text)
+
 
 def parsing_vsml(filename: str, is_offline: bool) -> VSML:
     """
@@ -92,7 +99,7 @@ def parsing_vsml(filename: str, is_offline: bool) -> VSML:
     ----------
     filename : str
         VSMLファイルのパス
-    
+
     Returns
     -------
     vsml_object : VSML
@@ -105,6 +112,6 @@ def parsing_vsml(filename: str, is_offline: bool) -> VSML:
     vsml_element = etree.fromstring(vsml_text, parser)
 
     # vsmlファイルからの相対パスを想定するため、vsmlのルートパスを取得
-    VSMLManager.set_root_path(path.dirname(filename) + '/')
+    VSMLManager.set_root_path(path.dirname(filename) + "/")
 
     return VSML(vsml_element)

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Any, Optional
-from utils import WidthHeight, Position
+
+from utils import Position, WidthHeight
+
 
 @dataclass
 class Process:

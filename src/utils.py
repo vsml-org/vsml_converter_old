@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Optional
+
 
 @dataclass
 class TagInfoTree:
@@ -8,6 +10,7 @@ class TagInfoTree:
     class_name: list[str]
     id_name: Optional[str]
     parent: Optional[TagInfoTree]
+
 
 class VSMLManager:
     root_path: str
@@ -29,16 +32,18 @@ class VSMLManager:
     def get_root_resolution() -> WidthHeight:
         return VSMLManager.root_resolution
 
+
 class Position:
     x: int
     y: int
 
     def __init__(self, x: int, y: int) -> None:
         self.x = x
-        self.y = y        
+        self.y = y
 
     def __repr__(self) -> str:
         return f"'Position({self.x}, {self.y})'"
+
 
 class WidthHeight:
     width: int
@@ -46,14 +51,14 @@ class WidthHeight:
 
     def __init__(self, w: int, h: int) -> None:
         self.width = w
-        self.height = h        
+        self.height = h
 
     def __repr__(self) -> str:
         return f"'WidthHeight({self.width}, {self.height})'"
 
     @classmethod
     def from_str(cls, x_str: str):
-        return cls(*map(int, x_str.split('x')))
+        return cls(*map(int, x_str.split("x")))
 
     def get_str(self) -> str:
-        return f'{self.width}x{self.height}'
+        return f"{self.width}x{self.height}"

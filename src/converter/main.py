@@ -1,13 +1,19 @@
 import time
 from typing import Optional
+
 import ffmpeg
-from content import VSMLContent, SourceContent, WrapContent
+
+from content import SourceContent, VSMLContent, WrapContent
 from vsml import VSML
+
 from .content import create_source_process
 from .schemas import Process
 from .wrap import create_wrap_process
 
-def create_process(vsml_content: VSMLContent, debug_mode: bool = False) -> Optional[Process]:
+
+def create_process(
+    vsml_content: VSMLContent, debug_mode: bool = False
+) -> Optional[Process]:
     if isinstance(vsml_content, SourceContent):
         process = create_source_process(vsml_content, debug_mode)
     elif isinstance(vsml_content, WrapContent):
@@ -26,8 +32,11 @@ def create_process(vsml_content: VSMLContent, debug_mode: bool = False) -> Optio
 
     return process
 
-def convert_video(vsml_data: VSML, out_filename: Optional[str], debug_mode: bool, overwrite: bool):
-    out_filename = 'video.mp4' if out_filename is None else out_filename
+
+def convert_video(
+    vsml_data: VSML, out_filename: Optional[str], debug_mode: bool, overwrite: bool
+):
+    out_filename = "video.mp4" if out_filename is None else out_filename
 
     process = create_process(vsml_data.content, debug_mode)
     if process is None:
@@ -49,6 +58,6 @@ def convert_video(vsml_data: VSML, out_filename: Optional[str], debug_mode: bool
         print(vsml_data.content)
         ffmpeg.view(process)
         time.sleep(0.1)
-        print(f'\n[[[command args]]]\n{ffmpeg.compile(process)}')
+        print(f"\n[[[command args]]]\n{ffmpeg.compile(process)}")
 
     ffmpeg.run(process, overwrite_output=overwrite)

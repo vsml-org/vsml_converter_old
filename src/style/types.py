@@ -1,6 +1,8 @@
 import re
 from enum import Enum, auto
+
 from definition import COLOR_LIST
+
 
 class Order(Enum):
     SEQUENCE = auto()
@@ -12,6 +14,7 @@ class Order(Enum):
     def __repr__(self) -> str:
         return f"'{self.name}'"
 
+
 class AudioSystem(Enum):
     MONAURAL = auto()
     STEREO = auto()
@@ -22,6 +25,7 @@ class AudioSystem(Enum):
     def __repr__(self) -> str:
         return f"'{self.name}'"
 
+
 class TimeUnit(Enum):
     PERCENT = auto()
     FRAME = auto()
@@ -30,24 +34,25 @@ class TimeUnit(Enum):
     def __str__(self) -> str:
         match self.name:
             case self.PERCENT.name:
-                return '%'
+                return "%"
             case self.FRAME.name:
-                return 'f'
+                return "f"
             case self.SECOND.name:
-                return 's'
+                return "s"
             case _:
-                return ''
+                return ""
 
     def __repr__(self) -> str:
         match self.name:
             case self.PERCENT.name:
-                return '%'
+                return "%"
             case self.FRAME.name:
-                return 'f'
+                return "f"
             case self.SECOND.name:
-                return 's'
+                return "s"
             case _:
-                return ''
+                return ""
+
 
 class GraphicUnit(Enum):
     PERCENT = auto()
@@ -60,40 +65,42 @@ class GraphicUnit(Enum):
     def __str__(self) -> str:
         match self.name:
             case self.PERCENT.name:
-                return '%'
+                return "%"
             case self.PIXEL.name:
-                return 'px'
+                return "px"
             case self.RESOLUTION_WIDTH.name:
-                return 'rw'
+                return "rw"
             case self.RESOLUTION_HEIGHT.name:
-                return 'rh'
+                return "rh"
             case self.RESOLUTION_MIN.name:
-                return 'rmin'
+                return "rmin"
             case self.RESOLUTION_MAX.name:
-                return 'rmax'
+                return "rmax"
             case _:
-                return ''
+                return ""
 
     def __repr__(self) -> str:
         match self.name:
             case self.PERCENT.name:
-                return '%'
+                return "%"
             case self.PIXEL.name:
-                return 'px'
+                return "px"
             case self.RESOLUTION_WIDTH.name:
-                return 'rw'
+                return "rw"
             case self.RESOLUTION_HEIGHT.name:
-                return 'rh'
+                return "rh"
             case self.RESOLUTION_MIN.name:
-                return 'rmin'
+                return "rmin"
             case self.RESOLUTION_MAX.name:
-                return 'rmax'
+                return "rmax"
             case _:
-                return ''
+                return ""
+
 
 class ColorType(Enum):
     PURE = auto()
     HEX = auto()
+
 
 class TimeValue:
     value: float
@@ -101,11 +108,11 @@ class TimeValue:
 
     def __init__(self, val: str) -> None:
         match val[-1:]:
-            case 's':
+            case "s":
                 self.unit = TimeUnit.SECOND
-            case 'f':
+            case "f":
                 self.unit = TimeUnit.FRAME
-            case '%':
+            case "%":
                 self.unit = TimeUnit.PERCENT
             case _:
                 raise ValueError()
@@ -117,27 +124,28 @@ class TimeValue:
     def __repr__(self) -> str:
         return f"'{self.value}{self.unit}'"
 
+
 class GraphicValue:
     value: float
     unit: GraphicUnit
 
     def __init__(self, val: str) -> None:
-        if val[-2:] == 'px':
+        if val[-2:] == "px":
             self.unit = GraphicUnit.PIXEL
             self.value = float(val[:-2])
-        elif val[-2:] == 'rw':
+        elif val[-2:] == "rw":
             self.unit = GraphicUnit.RESOLUTION_WIDTH
             self.value = float(val[:-2])
-        elif val[-2:] == 'rh':
+        elif val[-2:] == "rh":
             self.unit = GraphicUnit.RESOLUTION_HEIGHT
             self.value = float(val[:-2])
-        elif val[-4:] == 'rmin':
+        elif val[-4:] == "rmin":
             self.unit = GraphicUnit.RESOLUTION_MIN
             self.value = float(val[:-4])
-        elif val[-4:] == 'rmax':
+        elif val[-4:] == "rmax":
             self.unit = GraphicUnit.RESOLUTION_MAX
             self.value = float(val[:-4])
-        elif val[-1:] == '%':
+        elif val[-1:] == "%":
             self.unit = GraphicUnit.PERCENT
             self.value = float(val[:-1])
         else:
@@ -149,6 +157,7 @@ class GraphicValue:
     def __repr__(self) -> str:
         return f"'{self.value}{self.unit}'"
 
+
 class Color:
     value: str
     type: ColorType
@@ -157,8 +166,8 @@ class Color:
         if val in COLOR_LIST:
             self.value = val
             self.type = ColorType.PURE
-        elif val[0] == '#':
-            self.type = ColorType.HEX           
+        elif val[0] == "#":
+            self.type = ColorType.HEX
             hex_val = val[1:]
             match len(hex_val):
                 case 3:
@@ -168,14 +177,16 @@ class Color:
                 case 6 | 8:
                     self.value = val
         elif val[:4] == "rgb(":
-            self.type = ColorType.HEX           
-            find_val = re.findall(r'rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*\)', val)
+            self.type = ColorType.HEX
+            find_val = re.findall(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*\)", val)
             if len(find_val) > 0:
                 r, g, b = find_val[0]
                 self.value = f"#{format(r, 'x').zfill(2)}{format(g, 'x').zfill(2)}{format(b, 'x').zfill(2)}"
         elif val[:5] == "rgba(":
             self.type = ColorType.HEX
-            find_val = re.findall(r'rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*,(\d+)\s*\)', val)
+            find_val = re.findall(
+                r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*,(\d+)\s*\)", val
+            )
             if len(find_val) > 0:
                 r, g, b, a = find_val[0]
                 self.value = f"#{format(r, 'x').zfill(2)}{format(g, 'x').zfill(2)}{format(b, 'x').zfill(2)}{format(a, 'x').zfill(2)}"
