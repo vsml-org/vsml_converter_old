@@ -21,13 +21,7 @@ from .styling_parser import (
     pixel_parser,
     time_parser,
 )
-from .types import (
-    AudioSystem,
-    Color,
-    GraphicValue,
-    Order,
-    TimeValue,
-)
+from .types import AudioSystem, Color, GraphicValue, Order, TimeValue
 
 
 class Style:
@@ -195,58 +189,37 @@ class Style:
             match param:
                 case "object-length":
                     parse_value = time_parser(value)
-                    if isinstance(
-                        parse_value,
-                        TimeValue,
-                    ):
+                    if parse_value is not None:
                         self.object_length = parse_value
                 case "time-margin":
                     parse_value = double_time_parser(value)
-                    if isinstance(
-                        parse_value,
-                        tuple,
-                    ):
+                    if parse_value is not None:
                         (
                             self.time_margin_start,
                             self.time_margin_end,
                         ) = parse_value
                 case "time-margin-start":
                     parse_value = time_parser(value)
-                    if isinstance(
-                        parse_value,
-                        TimeValue,
-                    ):
+                    if parse_value is not None:
                         self.time_margin_start = parse_value
                 case "time-margin-end":
                     parse_value = time_parser(value)
-                    if isinstance(
-                        parse_value,
-                        TimeValue,
-                    ):
+                    if parse_value is not None:
                         self.time_margin_end = parse_value
                 case "time-padding":
                     parse_value = double_time_parser(value)
-                    if isinstance(
-                        parse_value,
-                        tuple,
-                    ):
+                    if parse_value is not None:
                         (
                             self.time_padding_start,
                             self.time_padding_end,
                         ) = parse_value
                 case "time-padding-start":
                     parse_value = time_parser(value)
-                    if isinstance(
-                        parse_value,
-                        TimeValue,
-                    ):
+                    if parse_value is not None:
                         self.time_padding_start = parse_value
                 case "time-padding-end":
                     parse_value = time_parser(value)
-                    if isinstance(
-                        parse_value,
-                        TimeValue,
-                    ):
+                    if parse_value is not None:
                         self.time_padding_end = parse_value
                 case "order":
                     parse_value = order_parser(value)
