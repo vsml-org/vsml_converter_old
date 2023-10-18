@@ -1,6 +1,5 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from chardet import UniversalDetector
 from typing import Optional
 
 @dataclass
@@ -9,6 +8,26 @@ class TagInfoTree:
     class_name: list[str]
     id_name: Optional[str]
     parent: Optional[TagInfoTree]
+
+class VSMLManager:
+    root_path: str
+    root_resolution: WidthHeight
+
+    @staticmethod
+    def set_root_path(root_path: str):
+        VSMLManager.root_path = root_path
+
+    @staticmethod
+    def get_root_path() -> str:
+        return VSMLManager.root_path
+
+    @staticmethod
+    def set_root_resolution(resolution: WidthHeight):
+        VSMLManager.root_resolution = resolution
+
+    @staticmethod
+    def get_root_resolution() -> WidthHeight:
+        return VSMLManager.root_resolution
 
 class Position:
     x: int
@@ -38,36 +57,3 @@ class WidthHeight:
 
     def get_str(self) -> str:
         return f'{self.width}x{self.height}'
-
-class VSMLManager:
-    root_path: str
-    root_resolution: WidthHeight
-
-    @staticmethod
-    def set_root_path(root_path: str):
-        VSMLManager.root_path = root_path
-
-    @staticmethod
-    def get_root_path() -> str:
-        return VSMLManager.root_path
-
-    @staticmethod
-    def set_root_resolution(resolution: WidthHeight):
-        VSMLManager.root_resolution = resolution
-
-    @staticmethod
-    def get_root_resolution() -> WidthHeight:
-        return VSMLManager.root_resolution
-
-def get_text_encoding(filename: str) -> Optional[str]:
-    with open(filename, 'rb') as file:
-        detector = UniversalDetector()
-        for line in file:
-            detector.feed(line)
-            if detector.done:
-                break
-    detector.close()
-    encoding = detector.result['encoding']
-    if encoding == 'SHIFT_JIS':
-        encoding = 'CP932'
-    return encoding

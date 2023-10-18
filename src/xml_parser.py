@@ -1,11 +1,26 @@
+from chardet import UniversalDetector
 from os import path
+from typing import Optional
 import requests
 from lxml import etree
 from vsml import VSML
-from utils import get_text_encoding, VSMLManager
+from utils import VSMLManager
 
 CONFIG_FILE = 'http://vsml.pigeons.house/config/vsml.xsd'
 OFFLINE_CONFIG_FILE = './config/vsml.xsd'
+
+def get_text_encoding(filename: str) -> Optional[str]:
+    with open(filename, 'rb') as file:
+        detector = UniversalDetector()
+        for line in file:
+            detector.feed(line)
+            if detector.done:
+                break
+    detector.close()
+    encoding = detector.result['encoding']
+    if encoding == 'SHIFT_JIS':
+        encoding = 'CP932'
+    return encoding
 
 def formatting_xml(xml_text: str) -> str:
     """

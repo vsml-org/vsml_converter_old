@@ -1,11 +1,11 @@
-import ffmpeg
 import time
 from typing import Optional
-from vsml import VSML, VSMLContent
+import ffmpeg
 from content import VSMLContent, SourceContent, WrapContent
+from vsml import VSML
 from .content import create_source_process
-from .wrap import create_wrap_process
 from .schemas import Process
+from .wrap import create_wrap_process
 
 def create_process(vsml_content: VSMLContent, debug_mode: bool = False) -> Optional[Process]:
     if isinstance(vsml_content, SourceContent):

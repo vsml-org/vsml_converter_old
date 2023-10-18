@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional
-from lxml.etree import _Attrib
 import ffmpeg
+from lxml.etree import _Attrib
 from utils import TagInfoTree
 from .styling_parser import time_parser, double_time_parser, graphic_parser, multi_graphic_parser, order_parser, color_parser, pixel_parser, font_weight_parser, font_style_parser, color_and_pixel_parser, percentage_parser, audio_system_parser
 from .types import AudioSystem, Order, TimeValue, GraphicValue, Color

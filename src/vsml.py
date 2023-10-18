@@ -1,9 +1,9 @@
 from typing import Optional
 from lxml.etree import _Element
-from utils import WidthHeight, VSMLManager, TagInfoTree
-from content import get_source_value, VSMLContent, WrapContent, SourceContent
 import definition
+from content import get_source_value, VSMLContent, WrapContent, SourceContent
 from style import Style, pickup_style
+from utils import WidthHeight, VSMLManager, TagInfoTree
 from vss import convert_vss_dict
 
 class VSML:

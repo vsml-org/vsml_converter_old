@@ -1,5 +1,5 @@
-from typing import Any, Optional
 from dataclasses import dataclass
+from typing import Any, Optional
 from utils import WidthHeight, Position
 
 @dataclass
