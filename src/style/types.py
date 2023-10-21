@@ -30,6 +30,8 @@ class TimeUnit(Enum):
     PERCENT = auto()
     FRAME = auto()
     SECOND = auto()
+    FIT = auto()
+    SOURCE = auto()
 
     def __str__(self) -> str:
         match self.name:
@@ -39,6 +41,10 @@ class TimeUnit(Enum):
                 return "f"
             case self.SECOND.name:
                 return "s"
+            case self.FIT.name:
+                return "fit"
+            case self.SOURCE.name:
+                return "source"
             case _:
                 return ""
 
@@ -50,11 +56,16 @@ class TimeUnit(Enum):
                 return "f"
             case self.SECOND.name:
                 return "s"
+            case self.FIT.name:
+                return "fit"
+            case self.SOURCE.name:
+                return "source"
             case _:
                 return ""
 
 
 class GraphicUnit(Enum):
+    AUTO = auto()
     PERCENT = auto()
     PIXEL = auto()
     RESOLUTION_WIDTH = auto()
@@ -64,6 +75,8 @@ class GraphicUnit(Enum):
 
     def __str__(self) -> str:
         match self.name:
+            case self.AUTO.name:
+                return "auto"
             case self.PERCENT.name:
                 return "%"
             case self.PIXEL.name:
@@ -81,6 +94,8 @@ class GraphicUnit(Enum):
 
     def __repr__(self) -> str:
         match self.name:
+            case self.AUTO.name:
+                return "auto"
             case self.PERCENT.name:
                 return "%"
             case self.PIXEL.name:
@@ -107,22 +122,35 @@ class TimeValue:
     unit: TimeUnit
 
     def __init__(self, val: str) -> None:
-        match val[-1:]:
-            case "s":
-                self.unit = TimeUnit.SECOND
-            case "f":
-                self.unit = TimeUnit.FRAME
-            case "%":
-                self.unit = TimeUnit.PERCENT
-            case _:
-                raise ValueError()
-        self.value = float(val[:-1])
+        if val == "fit":
+            self.unit = TimeUnit.FIT
+        elif val == "source":
+            self.unit = TimeUnit.SOURCE
+        else:
+            match val[-1:]:
+                case "s":
+                    self.unit = TimeUnit.SECOND
+                case "f":
+                    self.unit = TimeUnit.FRAME
+                case "%":
+                    self.unit = TimeUnit.PERCENT
+                case _:
+                    raise ValueError()
+            self.value = float(val[:-1])
 
     def __str__(self) -> str:
-        return "'{}{}'".format(self.value, self.unit)
+        match self.unit:
+            case TimeUnit.FIT | TimeUnit.SOURCE:
+                return "{}".format(self.unit)
+            case _:
+                return "'{}{}'".format(self.value, self.unit)
 
     def __repr__(self) -> str:
-        return "'{}{}'".format(self.value, self.unit)
+        match self.unit:
+            case TimeUnit.FIT | TimeUnit.SOURCE:
+                return "{}".format(self.unit)
+            case _:
+                return "'{}{}'".format(self.value, self.unit)
 
 
 class GraphicValue:
@@ -130,7 +158,10 @@ class GraphicValue:
     unit: GraphicUnit
 
     def __init__(self, val: str) -> None:
-        if val[-2:] == "px":
+        if val == "auto":
+            self.unit = GraphicUnit.AUTO
+            self.value = -1
+        elif val[-2:] == "px":
             self.unit = GraphicUnit.PIXEL
             self.value = float(val[:-2])
         elif val[-2:] == "rw":
@@ -152,10 +183,18 @@ class GraphicValue:
             raise ValueError()
 
     def __str__(self) -> str:
-        return "'{}{}'".format(self.value, self.unit)
+        match self.unit:
+            case GraphicUnit.AUTO:
+                return "{}".format(self.unit)
+            case _:
+                return "'{}{}'".format(self.value, self.unit)
 
     def __repr__(self) -> str:
-        return "'{}{}'".format(self.value, self.unit)
+        match self.unit:
+            case GraphicUnit.AUTO:
+                return "{}".format(self.unit)
+            case _:
+                return "'{}{}'".format(self.value, self.unit)
 
 
 class Color:

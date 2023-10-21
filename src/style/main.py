@@ -5,6 +5,7 @@ from typing import Optional
 import ffmpeg
 from lxml.etree import _Attrib
 
+from style import GraphicUnit, TimeUnit
 from utils import TagInfoTree
 
 from .styling_parser import (
@@ -27,15 +28,15 @@ from .types import AudioSystem, Color, GraphicValue, Order, TimeValue
 class Style:
     # style param
     # time param
-    object_length: TimeValue
+    object_length: TimeValue = TimeValue("fit")
     time_margin_start: TimeValue
     time_margin_end: TimeValue
     time_padding_start: TimeValue
     time_padding_end: TimeValue
     order: Optional[Order] = None
     # visual param
-    width: GraphicValue
-    height: GraphicValue
+    width: GraphicValue = GraphicValue("auto")
+    height: GraphicValue = GraphicValue("auto")
     margin_top: GraphicValue
     margin_left: GraphicValue
     margin_right: GraphicValue
@@ -85,6 +86,9 @@ class Style:
             if parent_param.font_style is not None:
                 self.font_style = parent_param.font_style
 
+        source_object_length = None
+        source_width = None
+        source_height = None
         match tag_name:
             case "cont":
                 self.order = Order.SEQUENCE
@@ -105,10 +109,12 @@ class Style:
                     meta_video,
                     meta_audio,
                 ) = self._get_info_from_meta(meta)
-                if meta_video is None:
+                if object_length is None or meta_video is None:
                     raise Exception()
-                self.width = meta_video["width"]
-                self.height = meta_video["height"]
+                source_object_length = TimeValue("{}s".format(object_length))
+                self.object_length = TimeValue("source")
+                source_width = graphic_parser(meta_video["width"] + "px")
+                source_height = graphic_parser(meta_video["height"] + "px")
                 if meta_audio is not None:
                     audio_system = (
                         AudioSystem.STEREO
@@ -120,8 +126,6 @@ class Style:
                         if self.audio_system == AudioSystem.MONAURAL
                         else audio_system
                     )
-                if object_length is not None:
-                    self.object_length = TimeValue("{}s".format(object_length))
             case "aud":
                 meta = ffmpeg.probe(source_value)
                 (
@@ -129,8 +133,10 @@ class Style:
                     meta_video,
                     meta_audio,
                 ) = self._get_info_from_meta(meta)
-                if meta_audio is None:
+                if object_length is None or meta_audio is None:
                     raise Exception()
+                source_object_length = TimeValue("{}s".format(object_length))
+                self.object_length = TimeValue("source")
                 audio_system = (
                     AudioSystem.STEREO
                     if meta_audio.get("channel_layout") == "stereo"
@@ -141,8 +147,6 @@ class Style:
                     if self.audio_system == AudioSystem.MONAURAL
                     else audio_system
                 )
-                if object_length is not None:
-                    self.object_length = TimeValue("{}s".format(object_length))
             case "img":
                 meta = ffmpeg.probe(source_value)
                 (
@@ -152,8 +156,8 @@ class Style:
                 ) = self._get_info_from_meta(meta)
                 if meta_video is None:
                     raise Exception()
-                self.width = meta_video["width"]
-                self.height = meta_video["height"]
+                source_width = graphic_parser(meta_video["width"] + "px")
+                source_height = graphic_parser(meta_video["height"] + "px")
             case "txt":
                 self.font_color = (
                     self.font_color if self.font_color else Color("white")
@@ -164,6 +168,9 @@ class Style:
                 self.font_size = (
                     self.font_size if self.font_size else GraphicValue("30px")
                 )
+                # TODO: ここGlyphを使用してサイズを計算する
+                source_width = graphic_parser("100px")
+                source_height = graphic_parser("100px")
             case _:
                 raise Exception()
 
@@ -325,6 +332,61 @@ class Style:
                     self.background_color = Color(background_color)
             case _:
                 pass
+
+        # calculate param
+        if source_object_length is not None:
+            match self.object_length.unit:
+                case TimeUnit.SOURCE:
+                    self.object_length = source_object_length
+                case TimeUnit.PERCENT:
+                    if (
+                        parent_param is not None
+                        and parent_param.object_length is not None
+                        and parent_param.object_length.unit
+                        in [TimeUnit.SECOND, TimeUnit.FRAME]
+                    ):
+                        self.object_length.value = (
+                            parent_param.object_length.value
+                            * self.object_length.value
+                            / 100
+                        )
+                        self.object_length.unit = (
+                            parent_param.object_length.unit
+                        )
+                    else:
+                        self.object_length = source_object_length
+        if source_width is not None:
+            match self.width.unit:
+                case GraphicUnit.AUTO:
+                    self.width = source_width
+                case GraphicUnit.PERCENT:
+                    if (
+                        parent_param is not None
+                        and parent_param.width is not None
+                        and parent_param.width.unit == GraphicUnit.PIXEL
+                    ):
+                        self.width.value = (
+                            parent_param.width.value * self.width.value / 100
+                        )
+                        self.width.unit = parent_param.width.unit
+                    else:
+                        self.width = source_width
+        if source_height is not None:
+            match self.height.unit:
+                case GraphicUnit.AUTO:
+                    self.height = source_height
+                case GraphicUnit.PERCENT:
+                    if (
+                        parent_param is not None
+                        and parent_param.height is not None
+                        and parent_param.height.unit == GraphicUnit.PIXEL
+                    ):
+                        self.height.value = (
+                            parent_param.height.value * self.height.value / 100
+                        )
+                        self.height.unit = parent_param.height.unit
+                    else:
+                        self.height = source_height
 
     def _get_info_from_meta(
         self, meta: dict
