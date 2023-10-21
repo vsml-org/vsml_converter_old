@@ -36,18 +36,6 @@ class VSMLManager:
         return VSMLManager.root_resolution
 
 
-class Position:
-    x: int
-    y: int
-
-    def __init__(self, x: int, y: int) -> None:
-        self.x = x
-        self.y = y
-
-    def __repr__(self) -> str:
-        return "'Position({}, {})'".format(self.x, self.y)
-
-
 class WidthHeight:
     width: int
     height: int
