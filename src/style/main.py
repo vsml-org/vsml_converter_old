@@ -6,7 +6,7 @@ import ffmpeg
 from lxml.etree import _Attrib
 
 from style import GraphicUnit, TimeUnit
-from utils import TagInfoTree
+from utils import TagInfoTree, VSMLManager
 
 from .styling_parser import (
     audio_system_parser,
@@ -371,6 +371,35 @@ class Style:
                         self.width.unit = parent_param.width.unit
                     else:
                         self.width = source_width
+                case GraphicUnit.RESOLUTION_WIDTH:
+                    self.width.value = (
+                        VSMLManager.get_root_resolution().width
+                        * self.width.value
+                        / 100
+                    )
+                    self.width.unit = GraphicUnit.PIXEL
+                case GraphicUnit.RESOLUTION_HEIGHT:
+                    self.width.value = (
+                        VSMLManager.get_root_resolution().height
+                        * self.width.value
+                        / 100
+                    )
+                    self.width.unit = GraphicUnit.PIXEL
+                case GraphicUnit.RESOLUTION_MIN:
+                    self.width.value = (
+                        VSMLManager.get_root_resolution().get_min()
+                        * self.width.value
+                        / 100
+                    )
+                    self.width.unit = GraphicUnit.PIXEL
+                case GraphicUnit.RESOLUTION_MAX:
+                    self.width.value = (
+                        VSMLManager.get_root_resolution().get_max()
+                        * self.width.value
+                        / 100
+                    )
+                    self.width.unit = GraphicUnit.PIXEL
+
         if source_height is not None:
             match self.height.unit:
                 case GraphicUnit.AUTO:
@@ -387,6 +416,34 @@ class Style:
                         self.height.unit = parent_param.height.unit
                     else:
                         self.height = source_height
+                case GraphicUnit.RESOLUTION_WIDTH:
+                    self.height.value = (
+                        VSMLManager.get_root_resolution().width
+                        * self.height.value
+                        / 100
+                    )
+                    self.height.unit = GraphicUnit.PIXEL
+                case GraphicUnit.RESOLUTION_HEIGHT:
+                    self.height.value = (
+                        VSMLManager.get_root_resolution().height
+                        * self.height.value
+                        / 100
+                    )
+                    self.height.unit = GraphicUnit.PIXEL
+                case GraphicUnit.RESOLUTION_MIN:
+                    self.height.value = (
+                        VSMLManager.get_root_resolution().get_min()
+                        * self.height.value
+                        / 100
+                    )
+                    self.height.unit = GraphicUnit.PIXEL
+                case GraphicUnit.RESOLUTION_MAX:
+                    self.height.value = (
+                        VSMLManager.get_root_resolution().get_max()
+                        * self.height.value
+                        / 100
+                    )
+                    self.height.unit = GraphicUnit.PIXEL
 
     def _get_info_from_meta(
         self, meta: dict

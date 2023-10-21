@@ -54,6 +54,12 @@ class WidthHeight:
     def get_str(self) -> str:
         return "{}x{}".format(self.width, self.height)
 
+    def get_min(self) -> int:
+        return min(self.width, self.height)
+
+    def get_max(self) -> int:
+        return max(self.width, self.height)
+
 
 class SourceType(Enum):
     IMAGE = auto()
