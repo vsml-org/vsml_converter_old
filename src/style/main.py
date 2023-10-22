@@ -334,116 +334,147 @@ class Style:
                 pass
 
         # calculate param
-        if source_object_length is not None:
-            match self.object_length.unit:
-                case TimeUnit.SOURCE:
+        match self.object_length.unit:
+            case TimeUnit.SOURCE:
+                if source_object_length is None:
+                    # FIT
+                    self.object_length.unit = TimeUnit.FIT
+                else:
+                    # SECOND or FRAME
                     self.object_length = source_object_length
-                case TimeUnit.PERCENT:
-                    if (
-                        parent_param is not None
-                        and parent_param.object_length is not None
-                        and parent_param.object_length.unit
-                        in [TimeUnit.SECOND, TimeUnit.FRAME]
-                    ):
-                        self.object_length.value = (
-                            parent_param.object_length.value
-                            * self.object_length.value
-                            / 100
-                        )
-                        self.object_length.unit = (
-                            parent_param.object_length.unit
-                        )
+            case TimeUnit.PERCENT:
+                if (
+                    parent_param is not None
+                    and parent_param.object_length is not None
+                    and parent_param.object_length.unit
+                    in [TimeUnit.SECOND, TimeUnit.FRAME]
+                ):
+                    self.object_length.value = (
+                        parent_param.object_length.value
+                        * self.object_length.value
+                        / 100
+                    )
+                    # SECOND or FRAME
+                    self.object_length.unit = parent_param.object_length.unit
+                else:
+                    if source_object_length is None:
+                        # FIT
+                        self.object_length.unit = TimeUnit.FIT
                     else:
+                        # SECOND or FRAME
                         self.object_length = source_object_length
-        if source_width is not None:
-            match self.width.unit:
-                case GraphicUnit.AUTO:
-                    self.width = source_width
-                case GraphicUnit.PERCENT:
-                    if (
-                        parent_param is not None
-                        and parent_param.width is not None
-                        and parent_param.width.unit == GraphicUnit.PIXEL
-                    ):
-                        self.width.value = (
-                            parent_param.width.value * self.width.value / 100
-                        )
-                        self.width.unit = parent_param.width.unit
-                    else:
-                        self.width = source_width
-                case GraphicUnit.RESOLUTION_WIDTH:
-                    self.width.value = (
-                        VSMLManager.get_root_resolution().width
-                        * self.width.value
-                        / 100
-                    )
-                    self.width.unit = GraphicUnit.PIXEL
-                case GraphicUnit.RESOLUTION_HEIGHT:
-                    self.width.value = (
-                        VSMLManager.get_root_resolution().height
-                        * self.width.value
-                        / 100
-                    )
-                    self.width.unit = GraphicUnit.PIXEL
-                case GraphicUnit.RESOLUTION_MIN:
-                    self.width.value = (
-                        VSMLManager.get_root_resolution().get_min()
-                        * self.width.value
-                        / 100
-                    )
-                    self.width.unit = GraphicUnit.PIXEL
-                case GraphicUnit.RESOLUTION_MAX:
-                    self.width.value = (
-                        VSMLManager.get_root_resolution().get_max()
-                        * self.width.value
-                        / 100
-                    )
-                    self.width.unit = GraphicUnit.PIXEL
 
-        if source_height is not None:
-            match self.height.unit:
-                case GraphicUnit.AUTO:
-                    self.height = source_height
-                case GraphicUnit.PERCENT:
-                    if (
-                        parent_param is not None
-                        and parent_param.height is not None
-                        and parent_param.height.unit == GraphicUnit.PIXEL
-                    ):
-                        self.height.value = (
-                            parent_param.height.value * self.height.value / 100
-                        )
-                        self.height.unit = parent_param.height.unit
+        match self.width.unit:
+            case GraphicUnit.AUTO:
+                if source_width is not None:
+                    # PIXEL
+                    self.width = source_width
+            case GraphicUnit.PERCENT:
+                if (
+                    parent_param is not None
+                    and parent_param.width is not None
+                    and parent_param.width.unit == GraphicUnit.PIXEL
+                ):
+                    self.width.value = (
+                        parent_param.width.value * self.width.value / 100
+                    )
+                    # PIXEL
+                    self.width.unit = parent_param.width.unit
+                else:
+                    if source_width is None:
+                        # AUTO
+                        self.width.unit = GraphicUnit.AUTO
                     else:
+                        # PIXEL
+                        self.width = source_width
+            case GraphicUnit.RESOLUTION_WIDTH:
+                self.width.value = (
+                    VSMLManager.get_root_resolution().width
+                    * self.width.value
+                    / 100
+                )
+                # PIXEL
+                self.width.unit = GraphicUnit.PIXEL
+            case GraphicUnit.RESOLUTION_HEIGHT:
+                self.width.value = (
+                    VSMLManager.get_root_resolution().height
+                    * self.width.value
+                    / 100
+                )
+                # PIXEL
+                self.width.unit = GraphicUnit.PIXEL
+            case GraphicUnit.RESOLUTION_MIN:
+                self.width.value = (
+                    VSMLManager.get_root_resolution().get_min()
+                    * self.width.value
+                    / 100
+                )
+                # PIXEL
+                self.width.unit = GraphicUnit.PIXEL
+            case GraphicUnit.RESOLUTION_MAX:
+                self.width.value = (
+                    VSMLManager.get_root_resolution().get_max()
+                    * self.width.value
+                    / 100
+                )
+                # PIXEL
+                self.width.unit = GraphicUnit.PIXEL
+
+        match self.height.unit:
+            case GraphicUnit.AUTO:
+                if source_height is not None:
+                    # PIXEL
+                    self.height = source_height
+            case GraphicUnit.PERCENT:
+                if (
+                    parent_param is not None
+                    and parent_param.height is not None
+                    and parent_param.height.unit == GraphicUnit.PIXEL
+                ):
+                    self.height.value = (
+                        parent_param.height.value * self.height.value / 100
+                    )
+                    # PIXEL
+                    self.height.unit = parent_param.height.unit
+                else:
+                    if source_height is None:
+                        # AUTO
+                        self.height.unit = GraphicUnit.AUTO
+                    else:
+                        # PIXEL
                         self.height = source_height
-                case GraphicUnit.RESOLUTION_WIDTH:
-                    self.height.value = (
-                        VSMLManager.get_root_resolution().width
-                        * self.height.value
-                        / 100
-                    )
-                    self.height.unit = GraphicUnit.PIXEL
-                case GraphicUnit.RESOLUTION_HEIGHT:
-                    self.height.value = (
-                        VSMLManager.get_root_resolution().height
-                        * self.height.value
-                        / 100
-                    )
-                    self.height.unit = GraphicUnit.PIXEL
-                case GraphicUnit.RESOLUTION_MIN:
-                    self.height.value = (
-                        VSMLManager.get_root_resolution().get_min()
-                        * self.height.value
-                        / 100
-                    )
-                    self.height.unit = GraphicUnit.PIXEL
-                case GraphicUnit.RESOLUTION_MAX:
-                    self.height.value = (
-                        VSMLManager.get_root_resolution().get_max()
-                        * self.height.value
-                        / 100
-                    )
-                    self.height.unit = GraphicUnit.PIXEL
+            case GraphicUnit.RESOLUTION_WIDTH:
+                self.height.value = (
+                    VSMLManager.get_root_resolution().width
+                    * self.height.value
+                    / 100
+                )
+                # PIXEL
+                self.height.unit = GraphicUnit.PIXEL
+            case GraphicUnit.RESOLUTION_HEIGHT:
+                self.height.value = (
+                    VSMLManager.get_root_resolution().height
+                    * self.height.value
+                    / 100
+                )
+                # PIXEL
+                self.height.unit = GraphicUnit.PIXEL
+            case GraphicUnit.RESOLUTION_MIN:
+                self.height.value = (
+                    VSMLManager.get_root_resolution().get_min()
+                    * self.height.value
+                    / 100
+                )
+                # PIXEL
+                self.height.unit = GraphicUnit.PIXEL
+            case GraphicUnit.RESOLUTION_MAX:
+                self.height.value = (
+                    VSMLManager.get_root_resolution().get_max()
+                    * self.height.value
+                    / 100
+                )
+                # PIXEL
+                self.height.unit = GraphicUnit.PIXEL
 
     def _get_info_from_meta(
         self, meta: dict
