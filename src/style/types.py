@@ -15,6 +15,17 @@ class Order(Enum):
         return "'{}'".format(self.name)
 
 
+class LayerMode(Enum):
+    SINGLE = auto()
+    MULTI = auto()
+
+    def __str__(self) -> str:
+        return "'{}'".format(self.name)
+
+    def __repr__(self) -> str:
+        return "'{}'".format(self.name)
+
+
 class AudioSystem(Enum):
     MONAURAL = auto()
     STEREO = auto()

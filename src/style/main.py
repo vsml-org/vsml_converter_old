@@ -16,13 +16,21 @@ from .styling_parser import (
     font_style_parser,
     font_weight_parser,
     graphic_parser,
+    layer_mode_parser,
     multi_graphic_parser,
     order_parser,
     percentage_parser,
     pixel_parser,
     time_parser,
 )
-from .types import AudioSystem, Color, GraphicValue, Order, TimeValue
+from .types import (
+    AudioSystem,
+    Color,
+    GraphicValue,
+    LayerMode,
+    Order,
+    TimeValue,
+)
 
 
 class Style:
@@ -37,6 +45,7 @@ class Style:
     # visual param
     width: GraphicValue = GraphicValue("auto")
     height: GraphicValue = GraphicValue("auto")
+    layer_mode: Optional[LayerMode] = None
     margin_top: GraphicValue
     margin_left: GraphicValue
     margin_right: GraphicValue
@@ -92,16 +101,22 @@ class Style:
         match tag_name:
             case "cont":
                 self.order = Order.SEQUENCE
+                self.layer_mode = LayerMode.MULTI
             case "wrp":
                 self.order = Order.SEQUENCE
+                self.layer_mode = LayerMode.MULTI
             case "seq":
                 self.order = Order.SEQUENCE
+                self.layer_mode = LayerMode.MULTI
             case "rect":
                 self.order = Order.SEQUENCE
+                self.layer_mode = LayerMode.MULTI
             case "prl":
                 self.order = Order.PARALLEL
+                self.layer_mode = LayerMode.MULTI
             case "layer":
                 self.order = Order.PARALLEL
+                self.layer_mode = LayerMode.SINGLE
             case "vid":
                 meta = ffmpeg.probe(source_value)
                 (
@@ -226,6 +241,10 @@ class Style:
                     parse_value = graphic_parser(value)
                     if parse_value is not None:
                         self.height = parse_value
+                case "layer-mode":
+                    parse_value = layer_mode_parser(value)
+                    if parse_value is not None:
+                        self.layer_mode = parse_value
                 case "margin":
                     parse_value = multi_graphic_parser(value)
                     if parse_value is not None:

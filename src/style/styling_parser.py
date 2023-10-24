@@ -5,6 +5,7 @@ from .types import (
     AudioSystem,
     Color,
     GraphicValue,
+    LayerMode,
     Order,
     TimeValue,
 )
@@ -148,6 +149,16 @@ def order_parser(
             return Order.SEQUENCE
         case "parallel":
             return Order.PARALLEL
+
+
+def layer_mode_parser(
+    value: str,
+) -> Optional[LayerMode]:
+    match value:
+        case "single":
+            return LayerMode.SINGLE
+        case "multi":
+            return LayerMode.MULTI
 
 
 def audio_system_parser(
