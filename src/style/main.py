@@ -38,10 +38,10 @@ class Style:
     # time param
     object_length: TimeValue = TimeValue("fit")
     source_object_length: Optional[TimeValue] = None
-    time_margin_start: TimeValue
-    time_margin_end: TimeValue
-    time_padding_start: TimeValue
-    time_padding_end: TimeValue
+    time_margin_start: TimeValue = TimeValue("fit")
+    time_margin_end: TimeValue = TimeValue("fit")
+    time_padding_start: TimeValue = TimeValue("fit")
+    time_padding_end: TimeValue = TimeValue("fit")
     order: Optional[Order] = None
     # visual param
     width: GraphicValue = GraphicValue("auto")
@@ -49,14 +49,14 @@ class Style:
     source_width: Optional[GraphicValue] = None
     source_width: Optional[GraphicValue] = None
     layer_mode: Optional[LayerMode] = None
-    margin_top: GraphicValue
-    margin_left: GraphicValue
-    margin_right: GraphicValue
-    margin_bottom: GraphicValue
-    padding_top: GraphicValue
-    padding_left: GraphicValue
-    padding_right: GraphicValue
-    padding_bottom: GraphicValue
+    margin_top: GraphicValue = GraphicValue("auto")
+    margin_left: GraphicValue = GraphicValue("auto")
+    margin_right: GraphicValue = GraphicValue("auto")
+    margin_bottom: GraphicValue = GraphicValue("auto")
+    padding_top: GraphicValue = GraphicValue("auto")
+    padding_left: GraphicValue = GraphicValue("auto")
+    padding_right: GraphicValue = GraphicValue("auto")
+    padding_bottom: GraphicValue = GraphicValue("auto")
     background_color: Optional[Color] = None
     # audio param
     audio_volume: float = 100
