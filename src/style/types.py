@@ -1,7 +1,7 @@
 import re
 from enum import Enum, auto
 
-from definition import COLOR_LIST
+from definition import COLOR_LIST, COLOR_VALUE
 
 
 class Order(Enum):
@@ -207,15 +207,25 @@ class GraphicValue:
             case _:
                 return "'{}{}'".format(self.value, self.unit)
 
+    def get_pixel(self, default_value: float = 0) -> float:
+        return self.value if self.unit == GraphicUnit.PIXEL else default_value
+
 
 class Color:
     value: str
     type: ColorType
+    r_value: int
+    g_value: int
+    b_value: int
+    a_value: int = 255
 
     def __init__(self, val: str) -> None:
         if val in COLOR_LIST:
             self.value = val
             self.type = ColorType.PURE
+            self.r_value, self.g_value, self.b_value = COLOR_VALUE.get(
+                val, [0, 0, 0]
+            )
         elif val[0] == "#":
             self.type = ColorType.HEX
             hex_val = val[1:]
@@ -230,6 +240,15 @@ class Color:
                     )
                 case 6 | 8:
                     self.value = val
+            if len(self.value) == 7:
+                self.r_value = int(self.value[1:3], 16)
+                self.g_value = int(self.value[3:5], 16)
+                self.b_value = int(self.value[5:7], 16)
+            elif len(self.value) == 9:
+                self.r_value = int(self.value[1:3], 16)
+                self.g_value = int(self.value[3:5], 16)
+                self.b_value = int(self.value[5:7], 16)
+                self.a_value = int(self.value[7:9], 16)
         elif val[:4] == "rgb(":
             self.type = ColorType.HEX
             find_val = re.findall(
@@ -243,6 +262,9 @@ class Color:
                     format(g, "x").zfill(2),
                     format(b, "x").zfill(2),
                 )
+                self.r_value = int(r)
+                self.g_value = int(g)
+                self.b_value = int(b)
         elif val[:5] == "rgba(":
             self.type = ColorType.HEX
             find_val = re.findall(
@@ -257,6 +279,10 @@ class Color:
                     format(b, "x").zfill(2),
                     format(a, "x").zfill(2),
                 )
+                self.r_value = int(r)
+                self.g_value = int(g)
+                self.b_value = int(b)
+                self.a_value = int(a)
         else:
             raise ValueError()
 
