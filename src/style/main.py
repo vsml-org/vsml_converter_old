@@ -479,33 +479,6 @@ class Style:
                 # PIXEL
                 self.height.unit = GraphicUnit.PIXEL
 
-        # 画像、動画でwidth, heightを一方指定すると、縦横比を維持して指定値にリサイズする
-        if (
-            self.source_width is not None
-            and self.source_height is not None
-            and tag_name != "txt"
-        ):
-            if (
-                self.width.unit == GraphicUnit.AUTO
-                and self.height.unit != GraphicUnit.AUTO
-            ):
-                self.width.unit = self.height.unit
-                self.width.value = (
-                    self.source_width.value
-                    * self.height.value
-                    / self.source_height.value
-                )
-            elif (
-                self.width.unit != GraphicUnit.AUTO
-                and self.height.unit == GraphicUnit.AUTO
-            ):
-                self.height.unit = self.width.unit
-                self.height.value = (
-                    self.source_height.value
-                    * self.width.value
-                    / self.source_width.value
-                )
-
     def _get_info_from_meta(
         self, meta: dict
     ) -> tuple[Optional[str], Optional[dict], Optional[dict],]:
