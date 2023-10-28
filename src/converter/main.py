@@ -14,7 +14,7 @@ from .wrap import create_wrap_process
 def create_process(
     vsml_content: VSMLContent,
     debug_mode: bool = False,
-) -> Optional[Process]:
+) -> Process:
     if isinstance(vsml_content, SourceContent):
         process = create_source_process(
             vsml_content,
@@ -50,10 +50,6 @@ def convert_video(
     out_filename = "video.mp4" if out_filename is None else out_filename
 
     process = create_process(vsml_data.content, debug_mode)
-    if process is None:
-        raise Exception()
-    if process.duration is None:
-        raise Exception()
     match (
         process.video,
         process.audio,

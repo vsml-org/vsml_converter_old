@@ -1,9 +1,5 @@
-from typing import Optional
-
-import ffmpeg
-
 from content import WrapContent
-from style.types import Order
+from style import Order
 
 from .schemas import Process
 
@@ -19,9 +15,7 @@ def create_sequence_process(
     return Process(
         video_process,
         audio_process,
-        None,
-        None,
-        None,
+        vsml_content.style,
     )
 
 
@@ -36,9 +30,7 @@ def create_parallel_process(
     return Process(
         video_process,
         audio_process,
-        None,
-        None,
-        None,
+        vsml_content.style,
     )
 
 
@@ -46,7 +38,7 @@ def create_wrap_process(
     processes: list[Process],
     vsml_content: WrapContent,
     debug_mode: bool = False,
-) -> Optional[Process]:
+) -> Process:
     if vsml_content.style.order == Order.SEQUENCE:
         process = create_sequence_process(
             processes,

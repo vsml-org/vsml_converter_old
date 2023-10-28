@@ -1,13 +1,11 @@
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
-from utils import Position, WidthHeight
+from style import Style
 
 
 @dataclass
 class Process:
     video: Any
     audio: Any
-    duration: Optional[float]
-    resolution: Optional[WidthHeight]
-    start_position: Optional[Position]
+    style: Style
