@@ -37,6 +37,7 @@ class Style:
     # style param
     # time param
     object_length: TimeValue = TimeValue("fit")
+    source_object_length: Optional[TimeValue] = None
     time_margin_start: TimeValue
     time_margin_end: TimeValue
     time_padding_start: TimeValue
@@ -45,6 +46,8 @@ class Style:
     # visual param
     width: GraphicValue = GraphicValue("auto")
     height: GraphicValue = GraphicValue("auto")
+    source_width: Optional[GraphicValue] = None
+    source_width: Optional[GraphicValue] = None
     layer_mode: Optional[LayerMode] = None
     margin_top: GraphicValue
     margin_left: GraphicValue
@@ -95,9 +98,6 @@ class Style:
             if parent_param.font_style is not None:
                 self.font_style = parent_param.font_style
 
-        source_object_length = None
-        source_width = None
-        source_height = None
         match tag_name:
             case "cont":
                 self.order = Order.SEQUENCE
@@ -126,10 +126,14 @@ class Style:
                 ) = self._get_info_from_meta(meta)
                 if object_length is None or meta_video is None:
                     raise Exception()
-                source_object_length = TimeValue("{}s".format(object_length))
                 self.object_length = TimeValue("source")
-                source_width = graphic_parser(meta_video["width"] + "px")
-                source_height = graphic_parser(meta_video["height"] + "px")
+                self.source_object_length = TimeValue(
+                    "{}s".format(object_length)
+                )
+                self.source_width = graphic_parser(meta_video["width"] + "px")
+                self.source_height = graphic_parser(
+                    meta_video["height"] + "px"
+                )
                 if meta_audio is not None:
                     audio_system = (
                         AudioSystem.STEREO
@@ -150,8 +154,10 @@ class Style:
                 ) = self._get_info_from_meta(meta)
                 if object_length is None or meta_audio is None:
                     raise Exception()
-                source_object_length = TimeValue("{}s".format(object_length))
                 self.object_length = TimeValue("source")
+                self.source_object_length = TimeValue(
+                    "{}s".format(object_length)
+                )
                 audio_system = (
                     AudioSystem.STEREO
                     if meta_audio.get("channel_layout") == "stereo"
@@ -171,8 +177,10 @@ class Style:
                 ) = self._get_info_from_meta(meta)
                 if meta_video is None:
                     raise Exception()
-                source_width = graphic_parser(meta_video["width"] + "px")
-                source_height = graphic_parser(meta_video["height"] + "px")
+                self.source_width = graphic_parser(meta_video["width"] + "px")
+                self.source_height = graphic_parser(
+                    meta_video["height"] + "px"
+                )
             case "txt":
                 self.font_color = (
                     self.font_color if self.font_color else Color("white")
@@ -184,8 +192,8 @@ class Style:
                     self.font_size if self.font_size else GraphicValue("30px")
                 )
                 # TODO: ここGlyphを使用してサイズを計算する
-                source_width = graphic_parser("100px")
-                source_height = graphic_parser("100px")
+                self.source_width = graphic_parser("100px")
+                self.source_height = graphic_parser("100px")
             case _:
                 raise Exception()
 
@@ -353,41 +361,21 @@ class Style:
                 pass
 
         # calculate param
-        match self.object_length.unit:
-            case TimeUnit.SOURCE:
-                if source_object_length is None:
-                    # FIT
-                    self.object_length.unit = TimeUnit.FIT
-                else:
-                    # SECOND or FRAME
-                    self.object_length = source_object_length
-            case TimeUnit.PERCENT:
-                if (
-                    parent_param is not None
-                    and parent_param.object_length is not None
-                    and parent_param.object_length.unit
-                    in [TimeUnit.SECOND, TimeUnit.FRAME]
-                ):
-                    self.object_length.value = (
-                        parent_param.object_length.value
-                        * self.object_length.value
-                        / 100
-                    )
-                    # SECOND or FRAME
-                    self.object_length.unit = parent_param.object_length.unit
-                else:
-                    if source_object_length is None:
-                        # FIT
-                        self.object_length.unit = TimeUnit.FIT
-                    else:
-                        # SECOND or FRAME
-                        self.object_length = source_object_length
+        if self.object_length.unit == TimeUnit.PERCENT:
+            if (
+                parent_param is not None
+                and parent_param.object_length is not None
+                and parent_param.object_length.unit
+                in [TimeUnit.SECOND, TimeUnit.FRAME]
+            ):
+                self.object_length.value = (
+                    parent_param.object_length.value
+                    * self.object_length.value
+                    / 100
+                )
+                self.object_length.unit = parent_param.object_length.unit
 
         match self.width.unit:
-            case GraphicUnit.AUTO:
-                if source_width is not None:
-                    # PIXEL
-                    self.width = source_width
             case GraphicUnit.PERCENT:
                 if (
                     parent_param is not None
@@ -400,12 +388,12 @@ class Style:
                     # PIXEL
                     self.width.unit = parent_param.width.unit
                 else:
-                    if source_width is None:
+                    if self.source_width is None:
                         # AUTO
                         self.width.unit = GraphicUnit.AUTO
                     else:
                         # PIXEL
-                        self.width = source_width
+                        self.width = self.source_width
             case GraphicUnit.RESOLUTION_WIDTH:
                 self.width.value = (
                     VSMLManager.get_root_resolution().width
@@ -440,10 +428,6 @@ class Style:
                 self.width.unit = GraphicUnit.PIXEL
 
         match self.height.unit:
-            case GraphicUnit.AUTO:
-                if source_height is not None:
-                    # PIXEL
-                    self.height = source_height
             case GraphicUnit.PERCENT:
                 if (
                     parent_param is not None
@@ -456,12 +440,12 @@ class Style:
                     # PIXEL
                     self.height.unit = parent_param.height.unit
                 else:
-                    if source_height is None:
+                    if self.source_height is None:
                         # AUTO
                         self.height.unit = GraphicUnit.AUTO
                     else:
                         # PIXEL
-                        self.height = source_height
+                        self.height = self.source_height
             case GraphicUnit.RESOLUTION_WIDTH:
                 self.height.value = (
                     VSMLManager.get_root_resolution().width
@@ -494,6 +478,33 @@ class Style:
                 )
                 # PIXEL
                 self.height.unit = GraphicUnit.PIXEL
+
+        # 画像、動画でwidth, heightを一方指定すると、縦横比を維持して指定値にリサイズする
+        if (
+            self.source_width is not None
+            and self.source_height is not None
+            and tag_name != "txt"
+        ):
+            if (
+                self.width.unit == GraphicUnit.AUTO
+                and self.height.unit != GraphicUnit.AUTO
+            ):
+                self.width.unit = self.height.unit
+                self.width.value = (
+                    self.source_width.value
+                    * self.height.value
+                    / self.source_height.value
+                )
+            elif (
+                self.width.unit != GraphicUnit.AUTO
+                and self.height.unit == GraphicUnit.AUTO
+            ):
+                self.height.unit = self.width.unit
+                self.height.value = (
+                    self.source_height.value
+                    * self.width.value
+                    / self.source_width.value
+                )
 
     def _get_info_from_meta(
         self, meta: dict
