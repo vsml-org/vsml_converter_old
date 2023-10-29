@@ -70,6 +70,7 @@ class Style:
     source_object_length: Optional[TimeValue] = None
     source_width: Optional[GraphicValue] = None
     source_width: Optional[GraphicValue] = None
+    source_audio_system: Optional[AudioSystem] = None
 
     # 各タグのデフォルトparam
     def __init__(
@@ -136,7 +137,7 @@ class Style:
                     meta_video["height"] + "px"
                 )
                 if meta_audio is not None:
-                    audio_system = (
+                    self.source_audio_system = (
                         AudioSystem.STEREO
                         if meta_audio.get("channel_layout") == "stereo"
                         else AudioSystem.MONAURAL
@@ -144,7 +145,7 @@ class Style:
                     self.audio_system = (
                         self.audio_system
                         if self.audio_system == AudioSystem.MONAURAL
-                        else audio_system
+                        else self.source_audio_system
                     )
             case "aud":
                 meta = ffmpeg.probe(source_value)
@@ -159,7 +160,7 @@ class Style:
                 self.source_object_length = TimeValue(
                     "{}s".format(object_length)
                 )
-                audio_system = (
+                self.source_audio_system = (
                     AudioSystem.STEREO
                     if meta_audio.get("channel_layout") == "stereo"
                     else AudioSystem.MONAURAL
@@ -167,7 +168,7 @@ class Style:
                 self.audio_system = (
                     self.audio_system
                     if self.audio_system == AudioSystem.MONAURAL
-                    else audio_system
+                    else self.source_audio_system
                 )
             case "img":
                 meta = ffmpeg.probe(source_value)

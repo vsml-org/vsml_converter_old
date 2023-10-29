@@ -15,6 +15,8 @@ def create_image_process(
         "setsar", "1/1"
     )
 
+    # videoのstyle対応
+    # resize
     width = vsml_content.style.width
     height = vsml_content.style.height
     if width.unit != GraphicUnit.AUTO or height.unit != GraphicUnit.AUTO:
@@ -24,7 +26,7 @@ def create_image_process(
             width.get_pixel(-1),
             height.get_pixel(-1),
         )
-
+    # padding and background-color
     source_width_px = (
         vsml_content.style.source_width.value
         if vsml_content.style.source_width is not None
@@ -45,7 +47,6 @@ def create_image_process(
     height_px_with_padding = (
         height.get_pixel(source_height_px) + padding_top_px + padding_bottom_px
     )
-
     if (
         source_width_px != width_px_with_padding
         or source_height_px != height_px_with_padding
@@ -61,6 +62,7 @@ def create_image_process(
             y=padding_top_px,
         )
 
+    # timeのstyle対応
     object_length = vsml_content.style.object_length
     match object_length.unit:
         case TimeUnit.FRAME:
