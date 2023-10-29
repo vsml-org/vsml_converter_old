@@ -37,7 +37,6 @@ class Style:
     # style param
     # time param
     object_length: TimeValue = TimeValue("fit")
-    source_object_length: Optional[TimeValue] = None
     time_margin_start: TimeValue = TimeValue("fit")
     time_margin_end: TimeValue = TimeValue("fit")
     time_padding_start: TimeValue = TimeValue("fit")
@@ -46,8 +45,6 @@ class Style:
     # visual param
     width: GraphicValue = GraphicValue("auto")
     height: GraphicValue = GraphicValue("auto")
-    source_width: Optional[GraphicValue] = None
-    source_width: Optional[GraphicValue] = None
     layer_mode: Optional[LayerMode] = None
     margin_top: GraphicValue = GraphicValue("auto")
     margin_left: GraphicValue = GraphicValue("auto")
@@ -69,6 +66,10 @@ class Style:
     font_size: Optional[GraphicValue] = None  # inherit
     font_weight: Optional[bool] = None  # inherit
     font_style: Optional[bool] = None  # inherit
+    # source value
+    source_object_length: Optional[TimeValue] = None
+    source_width: Optional[GraphicValue] = None
+    source_width: Optional[GraphicValue] = None
 
     # 各タグのデフォルトparam
     def __init__(
