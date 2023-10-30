@@ -137,16 +137,14 @@ class Style:
                     meta_video["height"] + "px"
                 )
                 if meta_audio is not None:
-                    self.source_audio_system = (
-                        AudioSystem.STEREO
-                        if meta_audio.get("channel_layout") == "stereo"
-                        else AudioSystem.MONAURAL
-                    )
-                    self.audio_system = (
-                        self.audio_system
-                        if self.audio_system == AudioSystem.MONAURAL
-                        else self.source_audio_system
-                    )
+                    channel_layout = meta_audio.get("channel_layout")
+                    match channel_layout:
+                        case "stereo":
+                            self.source_audio_system = AudioSystem.STEREO
+                        case "monaural":
+                            self.source_audio_system = AudioSystem.STEREO
+                    if self.audio_system == AudioSystem.STEREO:
+                        self.audio_system = self.audio_system
             case "aud":
                 meta = ffmpeg.probe(source_value)
                 (
@@ -160,16 +158,14 @@ class Style:
                 self.source_object_length = TimeValue(
                     "{}s".format(object_length)
                 )
-                self.source_audio_system = (
-                    AudioSystem.STEREO
-                    if meta_audio.get("channel_layout") == "stereo"
-                    else AudioSystem.MONAURAL
-                )
-                self.audio_system = (
-                    self.audio_system
-                    if self.audio_system == AudioSystem.MONAURAL
-                    else self.source_audio_system
-                )
+                channel_layout = meta_audio.get("channel_layout")
+                match channel_layout:
+                    case "stereo":
+                        self.source_audio_system = AudioSystem.STEREO
+                    case "monaural":
+                        self.source_audio_system = AudioSystem.STEREO
+                if self.audio_system == AudioSystem.STEREO:
+                    self.audio_system = self.audio_system
             case "img":
                 meta = ffmpeg.probe(source_value)
                 (
@@ -184,15 +180,13 @@ class Style:
                     meta_video["height"] + "px"
                 )
             case "txt":
-                self.font_color = (
-                    self.font_color if self.font_color else Color("white")
-                )
-                self.font_family = (
-                    self.font_family if self.font_family else "MS Gothic"
-                )
-                self.font_size = (
-                    self.font_size if self.font_size else GraphicValue("30px")
-                )
+                if self.font_color is None:
+                    self.font_color = Color("white")
+                # TODO: フォントファイルの取得をする
+                if self.font_family is None:
+                    self.font_family = "MS Gothic"
+                if self.font_size is None:
+                    self.font_size = GraphicValue("30px")
                 # TODO: ここGlyphを使用してサイズを計算する
                 self.source_width = graphic_parser("100px")
                 self.source_height = graphic_parser("100px")
