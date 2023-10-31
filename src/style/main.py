@@ -500,6 +500,29 @@ class Style:
     def __repr__(self) -> str:
         return str(vars(self))
 
+    def get_size_with_padding(self) -> tuple[float, float]:
+        source_width_px = 0
+        source_height_px = 0
+        if self.source_width is not None:
+            source_width_px = self.source_width.get_pixel()
+        if self.source_height is not None:
+            source_height_px = self.source_height.get_pixel()
+        padding_left_px = self.padding_left.get_pixel()
+        padding_right_px = self.padding_right.get_pixel()
+        padding_top_px = self.padding_top.get_pixel()
+        padding_bottom_px = self.padding_bottom.get_pixel()
+        width_px_with_padding = (
+            self.width.get_pixel(source_width_px)
+            + padding_left_px
+            + padding_right_px
+        )
+        height_px_with_padding = (
+            self.height.get_pixel(source_height_px)
+            + padding_top_px
+            + padding_bottom_px
+        )
+        return width_px_with_padding, height_px_with_padding
+
 
 def pickup_style(
     style_tree: dict[str, dict[str, str]],

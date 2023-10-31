@@ -15,45 +15,37 @@ def create_image_process(
         "setsar", "1/1"
     )
 
+    style = vsml_content.style
     # videoのstyle対応
     # resize
-    width = vsml_content.style.width
-    height = vsml_content.style.height
-    if width.unit != GraphicUnit.AUTO or height.unit != GraphicUnit.AUTO:
+    if (
+        style.width.unit != GraphicUnit.AUTO
+        or style.height.unit != GraphicUnit.AUTO
+    ):
         video_process = ffmpeg.filter(
             video_process,
             "scale",
-            width.get_pixel(-1),
-            height.get_pixel(-1),
+            style.width.get_pixel(-1),
+            style.height.get_pixel(-1),
         )
     # padding and background-color
-    source_width_px = (
-        vsml_content.style.source_width.value
-        if vsml_content.style.source_width is not None
-        else 0.0
-    )
-    padding_left_px = vsml_content.style.padding_left.get_pixel()
-    padding_right_px = vsml_content.style.padding_right.get_pixel()
-    source_height_px = (
-        vsml_content.style.source_height.value
-        if vsml_content.style.source_height is not None
-        else 0.0
-    )
-    padding_top_px = vsml_content.style.padding_top.get_pixel()
-    padding_bottom_px = vsml_content.style.padding_bottom.get_pixel()
-    width_px_with_padding = (
-        width.get_pixel(source_width_px) + padding_left_px + padding_right_px
-    )
-    height_px_with_padding = (
-        height.get_pixel(source_height_px) + padding_top_px + padding_bottom_px
-    )
+    padding_top_px = style.padding_top.get_pixel()
+    padding_left_px = style.padding_left.get_pixel()
+    padding_right_px = style.padding_right.get_pixel()
+    padding_bottom_px = style.padding_bottom.get_pixel()
     if (
-        source_width_px != width_px_with_padding
-        or source_height_px != height_px_with_padding
+        padding_top_px != 0
+        or padding_left_px != 0
+        or padding_right_px != 0
+        or padding_bottom_px != 0
     ):
+        (
+            width_with_padding,
+            height_with_padding,
+        ) = style.get_size_with_padding()
         transparent_process = get_background_process(
-            "{}x{}".format(width_px_with_padding, height_px_with_padding),
-            vsml_content.style.background_color,
+            "{}x{}".format(width_with_padding, height_with_padding),
+            style.background_color,
         )
         video_process = ffmpeg.overlay(
             transparent_process,
@@ -63,55 +55,44 @@ def create_image_process(
         )
 
     # timeのstyle対応
-    object_length = vsml_content.style.object_length
-    match object_length.unit:
-        case TimeUnit.FRAME:
-            ffmpeg.trim(
-                video_process,
-                end_frame=object_length.value + 1,
-            )
-        case TimeUnit.SECOND:
-            ffmpeg.trim(
-                video_process,
-                end=object_length.value,
-            )
-    time_padding_start = vsml_content.style.time_padding_start
+    if style.object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+        option = {}
+        if style.object_length.unit == TimeUnit.FRAME:
+            option = {"end_frame": style.object_length.value + 1}
+        elif style.object_length.unit == TimeUnit.SECOND:
+            option = {"end": style.object_length.value}
+        ffmpeg.trim(video_process, **option)
     background_color = (
-        vsml_content.style.background_color.value
-        if vsml_content.style.background_color
+        style.background_color.value
+        if style.background_color
         else "0x00000000"
     )
-    match time_padding_start.unit:
-        case TimeUnit.FRAME:
-            ffmpeg.filter(
-                "tpad",
-                video_process,
-                start=time_padding_start.value,
-                color=background_color,
-            )
-        case TimeUnit.SECOND:
-            ffmpeg.filter(
-                "tpad",
-                video_process,
-                start_duration=time_padding_start.value,
-                color=background_color,
-            )
-    if object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
-        time_padding_end = vsml_content.style.time_padding_end
-        match time_padding_end.unit:
-            case TimeUnit.FRAME:
-                ffmpeg.filter(
-                    "tpad",
-                    video_process,
-                    stop=time_padding_start.value,
-                    color=background_color,
-                )
-            case TimeUnit.SECOND:
-                ffmpeg.filter(
-                    "tpad",
-                    video_process,
-                    stop_duration=time_padding_start.value,
-                    color=background_color,
-                )
+    if style.time_padding_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+        option = {}
+        if style.time_padding_start.unit == TimeUnit.FRAME:
+            option = {"start": style.time_padding_start.value}
+        elif style.time_padding_start.unit == TimeUnit.SECOND:
+            option = {"start_duration": style.time_padding_start.value}
+        ffmpeg.filter(
+            "tpad",
+            video_process,
+            color=background_color,
+            **option,
+        )
+    if style.object_length.unit in [
+        TimeUnit.FRAME,
+        TimeUnit.SECOND,
+    ] and style.time_padding_end.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+        option = {}
+        if style.time_padding_end.unit == TimeUnit.FRAME:
+            option = {"stop": style.time_padding_end.value}
+        elif style.time_padding_end.unit == TimeUnit.SECOND:
+            option = {"stop_duration": style.time_padding_end.value}
+        ffmpeg.filter(
+            "tpad",
+            video_process,
+            color=background_color,
+            **option,
+        )
 
     return Process(video_process, None, vsml_content.style)
