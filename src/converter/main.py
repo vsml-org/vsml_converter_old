@@ -4,6 +4,7 @@ from typing import Optional
 import ffmpeg
 
 from content import SourceContent, VSMLContent, WrapContent
+from utils import VSMLManager
 from vsml import VSML
 
 from .content import create_source_process
@@ -71,7 +72,7 @@ def convert_video(
     process = ffmpeg.output(
         process,
         out_filename,
-        r=vsml_data.fps,
+        r=VSMLManager.get_root_fps(),
     )
 
     if debug_mode:

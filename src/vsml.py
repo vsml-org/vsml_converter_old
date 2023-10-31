@@ -10,7 +10,6 @@ from vss import convert_vss_dict
 
 
 class VSML:
-    fps: int
     content: VSMLContent
 
     def __init__(self, vsml: _Element):
@@ -29,7 +28,7 @@ class VSML:
         VSMLManager.set_root_resolution(
             WidthHeight.from_str(contentElement.attrib["resolution"])
         )
-        self.fps = int(contentElement.attrib["fps"])
+        VSMLManager.set_root_fps(int(contentElement.attrib["fps"]))
         content = element_to_content(contentElement, style_tree)
         if content is None:
             raise Exception()

@@ -76,18 +76,25 @@ def create_image_process(
                 end=object_length.value,
             )
     time_padding_start = vsml_content.style.time_padding_start
+    background_color = (
+        vsml_content.style.background_color.value
+        if vsml_content.style.background_color
+        else "0x00000000"
+    )
     match time_padding_start.unit:
         case TimeUnit.FRAME:
             ffmpeg.filter(
                 "tpad",
                 video_process,
                 start=time_padding_start.value,
+                color=background_color,
             )
         case TimeUnit.SECOND:
             ffmpeg.filter(
                 "tpad",
                 video_process,
                 start_duration=time_padding_start.value,
+                color=background_color,
             )
     if object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         time_padding_end = vsml_content.style.time_padding_end
@@ -96,13 +103,15 @@ def create_image_process(
                 ffmpeg.filter(
                     "tpad",
                     video_process,
-                    start=time_padding_start.value,
+                    stop=time_padding_start.value,
+                    color=background_color,
                 )
             case TimeUnit.SECOND:
                 ffmpeg.filter(
                     "tpad",
                     video_process,
-                    start_duration=time_padding_start.value,
+                    stop_duration=time_padding_start.value,
+                    color=background_color,
                 )
 
     return Process(video_process, None, vsml_content.style)

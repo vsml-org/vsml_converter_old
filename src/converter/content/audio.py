@@ -5,6 +5,7 @@ import ffmpeg
 from content import SourceContent
 from converter.schemas import Process
 from style import AudioSystem, TimeUnit
+from utils import VSMLManager
 
 
 def create_audio_process(
@@ -39,12 +40,14 @@ def create_audio_process(
     object_length = vsml_content.style.object_length
     match object_length.unit:
         case TimeUnit.FRAME:
-            ffmpeg.trim(
+            ffmpeg.filter(
+                "atrim",
                 audio_process,
-                end_frame=object_length.value + 1,
+                end=object_length.value / VSMLManager.get_root_fps(),
             )
         case TimeUnit.SECOND:
-            ffmpeg.trim(
+            ffmpeg.filter(
+                "atrim",
                 audio_process,
                 end=object_length.value,
             )
@@ -52,30 +55,33 @@ def create_audio_process(
     match time_padding_start.unit:
         case TimeUnit.FRAME:
             ffmpeg.filter(
-                "tpad",
+                "adelay",
                 audio_process,
-                start=time_padding_start.value,
+                delays=time_padding_start.value / VSMLManager.get_root_fps(),
+                all=1,
             )
         case TimeUnit.SECOND:
             ffmpeg.filter(
-                "tpad",
+                "adelay",
                 audio_process,
-                start_duration=time_padding_start.value,
+                delays=time_padding_start.value,
+                all=1,
             )
     if object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         time_padding_end = vsml_content.style.time_padding_end
         match time_padding_end.unit:
             case TimeUnit.FRAME:
                 ffmpeg.filter(
-                    "tpad",
+                    "apad",
                     audio_process,
-                    start=time_padding_start.value,
+                    pad_dur=time_padding_start.value
+                    / VSMLManager.get_root_fps(),
                 )
             case TimeUnit.SECOND:
                 ffmpeg.filter(
-                    "tpad",
+                    "apad",
                     audio_process,
-                    start_duration=time_padding_start.value,
+                    pad_dur=time_padding_start.value,
                 )
 
     # processの作成

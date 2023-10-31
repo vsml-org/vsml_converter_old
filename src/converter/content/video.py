@@ -6,6 +6,7 @@ from content import SourceContent
 from converter.schemas import Process
 from converter.utils import get_background_process
 from style import AudioSystem, GraphicUnit, TimeUnit
+from utils import VSMLManager
 
 
 def create_video_process(
@@ -93,11 +94,26 @@ def create_video_process(
                 video_process,
                 end_frame=object_length.value + 1,
             )
+            ffmpeg.filter(
+                "atrim",
+                audio_process,
+                end=object_length.value / VSMLManager.get_root_fps(),
+            )
         case TimeUnit.SECOND:
             ffmpeg.trim(
                 video_process,
                 end=object_length.value,
             )
+            ffmpeg.filter(
+                "atrim",
+                audio_process,
+                end=object_length.value,
+            )
+    background_color = (
+        vsml_content.style.background_color.value
+        if vsml_content.style.background_color
+        else "0x00000000"
+    )
     time_padding_start = vsml_content.style.time_padding_start
     match time_padding_start.unit:
         case TimeUnit.FRAME:
@@ -105,12 +121,26 @@ def create_video_process(
                 "tpad",
                 video_process,
                 start=time_padding_start.value,
+                color=background_color,
+            )
+            ffmpeg.filter(
+                "adelay",
+                audio_process,
+                delays=time_padding_start.value / VSMLManager.get_root_fps(),
+                all=1,
             )
         case TimeUnit.SECOND:
             ffmpeg.filter(
                 "tpad",
                 video_process,
                 start_duration=time_padding_start.value,
+                color=background_color,
+            )
+            ffmpeg.filter(
+                "adelay",
+                audio_process,
+                delays=time_padding_start.value,
+                all=1,
             )
     if object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         time_padding_end = vsml_content.style.time_padding_end
@@ -119,13 +149,26 @@ def create_video_process(
                 ffmpeg.filter(
                     "tpad",
                     video_process,
-                    start=time_padding_start.value,
+                    stop=time_padding_start.value,
+                    color=background_color,
+                )
+                ffmpeg.filter(
+                    "apad",
+                    audio_process,
+                    pad_dur=time_padding_start.value
+                    / VSMLManager.get_root_fps(),
                 )
             case TimeUnit.SECOND:
                 ffmpeg.filter(
                     "tpad",
                     video_process,
-                    start_duration=time_padding_start.value,
+                    stop_duration=time_padding_start.value,
+                    color=background_color,
+                )
+                ffmpeg.filter(
+                    "apad",
+                    audio_process,
+                    pad_dur=time_padding_start.value,
                 )
 
     return Process(video_process, audio_process, vsml_content.style)
