@@ -46,7 +46,7 @@ def create_audio_process(
             }
         if style.object_length.unit == TimeUnit.SECOND:
             option = {"end": style.object_length.value}
-        ffmpeg.filter("atrim", audio_process, **option)
+        audio_process = ffmpeg.filter("atrim", audio_process, **option)
     if style.time_padding_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         option = {}
         if style.time_padding_start.unit == TimeUnit.FRAME:
@@ -56,7 +56,7 @@ def create_audio_process(
             }
         elif style.time_padding_start.unit == TimeUnit.SECOND:
             option = {"delays": style.time_padding_start.value}
-        ffmpeg.filter(
+        audio_process = ffmpeg.filter(
             "adelay",
             audio_process,
             all=1,
@@ -74,7 +74,7 @@ def create_audio_process(
             }
         elif style.time_padding_end.unit == TimeUnit.SECOND:
             option = {"pad_dur": style.time_padding_end.value}
-        ffmpeg.filter("apad", audio_process, **option)
+        audio_process = ffmpeg.filter("apad", audio_process, **option)
 
     # processの作成
     return Process(None, audio_process, vsml_content.style)

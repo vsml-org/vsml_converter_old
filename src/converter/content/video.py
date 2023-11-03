@@ -90,8 +90,8 @@ def create_video_process(
         elif style.object_length.unit == TimeUnit.SECOND:
             video_option = {"end": style.object_length.value}
             audio_option = {"end": style.object_length.value}
-        ffmpeg.trim(video_process, **video_option)
-        ffmpeg.filter("atrim", audio_process, **audio_option)
+        video_process = ffmpeg.trim(video_process, **video_option)
+        audio_process = ffmpeg.filter("atrim", audio_process, **audio_option)
     background_color = (
         style.background_color.value
         if style.background_color
@@ -113,10 +113,12 @@ def create_video_process(
             audio_option = {
                 "delays": style.time_padding_start.value,
             }
-        ffmpeg.filter(
+        video_process = ffmpeg.filter(
             "tpad", video_process, color=background_color, **video_option
         )
-        ffmpeg.filter("adelay", audio_process, all=1, **audio_option)
+        audio_process = ffmpeg.filter(
+            "adelay", audio_process, all=1, **audio_option
+        )
     if style.object_length.unit in [
         TimeUnit.FRAME,
         TimeUnit.SECOND,
@@ -138,9 +140,9 @@ def create_video_process(
             audio_option = {
                 "pad_dur": style.time_padding_start.value,
             }
-        ffmpeg.filter(
+        video_process = ffmpeg.filter(
             "tpad", video_process, color=background_color, **video_option
         )
-        ffmpeg.filter("apad", audio_process, **audio_option)
+        audio_process = ffmpeg.filter("apad", audio_process, **audio_option)
 
     return Process(video_process, audio_process, vsml_content.style)
