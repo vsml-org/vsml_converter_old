@@ -4,12 +4,20 @@
         "*.vsml": "xml"
     },
     "cSpell.words": [
+        "adelay",
         "aliceblue",
+        "amerge",
+        "amix",
         "antiquewhite",
+        "apad",
+        "atrim",
         "blanchedalmond",
         "blueviolet",
+        "bordercolor",
+        "borderw",
         "burlywood",
         "cadetblue",
+        "chardet",
         "cornflowerblue",
         "cornsilk",
         "darkcyan",
@@ -33,6 +41,7 @@
         "dimgray",
         "dodgerblue",
         "floralwhite",
+        "fontcolor",
         "forestgreen",
         "gainsboro",
         "ghostwhite",
@@ -79,30 +88,39 @@
         "palevioletred",
         "papayawhip",
         "peachpuff",
+        "pipenv",
         "powderblue",
         "rgbtestsrc",
+        "rmax",
         "rosybrown",
         "royalblue",
         "saddlebrown",
         "sandybrown",
         "seagreen",
+        "setsar",
         "skyblue",
         "slateblue",
         "slategray",
         "springgreen",
         "steelblue",
+        "tpad",
         "vsml",
         "whitesmoke",
         "yellowgreen"
     ],
     "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "isort.args": [
+        "--profile=black",
+        "-l 79"
+    ],
     "flake8.args": [
         "--max-line-length=79",
+        "--extend-ignore=E203,W503",
         "--per-file-ignores=*/__init__.py:F401,F403"
     ],
-    "python.analysis.diagnosticMode": "workspace",
     "black-formatter.args": [
         "--line-length=79"
-    ],
-    "editor.formatOnSave": true
+    ]
 }
