@@ -16,7 +16,7 @@ class TagInfoTree:
 class VSMLManager:
     root_path: str
     root_resolution: WidthHeight
-    root_fps: int
+    root_fps: float
 
     @staticmethod
     def set_root_path(root_path: str):
@@ -37,11 +37,11 @@ class VSMLManager:
         return VSMLManager.root_resolution
 
     @staticmethod
-    def set_root_fps(root_fps: int):
+    def set_root_fps(root_fps: float):
         VSMLManager.root_fps = root_fps
 
     @staticmethod
-    def get_root_fps() -> int:
+    def get_root_fps() -> float:
         return VSMLManager.root_fps
 
 

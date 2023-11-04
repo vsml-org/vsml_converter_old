@@ -56,7 +56,7 @@ class Style:
     padding_bottom: GraphicValue = GraphicValue("auto")
     background_color: Optional[Color] = None
     # audio param
-    audio_volume: float = 100
+    audio_volume: float = 100  # inherit
     audio_system: Optional[AudioSystem] = None  # inherit
     # text tag param
     font_color: Optional[Color] = None  # inherit
@@ -83,6 +83,8 @@ class Style:
     ) -> None:
         # inheriting
         if parent_param is not None:
+            if parent_param.audio_volume is not None:
+                self.audio_volume = parent_param.audio_volume
             if parent_param.audio_system is not None:
                 self.audio_system = parent_param.audio_system
             if parent_param.font_color is not None:

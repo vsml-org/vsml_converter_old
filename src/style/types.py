@@ -163,6 +163,14 @@ class TimeValue:
             case _:
                 return "'{}{}'".format(self.value, self.unit)
 
+    def get_second(self, fps: float, default_value: float = 0) -> float:
+        if self.unit == TimeUnit.SECOND:
+            return self.value
+        elif self.unit == TimeUnit.FRAME:
+            return self.value / fps
+        else:
+            return default_value
+
 
 class GraphicValue:
     value: float

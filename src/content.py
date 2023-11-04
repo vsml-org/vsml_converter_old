@@ -49,6 +49,8 @@ def get_source_value(
 class VSMLContent:
     tag_name: str
     style: Style
+    exist_video: bool = False
+    exist_audio: bool = False
 
     def __init__(
         self,
@@ -100,12 +102,17 @@ class SourceContent(VSMLContent):
         match vsml_element.tag:
             case "img":
                 self.type = SourceType.IMAGE
+                self.exist_video = True
             case "vid":
                 self.type = SourceType.VIDEO
+                self.exist_video = True
+                self.exist_audio = True
             case "aud":
                 self.type = SourceType.AUDIO
+                self.exist_audio = True
             case "txt":
                 self.type = SourceType.TEXT
+                self.exist_video = True
             case _:
                 raise Exception()
 
