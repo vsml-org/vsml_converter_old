@@ -1,7 +1,4 @@
-from argparse import (
-    ArgumentParser,
-    Namespace,
-)
+from argparse import ArgumentParser, Namespace
 
 
 def init_parser():
