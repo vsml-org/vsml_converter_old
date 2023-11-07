@@ -5,7 +5,6 @@ from typing import Optional
 import ffmpeg
 from lxml.etree import _Attrib
 
-from style import GraphicUnit, TimeUnit
 from utils import TagInfoTree, VSMLManager
 
 from .styling_parser import (
@@ -26,9 +25,11 @@ from .styling_parser import (
 from .types import (
     AudioSystem,
     Color,
+    GraphicUnit,
     GraphicValue,
     LayerMode,
     Order,
+    TimeUnit,
     TimeValue,
 )
 
