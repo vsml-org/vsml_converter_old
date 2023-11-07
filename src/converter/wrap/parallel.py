@@ -130,6 +130,28 @@ def create_parallel_process(
 
             # 音声の合成
             if process.audio:
+                if process.style.time_margin_start.unit in [
+                    TimeUnit.FRAME,
+                    TimeUnit.SECOND,
+                ]:
+                    second = process.style.time_margin_start.get_second(fps)
+                    process.video = ffmpeg.filter(
+                        "adelay",
+                        process.video,
+                        color=background_color,
+                        delays=second,
+                    )
+                if process.style.time_margin_end.unit in [
+                    TimeUnit.FRAME,
+                    TimeUnit.SECOND,
+                ]:
+                    second = process.style.time_margin_end.get_second(fps)
+                    process.video = ffmpeg.filter(
+                        "apad",
+                        process.video,
+                        color=background_color,
+                        pad_dur=second,
+                    )
                 if audio_process is None:
                     audio_process = process.audio
                 else:
