@@ -34,6 +34,6 @@ def get_background_process(
                 g=background_color.g_value,
                 b=background_color.b_value,
             )
-    background_processes = origin_background_process.sprit()
+    background_processes = origin_background_process.split()
     origin_background_processes[key] = background_processes[1]
     return background_processes[0]
