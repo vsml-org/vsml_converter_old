@@ -70,7 +70,7 @@ class Style:
     # source value
     source_object_length: Optional[TimeValue] = None
     source_width: Optional[GraphicValue] = None
-    source_width: Optional[GraphicValue] = None
+    source_height: Optional[GraphicValue] = None
     source_audio_system: Optional[AudioSystem] = None
 
     # 各タグのデフォルトparam
@@ -135,10 +135,10 @@ class Style:
                 self.source_object_length = TimeValue(
                     "{}s".format(object_length)
                 )
-                self.source_width = graphic_parser(meta_video["width"] + "px")
-                self.source_height = graphic_parser(
-                    meta_video["height"] + "px"
-                )
+                width = meta_video["width"]
+                height = meta_video["height"]
+                self.source_width = graphic_parser(f"{width}px")
+                self.source_height = graphic_parser(f"{height}px")
                 if meta_audio is not None:
                     channel_layout = meta_audio.get("channel_layout")
                     match channel_layout:
@@ -178,10 +178,10 @@ class Style:
                 ) = self._get_info_from_meta(meta)
                 if meta_video is None:
                     raise Exception()
-                self.source_width = graphic_parser(meta_video["width"] + "px")
-                self.source_height = graphic_parser(
-                    meta_video["height"] + "px"
-                )
+                width = meta_video["width"]
+                height = meta_video["height"]
+                self.source_width = graphic_parser(f"{width}px")
+                self.source_height = graphic_parser(f"{height}px")
             case "txt":
                 if self.font_color is None:
                     self.font_color = Color("white")
