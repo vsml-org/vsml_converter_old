@@ -91,7 +91,7 @@ def create_video_process(
             video_option = {"end": style.object_length.value}
             audio_option = {"end": style.object_length.value}
         video_process = ffmpeg.trim(video_process, **video_option)
-        audio_process = ffmpeg.filter("atrim", audio_process, **audio_option)
+        audio_process = ffmpeg.filter(audio_process, "atrim", **audio_option)
     background_color = (
         style.background_color.value
         if style.background_color
@@ -143,6 +143,6 @@ def create_video_process(
         video_process = ffmpeg.filter(
             "tpad", video_process, color=background_color, **video_option
         )
-        audio_process = ffmpeg.filter("apad", audio_process, **audio_option)
+        audio_process = ffmpeg.filter(audio_process, "apad", **audio_option)
 
     return Process(video_process, audio_process, vsml_content.style)
