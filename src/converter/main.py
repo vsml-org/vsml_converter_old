@@ -9,6 +9,7 @@ from vsml import VSML
 
 from .content import create_source_process
 from .schemas import Process
+from .utils import get_background_process
 from .wrap import create_wrap_process
 
 
@@ -51,6 +52,22 @@ def convert_video(
     out_filename = "video.mp4" if out_filename is None else out_filename
 
     process = create_process(vsml_data.content, debug_mode)
+    if process.video:
+        fps = VSMLManager.get_root_fps()
+        style = vsml_data.content.style
+        source_object_length = (
+            style.source_object_length.get_second(fps)
+            if style.source_object_length
+            else 0.0
+        )
+        bg_process = get_background_process(
+            VSMLManager.get_root_resolution().get_str()
+        )
+        process.video = ffmpeg.overlay(bg_process, process.video, x=0, y=0)
+        process.video = ffmpeg.trim(
+            process.video,
+            end=style.object_length.get_second(fps, source_object_length),
+        )
     match (
         process.video,
         process.audio,

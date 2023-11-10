@@ -376,9 +376,16 @@ class Style:
 
         match self.width.unit:
             case GraphicUnit.PERCENT:
-                if (
-                    parent_param is not None
-                    and parent_param.width is not None
+                if parent_param is None:
+                    self.width.value = int(
+                        VSMLManager.get_root_resolution().width
+                        * self.width.value
+                        / 100
+                    )
+                    # PIXEL
+                    self.width.unit = GraphicUnit.PIXEL
+                elif (
+                    parent_param.width is not None
                     and parent_param.width.unit == GraphicUnit.PIXEL
                 ):
                     self.width.value = int(
@@ -428,9 +435,16 @@ class Style:
 
         match self.height.unit:
             case GraphicUnit.PERCENT:
-                if (
-                    parent_param is not None
-                    and parent_param.height is not None
+                if parent_param is None:
+                    self.height.value = int(
+                        VSMLManager.get_root_resolution().height
+                        * self.height.value
+                        / 100
+                    )
+                    # PIXEL
+                    self.width.unit = GraphicUnit.PIXEL
+                elif (
+                    parent_param.height is not None
                     and parent_param.height.unit == GraphicUnit.PIXEL
                 ):
                     self.height.value = int(
