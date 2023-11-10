@@ -173,7 +173,7 @@ class TimeValue:
 
 
 class GraphicValue:
-    value: float
+    value: int
     unit: GraphicUnit
 
     def __init__(self, val: str) -> None:
@@ -182,22 +182,22 @@ class GraphicValue:
             self.value = -1
         elif val[-2:] == "px":
             self.unit = GraphicUnit.PIXEL
-            self.value = float(val[:-2])
+            self.value = int(val[:-2])
         elif val[-2:] == "rw":
             self.unit = GraphicUnit.RESOLUTION_WIDTH
-            self.value = float(val[:-2])
+            self.value = int(val[:-2])
         elif val[-2:] == "rh":
             self.unit = GraphicUnit.RESOLUTION_HEIGHT
-            self.value = float(val[:-2])
+            self.value = int(val[:-2])
         elif val[-4:] == "rmin":
             self.unit = GraphicUnit.RESOLUTION_MIN
-            self.value = float(val[:-4])
+            self.value = int(val[:-4])
         elif val[-4:] == "rmax":
             self.unit = GraphicUnit.RESOLUTION_MAX
-            self.value = float(val[:-4])
+            self.value = int(val[:-4])
         elif val[-1:] == "%":
             self.unit = GraphicUnit.PERCENT
-            self.value = float(val[:-1])
+            self.value = int(val[:-1])
         else:
             raise ValueError()
 
@@ -215,7 +215,7 @@ class GraphicValue:
             case _:
                 return "'{}{}'".format(self.value, self.unit)
 
-    def get_pixel(self, default_value: float = 0) -> float:
+    def get_pixel(self, default_value: int = 0) -> int:
         return self.value if self.unit == GraphicUnit.PIXEL else default_value
 
 

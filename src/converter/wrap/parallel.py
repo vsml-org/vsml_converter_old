@@ -48,9 +48,9 @@ def create_parallel_process(
     # 時間的長さがない場合processはNoneとなる
     # 時間的長さがある場合
     if style.object_length.unit != TimeUnit.FIT:
-        audio_max_length = 0.0
-        left_width = 0.0
-        remain_margin = 0.0
+        audio_max_length = 0
+        left_width = 0
+        remain_margin = 0
         for process in processes:
             # 映像の合成
             if process.video:

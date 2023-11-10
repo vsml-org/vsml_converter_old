@@ -117,10 +117,10 @@ def element_to_content(
         children_object_length = 0.0
         child_object_length_is_fit = False
         last_time_margin = 0.0
-        children_width = 0.0
-        last_margin_horizontal = 0.0
-        children_height = 0.0
-        last_margin_vertical = 0.0
+        children_width = 0
+        last_margin_horizontal = 0
+        children_height = 0
+        last_margin_vertical = 0
 
         for vsml_element_child in vsml_element_children:
             child_content = element_to_content(
@@ -137,31 +137,53 @@ def element_to_content(
                 vsml_content.exist_audio or child_content.exist_audio
             )
             child_style = child_content.style
+            child_source_object_length = (
+                child_style.source_object_length.value
+                if child_style.source_object_length
+                else 0.0
+            )
+            child_source_width = (
+                child_style.source_width.value
+                if child_style.source_width
+                else 0
+            )
+            child_source_height = (
+                child_style.source_height.value
+                if child_style.source_height
+                else 0
+            )
 
+            # 時間計算
             if style.object_length.unit == TimeUnit.FIT:
+                # シーケンス(時間的逐次)
                 if style.order == Order.SEQUENCE:
+                    # 時間の制限がない(FIT)場合親もFITにする
                     if child_style.object_length == TimeUnit.FIT:
                         child_object_length_is_fit = True
+                    # FITでないとき
                     if not child_object_length_is_fit:
-                        # 時間計算
                         children_object_length += (
                             max(
                                 child_style.time_margin_start.get_second(fps),
                                 last_time_margin,
                             )
                             + child_style.time_padding_start.get_second(fps)
-                            + child_style.object_length.get_second(fps)
+                            + child_style.object_length.get_second(
+                                fps, child_source_object_length
+                            )
                             + child_style.time_padding_end.get_second(fps)
                         )
                         last_time_margin = (
                             child_style.time_margin_end.get_second(fps)
                         )
+                # パラレル(時間的並列)
                 elif style.order == Order.PARALLEL:
-                    # 時間計算
                     child_object_length = (
                         child_style.time_margin_start.get_second(fps)
                         + child_style.time_padding_start.get_second(fps)
-                        + child_style.object_length.get_second(fps)
+                        + child_style.object_length.get_second(
+                            fps, child_source_object_length
+                        )
                         + child_style.time_padding_end.get_second(fps)
                         + child_style.time_margin_end.get_second(fps)
                     )
@@ -170,6 +192,7 @@ def element_to_content(
                     )
 
             if child_content.exist_video:
+                # シングルレイヤ(横並び)モード
                 if (
                     style.order == Order.PARALLEL
                     and style.layer_mode == LayerMode.SINGLE
@@ -181,7 +204,7 @@ def element_to_content(
                             last_margin_horizontal,
                         )
                         + child_style.padding_left.get_pixel()
-                        + child_style.width.get_pixel()
+                        + child_style.width.get_pixel(child_source_width)
                         + child_style.padding_right.get_pixel()
                     )
                     last_margin_horizontal = (
@@ -195,11 +218,12 @@ def element_to_content(
                             last_margin_vertical,
                         )
                         + child_style.padding_top.get_pixel()
-                        + child_style.height.get_pixel()
+                        + child_style.height.get_pixel(child_source_height)
                         + child_style.padding_bottom.get_pixel()
                         + child_style.margin_bottom.get_pixel()
                     )
                     children_height = max(children_height, child_height)
+                # マルチレイヤ(奥行き並び)モード
                 else:
                     # 幅計算
                     child_width = (
@@ -208,7 +232,7 @@ def element_to_content(
                             last_margin_horizontal,
                         )
                         + child_style.padding_left.get_pixel()
-                        + child_style.width.get_pixel()
+                        + child_style.width.get_pixel(child_source_width)
                         + child_style.padding_right.get_pixel()
                         + child_style.margin_right.get_pixel()
                     )
@@ -221,7 +245,7 @@ def element_to_content(
                             last_margin_vertical,
                         )
                         + child_style.padding_top.get_pixel()
-                        + child_style.height.get_pixel()
+                        + child_style.height.get_pixel(child_source_height)
                         + child_style.padding_bottom.get_pixel()
                         + child_style.margin_bottom.get_pixel()
                     )
@@ -229,24 +253,30 @@ def element_to_content(
 
             vsml_content.items.append(child_content)
 
+        # FITでないとき
         if (
             style.object_length.unit == TimeUnit.FIT
             and not child_object_length_is_fit
         ):
+            # シーケンスのとき
             if style.order == Order.SEQUENCE:
                 children_object_length += last_time_margin
+            # 親のobject_lengthを更新
             style.object_length = TimeValue(
                 "{}s".format(children_object_length)
             )
         if vsml_content.exist_video:
+            # シングルレイヤ(横並び)モード
             if (
                 style.order == Order.PARALLEL
                 and style.layer_mode == LayerMode.SINGLE
             ):
                 children_width += last_margin_horizontal
                 children_height += last_margin_vertical
+            # 親のwidth, heightを更新
             style.width = GraphicValue("{}px".format(children_width))
             style.height = GraphicValue("{}px".format(children_height))
+
     else:
         raise Exception()
 

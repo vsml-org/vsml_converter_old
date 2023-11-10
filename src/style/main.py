@@ -381,7 +381,7 @@ class Style:
                     and parent_param.width is not None
                     and parent_param.width.unit == GraphicUnit.PIXEL
                 ):
-                    self.width.value = (
+                    self.width.value = int(
                         parent_param.width.value * self.width.value / 100
                     )
                     # PIXEL
@@ -394,7 +394,7 @@ class Style:
                         # PIXEL
                         self.width = self.source_width
             case GraphicUnit.RESOLUTION_WIDTH:
-                self.width.value = (
+                self.width.value = int(
                     VSMLManager.get_root_resolution().width
                     * self.width.value
                     / 100
@@ -402,7 +402,7 @@ class Style:
                 # PIXEL
                 self.width.unit = GraphicUnit.PIXEL
             case GraphicUnit.RESOLUTION_HEIGHT:
-                self.width.value = (
+                self.width.value = int(
                     VSMLManager.get_root_resolution().height
                     * self.width.value
                     / 100
@@ -410,7 +410,7 @@ class Style:
                 # PIXEL
                 self.width.unit = GraphicUnit.PIXEL
             case GraphicUnit.RESOLUTION_MIN:
-                self.width.value = (
+                self.width.value = int(
                     VSMLManager.get_root_resolution().get_min()
                     * self.width.value
                     / 100
@@ -418,7 +418,7 @@ class Style:
                 # PIXEL
                 self.width.unit = GraphicUnit.PIXEL
             case GraphicUnit.RESOLUTION_MAX:
-                self.width.value = (
+                self.width.value = int(
                     VSMLManager.get_root_resolution().get_max()
                     * self.width.value
                     / 100
@@ -433,7 +433,7 @@ class Style:
                     and parent_param.height is not None
                     and parent_param.height.unit == GraphicUnit.PIXEL
                 ):
-                    self.height.value = (
+                    self.height.value = int(
                         parent_param.height.value * self.height.value / 100
                     )
                     # PIXEL
@@ -446,7 +446,7 @@ class Style:
                         # PIXEL
                         self.height = self.source_height
             case GraphicUnit.RESOLUTION_WIDTH:
-                self.height.value = (
+                self.height.value = int(
                     VSMLManager.get_root_resolution().width
                     * self.height.value
                     / 100
@@ -454,7 +454,7 @@ class Style:
                 # PIXEL
                 self.height.unit = GraphicUnit.PIXEL
             case GraphicUnit.RESOLUTION_HEIGHT:
-                self.height.value = (
+                self.height.value = int(
                     VSMLManager.get_root_resolution().height
                     * self.height.value
                     / 100
@@ -462,7 +462,7 @@ class Style:
                 # PIXEL
                 self.height.unit = GraphicUnit.PIXEL
             case GraphicUnit.RESOLUTION_MIN:
-                self.height.value = (
+                self.height.value = int(
                     VSMLManager.get_root_resolution().get_min()
                     * self.height.value
                     / 100
@@ -470,7 +470,7 @@ class Style:
                 # PIXEL
                 self.height.unit = GraphicUnit.PIXEL
             case GraphicUnit.RESOLUTION_MAX:
-                self.height.value = (
+                self.height.value = int(
                     VSMLManager.get_root_resolution().get_max()
                     * self.height.value
                     / 100
@@ -503,7 +503,7 @@ class Style:
     def __repr__(self) -> str:
         return str(vars(self))
 
-    def get_size_with_padding(self) -> tuple[float, float]:
+    def get_size_with_padding(self) -> tuple[int, int]:
         source_width_px = 0
         source_height_px = 0
         if self.source_width is not None:
