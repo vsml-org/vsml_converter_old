@@ -107,7 +107,7 @@ def create_parallel_process(
                         video_process = ffmpeg.overlay(
                             video_process,
                             process.video,
-                            eof_action="repeat",
+                            eof_action="pass",
                             **option,
                         )
                         left_width += (
@@ -122,7 +122,7 @@ def create_parallel_process(
                         video_process = ffmpeg.overlay(
                             video_process,
                             process.video,
-                            eof_action="repeat",
+                            eof_action="pass",
                             **option,
                         )
                     case _:
