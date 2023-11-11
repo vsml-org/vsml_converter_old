@@ -49,16 +49,15 @@ def element_to_style(
     style_tree = {}
     for styleElement in meta_element:
         src_path = styleElement.get("src", None)
-        if src_path is None:
-            if styleElement.text is not None:
-                style_tree |= convert_vss_dict(styleElement.text)
-        else:
+        if src_path is not None and src_path != "":
             with open(
                 VSMLManager.get_root_path() + src_path,
                 "r",
             ) as style_src:
                 style_tree |= convert_vss_dict(style_src.read())
-
+        else:
+            if styleElement.text is not None and styleElement.text != "":
+                style_tree |= convert_vss_dict(styleElement.text)
     return style_tree
 
 
