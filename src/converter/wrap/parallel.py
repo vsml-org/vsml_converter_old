@@ -135,8 +135,8 @@ def create_parallel_process(
                     TimeUnit.SECOND,
                 ]:
                     second = process.style.time_margin_start.get_second(fps)
-                    process.video = ffmpeg.filter(
-                        process.video,
+                    process.audio = ffmpeg.filter(
+                        process.audio,
                         "adelay",
                         color=background_color,
                         delays=second,
@@ -146,8 +146,8 @@ def create_parallel_process(
                     TimeUnit.SECOND,
                 ]:
                     second = process.style.time_margin_end.get_second(fps)
-                    process.video = ffmpeg.filter(
-                        process.video,
+                    process.audio = ffmpeg.filter(
+                        process.audio,
                         "apad",
                         color=background_color,
                         pad_dur=second,
