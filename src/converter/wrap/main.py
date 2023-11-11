@@ -50,11 +50,11 @@ def create_wrap_process(
             }
         if process.video is not None:
             process.video = ffmpeg.filter(
-                "tpad", process.video, color=background_color, **video_option
+                process.video, "tpad", color=background_color, **video_option
             )
         if process.audio is not None:
             process.audio = ffmpeg.filter(
-                "adelay", process.audio, all=1, **audio_option
+                process.audio, "adelay", all=1, **audio_option
             )
     if style.object_length.unit in [
         TimeUnit.FRAME,
@@ -78,10 +78,10 @@ def create_wrap_process(
             }
         if process.video is not None:
             process.video = ffmpeg.filter(
-                "tpad", process.video, color=background_color, **video_option
+                process.video, "tpad", color=background_color, **video_option
             )
         if process.audio is not None:
             process.audio = ffmpeg.filter(
-                "apad", process.audio, **audio_option
+                process.audio, "apad", **audio_option
             )
     return process

@@ -114,10 +114,10 @@ def create_video_process(
                 "delays": style.time_padding_start.value,
             }
         video_process = ffmpeg.filter(
-            "tpad", video_process, color=background_color, **video_option
+            video_process, "tpad", color=background_color, **video_option
         )
         audio_process = ffmpeg.filter(
-            "adelay", audio_process, all=1, **audio_option
+            audio_process, "adelay", all=1, **audio_option
         )
     if style.object_length.unit in [
         TimeUnit.FRAME,
@@ -141,7 +141,7 @@ def create_video_process(
                 "pad_dur": style.time_padding_start.value,
             }
         video_process = ffmpeg.filter(
-            "tpad", video_process, color=background_color, **video_option
+            video_process, "tpad", color=background_color, **video_option
         )
         audio_process = ffmpeg.filter(audio_process, "apad", **audio_option)
 

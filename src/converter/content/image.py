@@ -74,8 +74,8 @@ def create_image_process(
         elif style.time_padding_start.unit == TimeUnit.SECOND:
             option = {"start_duration": style.time_padding_start.value}
         video_process = ffmpeg.filter(
-            "tpad",
             video_process,
+            "tpad",
             color=background_color,
             **option,
         )
@@ -89,8 +89,8 @@ def create_image_process(
         elif style.time_padding_end.unit == TimeUnit.SECOND:
             option = {"stop_duration": style.time_padding_end.value}
         video_process = ffmpeg.filter(
-            "tpad",
             video_process,
+            "tpad",
             color=background_color,
             **option,
         )

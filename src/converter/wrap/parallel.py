@@ -71,8 +71,8 @@ def create_parallel_process(
                         )
                         option = {"start_duration": second}
                     process.video = ffmpeg.filter(
-                        "tpad",
                         process.video,
+                        "tpad",
                         color=background_color,
                         **option,
                     )
@@ -87,8 +87,8 @@ def create_parallel_process(
                         second = process.style.time_margin_end.get_second(fps)
                         option = {"stop_duration": second}
                     process.video = ffmpeg.filter(
-                        "tpad",
                         process.video,
+                        "tpad",
                         color=background_color,
                         **option,
                     )
@@ -136,8 +136,8 @@ def create_parallel_process(
                 ]:
                     second = process.style.time_margin_start.get_second(fps)
                     process.video = ffmpeg.filter(
-                        "adelay",
                         process.video,
+                        "adelay",
                         color=background_color,
                         delays=second,
                     )
@@ -147,8 +147,8 @@ def create_parallel_process(
                 ]:
                     second = process.style.time_margin_end.get_second(fps)
                     process.video = ffmpeg.filter(
-                        "apad",
                         process.video,
+                        "apad",
                         color=background_color,
                         pad_dur=second,
                     )
