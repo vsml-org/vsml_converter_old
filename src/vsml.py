@@ -68,9 +68,6 @@ def element_to_content(
     parent_param: Optional[Style] = None,
     count: int = 0,
 ) -> VSMLContent:
-    # 子要素の取得
-    vsml_element_children = list(vsml_element)
-
     tag_name = vsml_element.tag
     classes_name = vsml_element.attrib.get("class", "").split(" ")
     id_name = vsml_element.attrib.get("id")
@@ -104,6 +101,9 @@ def element_to_content(
         )
     # vsml_elementがWrapContentの場合
     elif tag_name in definition.WRAP_TAG:
+        # 子要素の取得
+        vsml_element_children = list(vsml_element)
+
         vsml_content = WrapContent(vsml_element, style)
         tag_info_tree = TagInfoTree(
             tag_name,
