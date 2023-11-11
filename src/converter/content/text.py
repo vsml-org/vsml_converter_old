@@ -25,14 +25,31 @@ def create_text_process(
         style.background_color,
     )
     # TODO: フォントファイルを指定する
+    option: dict = {
+        "x": padding_left_px,
+        "y": padding_top_px,
+    }
+    if style.font_size is not None:
+        option |= {
+            "fontsize": style.font_size.get_pixel(),
+        }
+    if style.font_color is not None:
+        option |= {
+            "fontcolor": style.font_color.value,
+        }
+    if style.font_border_color is not None:
+        option |= {
+            "bordercolor": style.font_border_color.value,
+        }
+    if style.font_border_width is not None:
+        option |= {
+            "borderw": style.font_border_width,
+        }
+
     video_process = ffmpeg.drawtext(
         transparent_process,
         text=vsml_content.src_path,
-        fontcolor=style.font_color,
-        bordercolor=style.font_border_color,
-        borderw=style.font_border_width,
-        x=int(padding_left_px),
-        y=int(padding_top_px),
+        **option,
     )
 
     # timeのstyle対応
