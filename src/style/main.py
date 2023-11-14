@@ -336,11 +336,11 @@ class Style:
                 case "font-weight":
                     parse_value = font_weight_parser(value)
                     if parse_value is not None:
-                        self.font_border_width = parse_value
+                        self.font_weight = parse_value
                 case "font-style":
                     parse_value = font_style_parser(value)
                     if parse_value is not None:
-                        self.font_border_width = parse_value
+                        self.font_style = parse_value
                 case _:
                     continue
 
