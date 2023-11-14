@@ -185,9 +185,6 @@ class Style:
             case "txt":
                 if self.font_color is None:
                     self.font_color = Color("white")
-                # TODO: フォントファイルの取得をする
-                if self.font_family is None:
-                    self.font_family = "MS Gothic"
                 if self.font_size is None:
                     self.font_size = GraphicValue("30px")
                 # TODO: ここGlyphを使用してサイズを計算する

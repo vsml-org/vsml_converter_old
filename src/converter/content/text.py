@@ -24,11 +24,14 @@ def create_text_process(
         "{}x{}".format(width_with_padding, height_with_padding),
         style.background_color,
     )
-    # TODO: フォントファイルを指定する
     option: dict = {
         "x": padding_left_px,
         "y": padding_top_px,
     }
+    if style.font_family is not None:
+        option |= {
+            "font": style.font_family,
+        }
     if style.font_size is not None:
         option |= {
             "fontsize": style.font_size.get_pixel(),
