@@ -113,11 +113,11 @@ def create_sequence_process(
             child_style.object_length.unit == TimeUnit.FIT
             and child_style.source_object_length is None
         ):
-            if child_process.video is None:
+            if video_process is not None and child_process.video is None:
                 video_process = ffmpeg.filter(
                     video_process, "tpad", stop=-1, color=background_color
                 )
-            if child_process.audio is None:
+            if audio_process is not None and child_process.audio is None:
                 audio_process = ffmpeg.filter(
                     audio_process, "apad", pad_len=-1
                 )
