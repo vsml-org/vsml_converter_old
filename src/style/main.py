@@ -187,9 +187,6 @@ class Style:
                     self.font_color = Color("white")
                 if self.font_size is None:
                     self.font_size = GraphicValue("30px")
-                # TODO: ここGlyphを使用してサイズを計算する
-                self.source_width = graphic_parser("100px")
-                self.source_height = graphic_parser("100px")
             case _:
                 raise Exception()
 
@@ -353,6 +350,20 @@ class Style:
                 background_color = attrib.get("color")
                 if background_color is not None:
                     self.background_color = Color(background_color)
+            case "txt":
+                if self.font_size is not None:
+                    text_lines = source_value.split(r"\n")
+                    self.source_width = graphic_parser(
+                        "{}px".format(
+                            max(map(len, text_lines))
+                            * self.font_size.get_pixel()
+                        )
+                    )
+                    self.source_height = graphic_parser(
+                        "{}px".format(
+                            len(text_lines) * self.font_size.get_pixel()
+                        )
+                    )
             case _:
                 pass
 
