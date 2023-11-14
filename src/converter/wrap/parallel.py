@@ -118,7 +118,7 @@ def create_parallel_process(
                         )
                         remain_margin = process.style.margin_right.get_pixel()
                     case LayerMode.MULTI:
-                        option["y"] += process.style.margin_top.get_pixel()
+                        option["x"] += process.style.margin_left.get_pixel()
                         video_process = ffmpeg.overlay(
                             video_process,
                             process.video,
