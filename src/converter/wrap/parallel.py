@@ -139,7 +139,7 @@ def create_parallel_process(
                         process.audio,
                         "adelay",
                         color=background_color,
-                        delays=second,
+                        delays="{}s".format(second),
                     )
                 if process.style.time_margin_end.unit in [
                     TimeUnit.FRAME,

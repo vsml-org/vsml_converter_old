@@ -39,14 +39,18 @@ def create_wrap_process(
         if style.time_padding_start.unit == TimeUnit.FRAME:
             video_option = {"start": style.time_padding_start.value}
             audio_option = {
-                "delays": style.time_padding_start.get_second(fps),
+                "delays": "{}s".format(
+                    style.time_padding_start.get_second(fps)
+                ),
             }
         elif style.time_padding_start.unit == TimeUnit.SECOND:
             video_option = {
                 "start_duration": style.time_padding_start.get_second(fps),
             }
             audio_option = {
-                "delays": style.time_padding_start.get_second(fps),
+                "delays": "{}s".format(
+                    style.time_padding_start.get_second(fps)
+                ),
             }
         if process.video is not None:
             process.video = ffmpeg.filter(

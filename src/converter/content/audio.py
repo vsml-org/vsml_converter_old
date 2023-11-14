@@ -51,11 +51,12 @@ def create_audio_process(
         option = {}
         if style.time_padding_start.unit == TimeUnit.FRAME:
             option = {
-                "delays": style.time_padding_start.value
-                / VSMLManager.get_root_fps()
+                "delays": "{}s".format(
+                    style.time_padding_start.value / VSMLManager.get_root_fps()
+                )
             }
         elif style.time_padding_start.unit == TimeUnit.SECOND:
-            option = {"delays": style.time_padding_start.value}
+            option = {"delays": "{}s".format(style.time_padding_start.value)}
         audio_process = ffmpeg.filter(
             audio_process,
             "adelay",
