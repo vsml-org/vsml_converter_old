@@ -25,7 +25,7 @@ def create_sequence_process(
         if style.background_color
         else "0x00000000"
     )
-    # TODO: time_marginが重なるときに前のendと次のstartのmaxを取って1つ分のtime_marginを取る
+    remain_time_margin = 0
     for child_process in processes:
         child_style = child_process.style
 
@@ -37,11 +37,17 @@ def create_sequence_process(
                 video_option = {}
                 if child_style.time_margin_start.unit == TimeUnit.SECOND:
                     video_option = {
-                        "start_duration": child_style.time_margin_start.value
+                        "start_duration": max(
+                            child_style.time_margin_start.value,
+                            remain_time_margin,
+                        )
                     }
                 if child_style.time_margin_start.unit == TimeUnit.FRAME:
+                    remain_frame = remain_time_margin * fps
                     video_option = {
-                        "start": child_style.time_margin_start.value
+                        "start": max(
+                            child_style.time_margin_start.value, remain_frame
+                        )
                     }
                 child_process.video = ffmpeg.filter(
                     child_process.video,
@@ -49,39 +55,26 @@ def create_sequence_process(
                     color=background_color,
                     **video_option,
                 )
+            else:
+                delays = child_style.time_margin_start.get_second(fps)
+                video_margin += max(delays, remain_time_margin)
             if child_process.audio is not None:
                 delays = child_style.time_margin_start.get_second(fps)
                 child_process.audio = ffmpeg.filter(
                     child_process.audio,
                     "adelay",
-                    delays=delays,
+                    delays=max(delays, remain_time_margin),
                 )
+            else:
+                delays = child_style.time_margin_start.get_second(fps)
+                audio_margin += max(delays, remain_time_margin)
 
         if child_style.time_margin_end.unit in [
             TimeUnit.SECOND,
             TimeUnit.FRAME,
         ]:
-            if child_process.video is not None:
-                video_option = {}
-                if child_style.time_margin_end.unit == TimeUnit.SECOND:
-                    video_option = {
-                        "stop_duration": child_style.time_margin_end.value
-                    }
-                if child_style.time_margin_end.unit == TimeUnit.FRAME:
-                    video_option = {"stop": child_style.time_margin_end.value}
-                child_process.video = ffmpeg.filter(
-                    child_process.video,
-                    "tpad",
-                    color=background_color,
-                    **video_option,
-                )
-            if child_process.audio is not None:
-                duration = child_style.time_margin_end.get_second(fps)
-                child_process.audio = ffmpeg.filter(
-                    child_process.audio,
-                    "apad",
-                    pad_dur=duration,
-                )
+            remain_time_margin = child_style.time_margin_end.get_second(fps)
+
         if child_process.video is not None:
             if video_margin > 0:
                 child_process.video = ffmpeg.filter(
@@ -120,22 +113,33 @@ def create_sequence_process(
             child_style.object_length.unit == TimeUnit.FIT
             and child_style.source_object_length is None
         ):
-            # TODO: imageやtextなど長さ無限のもので、
-            # video/audioの一方しか無いときに、もう一方の
-            # 長さが無限になっていない
+            if child_process.video is None:
+                video_process = ffmpeg.filter(
+                    video_process, "tpad", stop=-1, color=background_color
+                )
+            if child_process.audio is None:
+                audio_process = ffmpeg.filter(
+                    audio_process, "apad", pad_len=-1
+                )
             video_margin = 0
             audio_margin = 0
             break
 
     # 余った時間マージンを追加する
-    if video_margin and video_process:
-        video_process = ffmpeg.filter(
-            video_process, "tpad", stop_duration=video_margin
-        )
-    if audio_margin and audio_process:
-        audio_process = ffmpeg.filter(
-            audio_process, "apad", pad_dur=audio_margin
-        )
+    if video_process:
+        if video_margin or remain_time_margin:
+            video_process = ffmpeg.filter(
+                video_process,
+                "tpad",
+                stop_duration=video_margin + remain_time_margin,
+            )
+    if audio_process:
+        if audio_margin or remain_time_margin:
+            audio_process = ffmpeg.filter(
+                audio_process,
+                "apad",
+                pad_dur=audio_margin + remain_time_margin,
+            )
 
     return Process(
         video_process,
