@@ -97,7 +97,6 @@ def create_sequence_process(
                 child_process.audio = ffmpeg.filter(
                     child_process.audio,
                     "adelay",
-                    color=background_color,
                     delays="{}s".format(audio_margin),
                 )
                 audio_margin = 0

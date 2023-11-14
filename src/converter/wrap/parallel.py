@@ -138,7 +138,6 @@ def create_parallel_process(
                     process.audio = ffmpeg.filter(
                         process.audio,
                         "adelay",
-                        color=background_color,
                         delays="{}s".format(second),
                     )
                 if process.style.time_margin_end.unit in [
@@ -149,7 +148,6 @@ def create_parallel_process(
                     process.audio = ffmpeg.filter(
                         process.audio,
                         "apad",
-                        color=background_color,
                         pad_dur=second,
                     )
                 if audio_process is None:
