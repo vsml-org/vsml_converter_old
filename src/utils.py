@@ -78,3 +78,6 @@ class SourceType(Enum):
 
     def __str__(self) -> str:
         return "'{}'".format(self.name)
+
+    def __repr__(self) -> str:
+        return "'{}'".format(self.name)
