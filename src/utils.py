@@ -75,3 +75,6 @@ class SourceType(Enum):
     VIDEO = auto()
     AUDIO = auto()
     TEXT = auto()
+
+    def __str__(self) -> str:
+        return "'{}'".format(self.name)
