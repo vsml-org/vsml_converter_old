@@ -4,6 +4,7 @@ from typing import Optional
 import ffmpeg
 
 from content import SourceContent, VSMLContent, WrapContent
+from style import TimeUnit
 from utils import VSMLManager
 from vsml import VSML
 
@@ -52,22 +53,67 @@ def convert_video(
     out_filename = "video.mp4" if out_filename is None else out_filename
 
     process = create_process(vsml_data.content, debug_mode)
+    fps = VSMLManager.get_root_fps()
+    style = vsml_data.content.style
     if process.video:
-        fps = VSMLManager.get_root_fps()
-        style = vsml_data.content.style
-        source_object_length = (
-            style.source_object_length.get_second(fps)
-            if style.source_object_length
-            else 0.0
-        )
         bg_process = get_background_process(
             VSMLManager.get_root_resolution().get_str()
         )
-        process.video = ffmpeg.overlay(bg_process, process.video, x=0, y=0)
-        process.video = ffmpeg.trim(
-            process.video,
-            end=style.object_length.get_second(fps, source_object_length),
+        process.video = ffmpeg.overlay(
+            bg_process, process.video, x=0, y=0, shortest=1
         )
+    if style.time_margin_start.unit in [
+        TimeUnit.SECOND,
+        TimeUnit.FRAME,
+    ]:
+        if process.video is not None:
+            video_option = {}
+            if style.time_margin_start.unit == TimeUnit.SECOND:
+                video_option = {
+                    "start_duration": style.time_margin_start.value,
+                }
+            if style.time_margin_start.unit == TimeUnit.FRAME:
+                video_option = {"start": style.time_margin_start.value}
+            process.video = ffmpeg.filter(
+                process.video,
+                "tpad",
+                **video_option,
+            )
+        if process.audio is not None:
+            process.audio = ffmpeg.filter(
+                process.audio,
+                "adelay",
+                all=1,
+                delays="{}s".format(style.time_margin_start.get_second(fps)),
+            )
+    if style.object_length.unit in [
+        TimeUnit.FRAME,
+        TimeUnit.SECOND,
+    ] and style.time_margin_end.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+        video_option = {}
+        audio_option = {}
+        if style.time_margin_end.unit == TimeUnit.FRAME:
+            video_option = {
+                "stop": style.time_margin_end.value,
+            }
+            audio_option = {
+                "pad_dur": style.time_margin_end.get_second(fps),
+            }
+        elif style.time_margin_end.unit == TimeUnit.SECOND:
+            video_option = {
+                "stop_duration": style.time_margin_end.get_second(fps),
+            }
+            audio_option = {
+                "pad_dur": style.time_margin_end.get_second(fps),
+            }
+        if process.video is not None:
+            process.video = ffmpeg.filter(
+                process.video, "tpad", **video_option
+            )
+        if process.audio is not None:
+            process.audio = ffmpeg.filter(
+                process.audio, "apad", **audio_option
+            )
     match (
         process.video,
         process.audio,
