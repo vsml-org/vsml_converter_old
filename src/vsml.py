@@ -114,7 +114,7 @@ def element_to_content(
 
         fps = VSMLManager.get_root_fps()
         children_object_length = 0.0
-        child_object_length_is_fit = False
+        child_object_length_is_fit = style.order == Order.PARALLEL
         last_time_margin = 0.0
         children_width = 0
         last_margin_horizontal = 0
@@ -157,7 +157,7 @@ def element_to_content(
                 # シーケンス(時間的逐次)
                 if style.order == Order.SEQUENCE:
                     # 時間の制限がない(FIT)場合親もFITにする
-                    if child_style.object_length == TimeUnit.FIT:
+                    if child_style.object_length.unit == TimeUnit.FIT:
                         child_object_length_is_fit = True
                     # FITでないとき
                     if not child_object_length_is_fit:
@@ -177,6 +177,8 @@ def element_to_content(
                         )
                 # パラレル(時間的並列)
                 elif style.order == Order.PARALLEL:
+                    if child_style.object_length.unit != TimeUnit.FIT:
+                        child_object_length_is_fit = False
                     child_object_length = (
                         child_style.time_margin_start.get_second(fps)
                         + child_style.time_padding_start.get_second(fps)
