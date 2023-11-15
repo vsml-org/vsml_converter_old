@@ -152,14 +152,14 @@ class TimeValue:
     def __str__(self) -> str:
         match self.unit:
             case TimeUnit.FIT | TimeUnit.SOURCE:
-                return "{}".format(self.unit)
+                return "'{}'".format(self.unit)
             case _:
                 return "'{}{}'".format(self.value, self.unit)
 
     def __repr__(self) -> str:
         match self.unit:
             case TimeUnit.FIT | TimeUnit.SOURCE:
-                return "{}".format(self.unit)
+                return "'{}'".format(self.unit)
             case _:
                 return "'{}{}'".format(self.value, self.unit)
 
