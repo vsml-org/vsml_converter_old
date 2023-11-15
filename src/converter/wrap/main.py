@@ -68,17 +68,17 @@ def create_wrap_process(
         audio_option = {}
         if style.time_padding_end.unit == TimeUnit.FRAME:
             video_option = {
-                "stop": style.time_padding_start.value,
+                "stop": style.time_padding_end.value,
             }
             audio_option = {
-                "pad_dur": style.time_padding_start.get_second(fps),
+                "pad_dur": style.time_padding_end.get_second(fps),
             }
         elif style.time_padding_end.unit == TimeUnit.SECOND:
             video_option = {
-                "stop_duration": style.time_padding_start.get_second(fps),
+                "stop_duration": style.time_padding_end.get_second(fps),
             }
             audio_option = {
-                "pad_dur": style.time_padding_start.get_second(fps),
+                "pad_dur": style.time_padding_end.get_second(fps),
             }
         if process.video is not None:
             process.video = ffmpeg.filter(
