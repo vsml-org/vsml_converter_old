@@ -63,6 +63,7 @@ def create_sequence_process(
                 child_process.audio = ffmpeg.filter(
                     child_process.audio,
                     "adelay",
+                    all=1,
                     delays="{}s".format(max(delays, remain_time_margin)),
                 )
             else:
@@ -97,6 +98,7 @@ def create_sequence_process(
                 child_process.audio = ffmpeg.filter(
                     child_process.audio,
                     "adelay",
+                    all=1,
                     delays="{}s".format(audio_margin),
                 )
                 audio_margin = 0
