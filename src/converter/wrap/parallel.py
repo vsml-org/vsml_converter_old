@@ -134,12 +134,14 @@ def create_parallel_process(
                     TimeUnit.FRAME,
                     TimeUnit.SECOND,
                 ]:
-                    second = process.style.time_margin_start.get_second(fps)
+                    delays = int(
+                        process.style.time_margin_start.get_second(fps) * 1000
+                    )
                     process.audio = ffmpeg.filter(
                         process.audio,
                         "adelay",
                         all=1,
-                        delays="{}s".format(second),
+                        delays=delays,
                     )
                 if process.style.time_margin_end.unit in [
                     TimeUnit.FRAME,

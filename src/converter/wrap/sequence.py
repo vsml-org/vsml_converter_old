@@ -64,7 +64,7 @@ def create_sequence_process(
                     child_process.audio,
                     "adelay",
                     all=1,
-                    delays="{}s".format(max(delays, remain_time_margin)),
+                    delays=int(max(delays, remain_time_margin) * 1000),
                 )
             else:
                 delays = child_style.time_margin_start.get_second(fps)
@@ -99,7 +99,7 @@ def create_sequence_process(
                     child_process.audio,
                     "adelay",
                     all=1,
-                    delays="{}s".format(audio_margin),
+                    delays=int(audio_margin * 1000),
                 )
                 audio_margin = 0
             if audio_process is None:

@@ -99,26 +99,24 @@ def create_video_process(
     )
     if style.time_padding_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         video_option = {}
-        audio_option = {}
+        delays = int(
+            style.time_padding_start.get_second(VSMLManager.get_root_fps())
+            * 1000
+        )
         if style.object_length.unit == TimeUnit.FRAME:
             video_option = {"start": style.time_padding_start.value}
-            audio_option = {
-                "delays": "{}s".format(
-                    style.time_padding_start.value / VSMLManager.get_root_fps()
-                ),
-            }
         elif style.object_length.unit == TimeUnit.SECOND:
             video_option = {
                 "start_duration": style.time_padding_start.value,
-            }
-            audio_option = {
-                "delays": "{}s".format(style.time_padding_start.value),
             }
         video_process = ffmpeg.filter(
             video_process, "tpad", color=background_color, **video_option
         )
         audio_process = ffmpeg.filter(
-            audio_process, "adelay", all=1, **audio_option
+            audio_process,
+            "adelay",
+            all=1,
+            delays=delays,
         )
     if style.object_length.unit in [
         TimeUnit.FRAME,

@@ -49,19 +49,15 @@ def create_audio_process(
         audio_process = ffmpeg.filter(audio_process, "atrim", **option)
     if style.time_padding_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         option = {}
-        if style.time_padding_start.unit == TimeUnit.FRAME:
-            option = {
-                "delays": "{}s".format(
-                    style.time_padding_start.value / VSMLManager.get_root_fps()
-                )
-            }
-        elif style.time_padding_start.unit == TimeUnit.SECOND:
-            option = {"delays": "{}s".format(style.time_padding_start.value)}
+        delays = int(
+            style.time_padding_start.get_second(VSMLManager.get_root_fps())
+            * 1000
+        )
         audio_process = ffmpeg.filter(
             audio_process,
             "adelay",
             all=1,
-            **option,
+            delays=delays,
         )
     if style.object_length.unit in [
         TimeUnit.FRAME,

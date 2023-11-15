@@ -84,7 +84,7 @@ def convert_video(
                 process.audio,
                 "adelay",
                 all=1,
-                delays="{}s".format(style.time_margin_start.get_second(fps)),
+                delays=int(style.time_margin_start.get_second(fps) * 1000),
             )
     if style.object_length.unit in [
         TimeUnit.FRAME,

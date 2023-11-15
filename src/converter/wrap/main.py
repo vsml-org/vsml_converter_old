@@ -35,22 +35,12 @@ def create_wrap_process(
     )
     if style.time_padding_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         video_option = {}
-        audio_option = {}
+        delays = int(style.time_padding_start.get_second(fps) * 1000)
         if style.time_padding_start.unit == TimeUnit.FRAME:
             video_option = {"start": style.time_padding_start.value}
-            audio_option = {
-                "delays": "{}s".format(
-                    style.time_padding_start.get_second(fps)
-                ),
-            }
         elif style.time_padding_start.unit == TimeUnit.SECOND:
             video_option = {
                 "start_duration": style.time_padding_start.get_second(fps),
-            }
-            audio_option = {
-                "delays": "{}s".format(
-                    style.time_padding_start.get_second(fps)
-                ),
             }
         if process.video is not None:
             process.video = ffmpeg.filter(
@@ -58,7 +48,10 @@ def create_wrap_process(
             )
         if process.audio is not None:
             process.audio = ffmpeg.filter(
-                process.audio, "adelay", all=1, **audio_option
+                process.audio,
+                "adelay",
+                all=1,
+                delays=delays,
             )
     if style.object_length.unit in [
         TimeUnit.FRAME,
