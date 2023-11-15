@@ -1,5 +1,6 @@
 import json
-import time
+
+# import time
 from typing import Optional
 
 import ffmpeg
@@ -40,7 +41,8 @@ def create_process(
 
     if debug_mode:
         # print(f"[new call detected]\ntype: {vsml_content.type}")
-        print(process)
+        # print(process)
+        pass
 
     return process
 
@@ -148,8 +150,8 @@ def convert_video(
         )
         with open("./debug.json", "w") as f:
             f.write(content_str)
-        ffmpeg.view(process)
-        time.sleep(0.1)
+        # ffmpeg.view(process)
+        # time.sleep(0.1)
         print("\n[[[command args]]]\n{}".format(ffmpeg.compile(process)))
 
     ffmpeg.run(
