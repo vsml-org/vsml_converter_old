@@ -1,3 +1,4 @@
+import json
 import time
 from typing import Optional
 
@@ -139,7 +140,14 @@ def convert_video(
     )
 
     if debug_mode:
-        print(vsml_data.content)
+        content_str = (
+            str(vsml_data.content).replace("'", '"').replace("True", "true")
+        )
+        content_str = json.dumps(
+            (json.loads(content_str)), indent=2, ensure_ascii=False
+        )
+        with open("./debug.json", "w") as f:
+            f.write(content_str)
         ffmpeg.view(process)
         time.sleep(0.1)
         print("\n[[[command args]]]\n{}".format(ffmpeg.compile(process)))
