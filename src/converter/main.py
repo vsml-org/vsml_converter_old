@@ -39,11 +39,6 @@ def create_process(
     else:
         raise Exception()
 
-    if debug_mode:
-        # print(f"[new call detected]\ntype: {vsml_content.type}")
-        # print(process)
-        pass
-
     return process
 
 
