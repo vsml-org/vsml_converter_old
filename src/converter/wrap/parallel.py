@@ -47,6 +47,7 @@ def create_parallel_process(
 
     left_width = 0
     remain_margin = 0
+    option_x = style.padding_left.get_pixel()
     # 時間的長さがある場合
     if style.object_length.unit != TimeUnit.FIT:
         for process in processes:
@@ -90,38 +91,33 @@ def create_parallel_process(
                         color=background_color,
                         **option,
                     )
-                option = {
-                    "x": style.padding_left.get_pixel(),
-                    "y": style.padding_top.get_pixel()
-                    + process.style.margin_top.get_pixel(),
-                }
                 match style.layer_mode:
                     case LayerMode.SINGLE:
                         max_margin = max(
                             process.style.margin_left.get_pixel(),
                             remain_margin,
                         )
-                        option["x"] += left_width + max_margin
+                        option_x = left_width + max_margin
                         video_process = ffmpeg.overlay(
                             video_process,
                             process.video,
                             eof_action="pass",
-                            **option,
+                            x=option_x,
+                            y=style.padding_top.get_pixel()
+                            + process.style.margin_top.get_pixel(),
                         )
-                        left_width += (
-                            max_margin
-                            + process.style.padding_left.get_pixel()
-                            + process.style.width.get_pixel()
-                            + process.style.padding_right.get_pixel()
-                        )
+                        child_width, _ = process.style.get_size_with_padding()
+                        left_width += max_margin + child_width
                         remain_margin = process.style.margin_right.get_pixel()
                     case LayerMode.MULTI:
-                        option["x"] += process.style.margin_left.get_pixel()
                         video_process = ffmpeg.overlay(
                             video_process,
                             process.video,
                             eof_action="pass",
-                            **option,
+                            x=style.padding_left.get_pixel()
+                            + process.style.margin_left.get_pixel(),
+                            y=style.padding_top.get_pixel()
+                            + process.style.margin_top.get_pixel(),
                         )
                     case _:
                         raise Exception()
@@ -200,38 +196,33 @@ def create_parallel_process(
                         stop_mode=1,
                     )
 
-                option = {
-                    "x": style.padding_left.get_pixel(),
-                    "y": style.padding_top.get_pixel()
-                    + process.style.margin_top.get_pixel(),
-                }
                 match style.layer_mode:
                     case LayerMode.SINGLE:
                         max_margin = max(
                             process.style.margin_left.get_pixel(),
                             remain_margin,
                         )
-                        option["x"] += left_width + max_margin
+                        option_x = left_width + max_margin
                         video_process = ffmpeg.overlay(
                             video_process,
                             process.video,
                             eof_action="pass",
-                            **option,
+                            x=option_x,
+                            y=style.padding_top.get_pixel()
+                            + process.style.margin_top.get_pixel(),
                         )
-                        left_width += (
-                            max_margin
-                            + process.style.padding_left.get_pixel()
-                            + process.style.width.get_pixel()
-                            + process.style.padding_right.get_pixel()
-                        )
+                        child_width, _ = process.style.get_size_with_padding()
+                        left_width += max_margin + child_width
                         remain_margin = process.style.margin_right.get_pixel()
                     case LayerMode.MULTI:
-                        option["x"] += process.style.margin_left.get_pixel()
                         video_process = ffmpeg.overlay(
                             video_process,
                             process.video,
                             eof_action="pass",
-                            **option,
+                            x=style.padding_left.get_pixel()
+                            + process.style.margin_left.get_pixel(),
+                            y=style.padding_top.get_pixel()
+                            + process.style.margin_top.get_pixel(),
                         )
                     case _:
                         raise Exception()
