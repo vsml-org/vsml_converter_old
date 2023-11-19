@@ -2,6 +2,7 @@ import ffmpeg
 
 from content import WrapContent
 from converter.schemas import Process
+from converter.utils import get_background_process
 from style import TimeUnit
 from utils import VSMLManager
 
@@ -140,6 +141,34 @@ def create_sequence_process(
                 audio_process,
                 "apad",
                 pad_dur=audio_margin + remain_time_margin,
+            )
+
+    if vsml_content.exist_video:
+        (
+            width_px_with_padding,
+            height_px_with_padding,
+        ) = style.get_size_with_padding()
+        background_process = get_background_process(
+            "{}x{}".format(width_px_with_padding, height_px_with_padding),
+            style.background_color,
+        )
+        if style.object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+            option = {}
+            if style.object_length.unit == TimeUnit.FRAME:
+                option = {"end_frame": style.object_length.value + 1}
+            elif style.object_length.unit == TimeUnit.SECOND:
+                option = {"end": style.object_length.value}
+            background_process = ffmpeg.trim(
+                background_process,
+                **option,
+            )
+        if video_process is None:
+            video_process = background_process
+        else:
+            video_process = ffmpeg.overlay(
+                background_process,
+                video_process,
+                eof_action="pass",
             )
 
     return Process(
