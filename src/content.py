@@ -79,7 +79,8 @@ class WrapContent(VSMLContent):
         items_str = "["
         for item in self.items:
             items_str += item.__repr__() + ","
-        items_str = items_str[:-1]
+        if items_str != "[":
+            items_str = items_str[:-1]
         items_str += "]"
 
         return "{{'tag_name': '{}', 'style': {}, 'items': {}}}".format(
