@@ -7,6 +7,7 @@ from lxml.etree import _Attrib
 
 from utils import TagInfoTree, VSMLManager
 
+from .calculator import graphic_calculator
 from .styling_parser import (
     audio_system_parser,
     color_and_pixel_parser,
@@ -382,123 +383,43 @@ class Style:
                 )
                 self.object_length.unit = parent_param.object_length.unit
 
-        match self.width.unit:
-            case GraphicUnit.PERCENT:
-                if parent_param is None:
-                    self.width.value = int(
-                        VSMLManager.get_root_resolution().width
-                        * self.width.value
-                        / 100
-                    )
-                    # PIXEL
-                    self.width.unit = GraphicUnit.PIXEL
-                elif (
-                    parent_param.width is not None
-                    and parent_param.width.unit == GraphicUnit.PIXEL
-                ):
-                    self.width.value = int(
-                        parent_param.width.value * self.width.value / 100
-                    )
-                    # PIXEL
-                    self.width.unit = parent_param.width.unit
-                else:
-                    if self.source_width is None:
-                        # AUTO
-                        self.width.unit = GraphicUnit.AUTO
-                    else:
-                        # PIXEL
-                        self.width = self.source_width
-            case GraphicUnit.RESOLUTION_WIDTH:
-                self.width.value = int(
-                    VSMLManager.get_root_resolution().width
-                    * self.width.value
-                    / 100
-                )
-                # PIXEL
-                self.width.unit = GraphicUnit.PIXEL
-            case GraphicUnit.RESOLUTION_HEIGHT:
-                self.width.value = int(
-                    VSMLManager.get_root_resolution().height
-                    * self.width.value
-                    / 100
-                )
-                # PIXEL
-                self.width.unit = GraphicUnit.PIXEL
-            case GraphicUnit.RESOLUTION_MIN:
-                self.width.value = int(
-                    VSMLManager.get_root_resolution().get_min()
-                    * self.width.value
-                    / 100
-                )
-                # PIXEL
-                self.width.unit = GraphicUnit.PIXEL
-            case GraphicUnit.RESOLUTION_MAX:
-                self.width.value = int(
-                    VSMLManager.get_root_resolution().get_max()
-                    * self.width.value
-                    / 100
-                )
-                # PIXEL
-                self.width.unit = GraphicUnit.PIXEL
+        parent_width = None
+        if parent_param is None:
+            parent_width = VSMLManager.get_root_resolution().width
+        elif (
+            parent_param.width is not None
+            and parent_param.width.unit == GraphicUnit.PIXEL
+        ):
+            parent_width = parent_param.width.value
+        parent_height = None
+        if parent_param is None:
+            parent_height = VSMLManager.get_root_resolution().height
+        elif (
+            parent_param.height is not None
+            and parent_param.height.unit == GraphicUnit.PIXEL
+        ):
+            parent_height = parent_param.height.value
 
-        match self.height.unit:
-            case GraphicUnit.PERCENT:
-                if parent_param is None:
-                    self.height.value = int(
-                        VSMLManager.get_root_resolution().height
-                        * self.height.value
-                        / 100
-                    )
-                    # PIXEL
-                    self.width.unit = GraphicUnit.PIXEL
-                elif (
-                    parent_param.height is not None
-                    and parent_param.height.unit == GraphicUnit.PIXEL
-                ):
-                    self.height.value = int(
-                        parent_param.height.value * self.height.value / 100
-                    )
-                    # PIXEL
-                    self.height.unit = parent_param.height.unit
-                else:
-                    if self.source_height is None:
-                        # AUTO
-                        self.height.unit = GraphicUnit.AUTO
-                    else:
-                        # PIXEL
-                        self.height = self.source_height
-            case GraphicUnit.RESOLUTION_WIDTH:
-                self.height.value = int(
-                    VSMLManager.get_root_resolution().width
-                    * self.height.value
-                    / 100
-                )
-                # PIXEL
-                self.height.unit = GraphicUnit.PIXEL
-            case GraphicUnit.RESOLUTION_HEIGHT:
-                self.height.value = int(
-                    VSMLManager.get_root_resolution().height
-                    * self.height.value
-                    / 100
-                )
-                # PIXEL
-                self.height.unit = GraphicUnit.PIXEL
-            case GraphicUnit.RESOLUTION_MIN:
-                self.height.value = int(
-                    VSMLManager.get_root_resolution().get_min()
-                    * self.height.value
-                    / 100
-                )
-                # PIXEL
-                self.height.unit = GraphicUnit.PIXEL
-            case GraphicUnit.RESOLUTION_MAX:
-                self.height.value = int(
-                    VSMLManager.get_root_resolution().get_max()
-                    * self.height.value
-                    / 100
-                )
-                # PIXEL
-                self.height.unit = GraphicUnit.PIXEL
+        self.width = graphic_calculator(
+            self.width, parent_width, self.source_width
+        )
+        self.height = graphic_calculator(
+            self.height, parent_height, self.source_height
+        )
+        self.margin_left = graphic_calculator(self.margin_left, parent_width)
+        self.margin_right = graphic_calculator(self.margin_right, parent_width)
+        self.margin_top = graphic_calculator(self.margin_top, parent_height)
+        self.margin_bottom = graphic_calculator(
+            self.margin_bottom, parent_height
+        )
+        self.padding_left = graphic_calculator(self.padding_left, parent_width)
+        self.padding_right = graphic_calculator(
+            self.padding_right, parent_width
+        )
+        self.padding_top = graphic_calculator(self.padding_top, parent_height)
+        self.padding_bottom = graphic_calculator(
+            self.padding_bottom, parent_height
+        )
 
     def _get_info_from_meta(
         self, meta: dict
