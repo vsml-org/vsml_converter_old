@@ -5,6 +5,7 @@ from lxml.etree import _Element
 import definition
 from content import SourceContent, VSMLContent, WrapContent, get_source_value
 from style import (
+    GraphicUnit,
     GraphicValue,
     LayerMode,
     Order,
@@ -275,8 +276,10 @@ def element_to_content(
                 children_width += last_margin_horizontal
                 children_height += last_margin_vertical
             # 親のwidth, heightを更新
-            style.width = GraphicValue("{}px".format(children_width))
-            style.height = GraphicValue("{}px".format(children_height))
+            if style.width.unit == GraphicUnit.AUTO:
+                style.width = GraphicValue("{}px".format(children_width))
+            if style.height.unit == GraphicUnit.AUTO:
+                style.height = GraphicValue("{}px".format(children_height))
 
     else:
         raise Exception()
