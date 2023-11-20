@@ -115,7 +115,9 @@ def element_to_content(
 
         fps = VSMLManager.get_root_fps()
         children_object_length = 0.0
-        child_object_length_is_fit = style.order == Order.PARALLEL
+        child_object_length_is_fit = (
+            style.order == Order.PARALLEL or len(vsml_element_children) == 0
+        )
         last_time_margin = 0.0
         children_width = 0
         last_margin_horizontal = 0
