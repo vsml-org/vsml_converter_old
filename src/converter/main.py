@@ -140,6 +140,7 @@ def convert_video(
         content_str = (
             str(vsml_data.content).replace("'", '"').replace("True", "true")
         )
+        print(content_str)
         content_str = json.dumps(
             (json.loads(content_str)), indent=2, ensure_ascii=False
         )
