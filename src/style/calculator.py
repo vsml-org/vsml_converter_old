@@ -12,6 +12,8 @@ def graphic_calculator(
 ) -> GraphicValue:
     output_value = GraphicValue("auto")
     match value.unit:
+        case GraphicUnit.PIXEL:
+            output_value = value
         case GraphicUnit.PERCENT:
             if parent_pixel is None:
                 if source_value is None:
