@@ -10,6 +10,7 @@ lxml = "*"
 black = "*"
 isort = "*"
 flake8 = "*"
+requests = "*"
 
 [dev-packages]
 pre-commit = "*"
