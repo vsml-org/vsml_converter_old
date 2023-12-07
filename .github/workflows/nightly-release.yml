@@ -2,7 +2,7 @@ name: Nightly App Release
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -33,31 +33,31 @@ jobs:
         name: release-linux
         path: dist/main
 
-  build_macintosh:
-    runs-on: macOS-latest
+  # build_macintosh:
+  #   runs-on: macOS-latest
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@master
-      with: { python-version: '3.10' }
+  #   - name: Set up Python 3.10
+  #     uses: actions/setup-python@master
+  #     with: { python-version: '3.10' }
 
-    - name: Upgrade pip
-      run: python -m pip install --upgrade pip pipenv
+  #   - name: Upgrade pip
+  #     run: python -m pip install --upgrade pip pipenv
 
-    - name: Install library
-      run: pipenv sync
+  #   - name: Install library
+  #     run: pipenv sync
 
-    - name: Build
-      run: pipenv run pyinstaller ./src/main.py -F
+  #   - name: Build
+  #     run: pipenv run pyinstaller ./src/main.py -F
 
-    - name: Upload
-      uses: actions/upload-artifact@v1
-      with:
-        name: release-mac
-        path: dist/main
+  #   - name: Upload
+  #     uses: actions/upload-artifact@v1
+  #     with:
+  #       name: release-mac
+  #       path: dist/main
 
   build_windows:
     runs-on: windows-latest
@@ -76,6 +76,9 @@ jobs:
     - name: Install library
       run: pipenv sync
 
+    - name: Install additional library
+      run: pipenv install pywin32-ctypes
+
     - name: Build
       run: pipenv run pyinstaller ./src/main.py -F
 
@@ -86,7 +89,7 @@ jobs:
         path: dist/main.exe
 
   release:
-    needs: [build_linux, build_macintosh, build_windows]
+    needs: [build_linux, build_windows]
     runs-on: ubuntu-latest
 
     steps:
@@ -95,10 +98,10 @@ jobs:
       with:
         name: release-linux
 
-    - name: Download Mac
-      uses: actions/download-artifact@v1
-      with:
-        name: release-mac
+    # - name: Download Mac
+    #   uses: actions/download-artifact@v1
+    #   with:
+    #     name: release-mac
 
     - name: Download Windows
       uses: actions/download-artifact@v1
@@ -119,7 +122,6 @@ jobs:
 
     - name: Zip
       run: |
-        tar -C release-mac -pczvf release-mac.tar.gz main
         tar -C release-linux -pczvf release-linux.tar.gz main
         zip --junk-paths release-win ./release-win/main.exe
 
@@ -133,15 +135,15 @@ jobs:
         asset_name: release-linux.tar.gz
         asset_content_type: application/gzip
 
-    - name: Append macintosh binary
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release-mac.tar.gz
-        asset_name: release-mac.tar.gz
-        asset_content_type: application/gzip
+    # - name: Append macintosh binary
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ./release-mac.tar.gz
+    #     asset_name: release-mac.tar.gz
+    #     asset_content_type: application/gzip
 
     - name: Append windows binary
       uses: actions/upload-release-asset@v1
