@@ -21,6 +21,10 @@ def create_sequence_process(
 
     style = vsml_content.style
 
+    (
+        width_px_with_padding,
+        height_px_with_padding,
+    ) = style.get_size_with_padding()
     background_color = (
         style.background_color.value
         if style.background_color
@@ -29,6 +33,29 @@ def create_sequence_process(
     remain_time_margin = 0
     for child_process in processes:
         child_style = child_process.style
+        length_with_padding = (
+            child_style.time_padding_start.get_second(fps)
+            + child_style.time_padding_end.get_second(fps)
+            + child_style.object_length.get_second(fps)
+        )
+
+        if child_process.video is not None:
+            background_process = get_background_process(
+                "{}x{}".format(width_px_with_padding, height_px_with_padding),
+                style.background_color,
+            )
+            if child_style.object_length.unit in [
+                TimeUnit.FRAME,
+                TimeUnit.SECOND,
+            ]:
+                background_process = ffmpeg.trim(
+                    background_process, end=length_with_padding
+                )
+            child_process.video = ffmpeg.overlay(
+                background_process,
+                child_process.video,
+                eof_action="pass",
+            )
 
         if child_style.time_margin_start.unit in [
             TimeUnit.SECOND,
@@ -93,7 +120,7 @@ def create_sequence_process(
                     video_process, child_process.video, v=1, a=0
                 )
         else:
-            video_margin += child_style.object_length.get_second(fps)
+            video_margin += length_with_padding
         if child_process.audio is not None:
             if audio_margin > 0:
                 child_process.audio = ffmpeg.filter(
@@ -110,7 +137,7 @@ def create_sequence_process(
                     audio_process, child_process.audio, v=0, a=1
                 )
         else:
-            audio_margin += child_style.object_length.get_second(fps)
+            audio_margin += length_with_padding
         if (
             child_style.object_length.unit == TimeUnit.FIT
             and child_style.source_object_length is None
@@ -141,34 +168,6 @@ def create_sequence_process(
                 audio_process,
                 "apad",
                 pad_dur=audio_margin + remain_time_margin,
-            )
-
-    if vsml_content.exist_video:
-        (
-            width_px_with_padding,
-            height_px_with_padding,
-        ) = style.get_size_with_padding()
-        background_process = get_background_process(
-            "{}x{}".format(width_px_with_padding, height_px_with_padding),
-            style.background_color,
-        )
-        if style.object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
-            option = {}
-            if style.object_length.unit == TimeUnit.FRAME:
-                option = {"end_frame": style.object_length.value + 1}
-            elif style.object_length.unit == TimeUnit.SECOND:
-                option = {"end": style.object_length.value}
-            background_process = ffmpeg.trim(
-                background_process,
-                **option,
-            )
-        if video_process is None:
-            video_process = background_process
-        else:
-            video_process = ffmpeg.overlay(
-                background_process,
-                video_process,
-                eof_action="pass",
             )
 
     return Process(
