@@ -114,9 +114,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.sha }}
+        tag_name: '@${{ github.sha }}'
         release_name: VSML@${{ github.sha }}
-        body: VSML v${{ github.sha }}
+        body: VSML nightly @${{ github.sha }}
         draft: false
         prerelease: false
 
