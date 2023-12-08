@@ -15,7 +15,7 @@ from style import (
     pickup_style,
 )
 from utils import TagInfoTree, VSMLManager, WidthHeight
-from vss import convert_vss_dict
+from vss import convert_prop_val_to_dict, convert_vss_dict
 
 
 class VSML:
@@ -62,6 +62,14 @@ def element_to_style(
     return style_tree
 
 
+def get_style_from_attribute(style_str: Optional[str]) -> dict[str, str]:
+    style_dict = {}
+    if style_str is not None:
+        for prop_val_str in style_str.split(";"):
+            style_dict |= convert_prop_val_to_dict(prop_val_str)
+    return style_dict
+
+
 def element_to_content(
     vsml_element: _Element,
     style_tree: dict[str, dict[str, str]],
@@ -84,6 +92,9 @@ def element_to_content(
         classes_name,
         id_name,
         parent_info_tree,
+    )
+    picked_up_style_tree |= get_style_from_attribute(
+        vsml_element.attrib.get("style")
     )
     style = Style(
         tag_name,

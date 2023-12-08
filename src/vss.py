@@ -49,11 +49,7 @@ def convert_vss_dict(
         properties = {}
 
         for prop_text in properties_text.split(";"):
-            prop_text = prop_text.strip()
-            if len(prop_text) == 0:
-                continue
-            prop, value = [s.strip() for s in prop_text.split(":", 1)]
-            properties[prop] = value
+            properties |= convert_prop_val_to_dict(prop_text)
 
         for selector in selectors_text.split(","):
             vss_object[
@@ -86,3 +82,13 @@ def convert_vss_dict(
         vss_object[selector] = copy_style
 
     return vss_object
+
+
+def convert_prop_val_to_dict(prop_val_str: str) -> dict[str, str]:
+    prop_val_pattern = re.compile(PROP_VAL_PATTERN, flags=re.S)
+    if prop_val_pattern.fullmatch(prop_val_str):
+        prop_text = prop_val_str.strip()
+        if len(prop_text) > 0:
+            prop, value = [s.strip() for s in prop_text.split(":", 1)]
+            return {prop: value}
+    return {}
