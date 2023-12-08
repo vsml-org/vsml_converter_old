@@ -11,6 +11,7 @@ black = "*"
 isort = "*"
 flake8 = "*"
 requests = "*"
+chardet = "*"
 
 [dev-packages]
 pre-commit = "*"
