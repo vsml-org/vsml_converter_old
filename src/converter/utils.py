@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import Any, Optional
 
 import ffmpeg
 
 from style import Color
 
 origin_background_processes = {}
+origin_graphic_processes: dict[str, dict[str, Any]] = {}
 
 
 def get_background_process(
@@ -37,3 +38,23 @@ def get_background_process(
     background_processes = origin_background_process.split()
     origin_background_processes[key] = background_processes[1]
     return background_processes[0]
+
+
+def get_graphical_process(src_path: str, exist_audio: bool, **option):
+    global origin_graphic_processes
+    origin_graphic_process = origin_graphic_processes.get(src_path)
+    if origin_graphic_process is None:
+        process = ffmpeg.input(src_path, **option)
+        origin_graphic_process = {
+            "video": process.video,
+            "audio": process.audio if exist_audio else None,
+        }
+    video_graphic_processes = origin_graphic_process["video"].split()
+    origin_graphic_processes[src_path] = {
+        "video": video_graphic_processes[1],
+        "audio": origin_graphic_process["audio"],
+    }
+    return {
+        "video": video_graphic_processes[0],
+        "audio": origin_graphic_process["audio"],
+    }

@@ -107,7 +107,7 @@ class SourceContent(VSMLContent):
             case "vid":
                 self.type = SourceType.VIDEO
                 self.exist_video = True
-                self.exist_audio = True
+                self.exist_audio = style.source_audio_system is not None
             case "aud":
                 self.type = SourceType.AUDIO
                 self.exist_audio = True

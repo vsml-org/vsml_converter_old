@@ -2,7 +2,7 @@ import ffmpeg
 
 from content import SourceContent
 from converter.schemas import Process
-from converter.utils import get_background_process
+from converter.utils import get_background_process, get_graphical_process
 from style import GraphicUnit, TimeUnit
 
 
@@ -11,9 +11,8 @@ def create_image_process(
     debug_mode: bool = False,
 ) -> Process:
     # video_processの処理
-    video_process = ffmpeg.input(vsml_content.src_path, loop=1).video.filter(
-        "setsar", "1/1"
-    )
+    source = get_graphical_process(vsml_content.src_path, False, loop=1)
+    video_process = source["video"].filter("setsar", "1/1")
 
     style = vsml_content.style
     # videoのstyle対応

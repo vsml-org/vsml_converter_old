@@ -4,7 +4,7 @@ import ffmpeg
 
 from content import SourceContent
 from converter.schemas import Process
-from converter.utils import get_background_process
+from converter.utils import get_background_process, get_graphical_process
 from style import AudioSystem, GraphicUnit, TimeUnit
 from utils import VSMLManager
 
@@ -14,9 +14,11 @@ def create_video_process(
     debug_mode: bool = False,
 ) -> Process:
     # sourceの取得
-    source = ffmpeg.input(vsml_content.src_path)
-    video_process = source.video
-    audio_process = source.audio
+    source = get_graphical_process(
+        vsml_content.src_path, vsml_content.exist_audio
+    )
+    video_process = source["video"]
+    audio_process = source["audio"]
 
     style = vsml_content.style
     # videoのstyle対応
