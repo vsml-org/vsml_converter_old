@@ -131,6 +131,9 @@ def parsing_vsml(filename: str, is_offline: bool) -> VSML:
     vsml_element = etree.fromstring(vsml_text, parser)
 
     # vsmlファイルからの相対パスを想定するため、vsmlのルートパスを取得
-    VSMLManager.set_root_path(path.dirname(filename) + "/")
+    root_path = path.dirname(filename)
+    if root_path != "":
+        root_path = root_path + "/"
+    VSMLManager.set_root_path(root_path)
 
     return VSML(vsml_element)
