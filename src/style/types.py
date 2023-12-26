@@ -260,37 +260,37 @@ class Color:
         elif val[:4] == "rgb(":
             self.type = ColorType.HEX
             find_val = re.findall(
-                r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*\)",
+                r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)",
                 val,
             )
             if len(find_val) > 0:
                 r, g, b = find_val[0]
-                self.value = "#{}{}{}".format(
-                    format(r, "x").zfill(2),
-                    format(g, "x").zfill(2),
-                    format(b, "x").zfill(2),
-                )
                 self.r_value = int(r)
                 self.g_value = int(g)
                 self.b_value = int(b)
+                self.value = "#{}{}{}".format(
+                    format(self.r_value, "x").zfill(2),
+                    format(self.g_value, "x").zfill(2),
+                    format(self.b_value, "x").zfill(2),
+                )
         elif val[:5] == "rgba(":
             self.type = ColorType.HEX
             find_val = re.findall(
-                r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,(\d+)\s*,(\d+)\s*\)",
+                r"rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)",
                 val,
             )
             if len(find_val) > 0:
                 r, g, b, a = find_val[0]
-                self.value = "#{}{}{}{}".format(
-                    format(r, "x").zfill(2),
-                    format(g, "x").zfill(2),
-                    format(b, "x").zfill(2),
-                    format(a, "x").zfill(2),
-                )
                 self.r_value = int(r)
                 self.g_value = int(g)
                 self.b_value = int(b)
                 self.a_value = int(a)
+                self.value = "#{}{}{}{}".format(
+                    format(self.r_value, "x").zfill(2),
+                    format(self.g_value, "x").zfill(2),
+                    format(self.b_value, "x").zfill(2),
+                    format(self.a_value, "x").zfill(2),
+                )
         else:
             raise ValueError()
 
