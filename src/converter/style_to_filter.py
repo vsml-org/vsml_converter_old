@@ -91,6 +91,15 @@ def object_length_filter(
                 "atrim",
                 end=audio_end,
             )
+    if object_length.unit == TimeUnit.FIT:
+        if video_process is not None:
+            video_process = ffmpeg.filter(
+                video_process, "loop", loop=-1, size=32767, start=0
+            )
+        if audio_process is not None:
+            audio_process = ffmpeg.filter(
+                audio_process, "aloop", loop=-1, size=2147483647, start=0
+            )
     return video_process, audio_process
 
 
