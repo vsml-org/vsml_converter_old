@@ -399,7 +399,7 @@ PERCENT_PATTERN = "{}%".format(regex.REAL_NUMBER_PATTERN)
 TIME_PATTERN = "({}|{}|{})".format(
     SECOND_PATTERN, FRAME_PATTERN, PERCENT_PATTERN
 )
-GRAPHIC_PATTERN = "({}|{}|{}|{}|{}|{})".format(
+GRAPHIC_PATTERN = "({}|{}|{}|{}|{}|{}|0)".format(
     PIXEL_PATTERN,
     RESOLUTION_WIDTH_PATTERN,
     RESOLUTION_HEIGHT_PATTERN,
@@ -480,12 +480,12 @@ STYLE_VALUE_PATTERN = {
     "align-content": "",
     "justify-content": "",
     "align-items": "",
-    "margin": r"{0}(\s+{0}){{0,3}}".format(GRAPHIC_PATTERN),
+    "margin": r"{0}(\s+{0}){1}".format(GRAPHIC_PATTERN, "{0,3}"),
     "margin-top": GRAPHIC_PATTERN,
     "margin-left": GRAPHIC_PATTERN,
     "margin-bottom": GRAPHIC_PATTERN,
     "margin-right": GRAPHIC_PATTERN,
-    "padding": r"{0}(\s+{0}){{0,3}}".format(GRAPHIC_PATTERN),
+    "padding": r"{0}(\s+{0}){1}".format(GRAPHIC_PATTERN, "{0,3}"),
     "padding-top": GRAPHIC_PATTERN,
     "padding-left": GRAPHIC_PATTERN,
     "padding-bottom": GRAPHIC_PATTERN,

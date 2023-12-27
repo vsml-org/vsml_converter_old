@@ -198,6 +198,9 @@ class GraphicValue:
         elif val[-1:] == "%":
             self.unit = GraphicUnit.PERCENT
             self.value = int(val[:-1])
+        elif val == "0":
+            self.unit = GraphicUnit.PIXEL
+            self.value = 0
         else:
             raise ValueError()
 
