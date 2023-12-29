@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from enum import Enum, auto
 
-from definition import COLOR_LIST, COLOR_VALUE
+from definition import COLOR_LIST, COLOR_VALUE, REAL_NUMBER_PATTERN
 from utils import VSMLManager
 
 
@@ -324,7 +324,8 @@ class Color:
         elif val[:5] == "rgba(":
             self.type = ColorType.HEX
             find_val = re.findall(
-                r"rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)",
+                r"rgba\(\s*(\d+)\s*,\s*(\d+)\s*,"
+                r"\s*(\d+)\s*,\s*([{0}]+)\s*\)".format(REAL_NUMBER_PATTERN),
                 val,
             )
             if len(find_val) > 0:
@@ -332,7 +333,7 @@ class Color:
                 self.r_value = int(r)
                 self.g_value = int(g)
                 self.b_value = int(b)
-                self.a_value = int(a)
+                self.a_value = int(float(a) % 1.0 * 255)
                 self.value = "#{}{}{}{}".format(
                     format(self.r_value, "x").zfill(2),
                     format(self.g_value, "x").zfill(2),
