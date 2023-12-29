@@ -1,9 +1,5 @@
 import json
-
-# import time
 from typing import Optional
-
-import ffmpeg
 
 from content import SourceContent, VSMLContent, WrapContent
 from style import TimeUnit
@@ -11,8 +7,13 @@ from utils import VSMLManager
 from vsml import VSML
 
 from .content import create_source_process
+from .ffmpeg import (
+    export_video,
+    set_background_filter,
+    time_space_end_filter,
+    time_space_start_filter,
+)
 from .schemas import Process
-from .utils import get_background_process
 from .wrap import create_wrap_process
 
 
@@ -53,87 +54,26 @@ def convert_video(
     process = create_process(vsml_data.content, debug_mode)
     style = vsml_data.content.style
     if process.video is not None:
-        bg_process = get_background_process(
-            VSMLManager.get_root_resolution().get_str()
+        process.video = set_background_filter(
+            background_color=style.background_color,
+            resolution_text=VSMLManager.get_root_resolution().get_str(),
+            video_process=process.video,
+            fit_video_process=True,
         )
-        process.video = ffmpeg.overlay(
-            bg_process, process.video, x=0, y=0, shortest=1
-        )
-    if style.time_margin_start.unit in [
-        TimeUnit.SECOND,
-        TimeUnit.FRAME,
-    ]:
-        if process.video is not None:
-            video_option = {}
-            if style.time_margin_start.unit == TimeUnit.SECOND:
-                video_option = {
-                    "start_duration": style.time_margin_start.value,
-                }
-            if style.time_margin_start.unit == TimeUnit.FRAME:
-                video_option = {"start": style.time_margin_start.value}
-            process.video = ffmpeg.filter(
-                process.video,
-                "tpad",
-                **video_option,
-            )
-        if process.audio is not None:
-            process.audio = ffmpeg.filter(
-                process.audio,
-                "adelay",
-                all=1,
-                delays=int(style.time_margin_start.get_second() * 1000),
-            )
+    process.video, process.audio = time_space_start_filter(
+        style.time_margin_start,
+        video_process=process.video,
+        audio_process=process.audio,
+    )
     if style.object_length.unit in [
         TimeUnit.FRAME,
         TimeUnit.SECOND,
-    ] and style.time_margin_end.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
-        video_option = {}
-        audio_option = {}
-        if style.time_margin_end.unit == TimeUnit.FRAME:
-            video_option = {
-                "stop": style.time_margin_end.value,
-            }
-            audio_option = {
-                "pad_dur": style.time_margin_end.get_second(),
-            }
-        elif style.time_margin_end.unit == TimeUnit.SECOND:
-            video_option = {
-                "stop_duration": style.time_margin_end.get_second(),
-            }
-            audio_option = {
-                "pad_dur": style.time_margin_end.get_second(),
-            }
-        if process.video is not None:
-            process.video = ffmpeg.filter(
-                process.video, "tpad", **video_option
-            )
-        if process.audio is not None:
-            process.audio = ffmpeg.filter(
-                process.audio, "apad", **audio_option
-            )
-    match (
-        process.video,
-        process.audio,
-    ):
-        case None, None:
-            raise Exception()
-        case _, None:
-            process = process.video
-        case None, _:
-            process = process.audio
-        case _:
-            process = ffmpeg.concat(
-                process.video,
-                process.audio,
-                v=1,
-                a=1,
-                n=1,
-            )
-    process = ffmpeg.output(
-        process,
-        out_filename,
-        r=VSMLManager.get_root_fps(),
-    )
+    ]:
+        process.video, process.audio = time_space_end_filter(
+            style.time_margin_end,
+            video_process=process.video,
+            audio_process=process.audio,
+        )
 
     if debug_mode:
         content_str = (
@@ -147,11 +87,7 @@ def convert_video(
         )
         with open("./debug.json", "w") as f:
             f.write(content_str)
-        # ffmpeg.view(process)
-        # time.sleep(0.1)
-        print("\n[[[command args]]]\n{}".format(ffmpeg.compile(process)))
 
-    ffmpeg.run(
-        process,
-        overwrite_output=overwrite,
+    export_video(
+        process.video, process.audio, out_filename, debug_mode, overwrite
     )

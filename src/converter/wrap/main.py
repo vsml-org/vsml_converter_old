@@ -1,10 +1,10 @@
 from content import WrapContent
-from converter.schemas import Process
-from converter.style_to_filter import (
+from converter.ffmpeg import (
     get_background_color_code,
     time_space_end_filter,
     time_space_start_filter,
 )
+from converter.schemas import Process
 from style import Order, TimeUnit
 
 from .parallel import create_parallel_process

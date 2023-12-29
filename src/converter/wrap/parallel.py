@@ -1,6 +1,5 @@
 from content import WrapContent
-from converter.schemas import Process
-from converter.style_to_filter import (
+from converter.ffmpeg import (
     adjust_parallel_audio,
     audio_merge_filter,
     get_background_color_code,
@@ -9,6 +8,7 @@ from converter.style_to_filter import (
     time_space_end_filter,
     time_space_start_filter,
 )
+from converter.schemas import Process
 from converter.utils import get_background_process
 from style import GraphicValue, LayerMode, TimeUnit
 

@@ -6,8 +6,7 @@ from content import SourceContent
 from style import Style, TimeUnit
 from utils import SourceType
 
-from .schemas import Process
-from .style_to_filter import (
+from .ffmpeg import (
     audio_system_filter,
     audio_volume_filter,
     get_background_color_code,
@@ -17,6 +16,7 @@ from .style_to_filter import (
     time_space_start_filter,
     width_height_filter,
 )
+from .schemas import Process
 from .utils import get_background_process, get_source_process
 
 
@@ -111,8 +111,8 @@ def create_source_process(
                 height_with_padding,
             ) = style.get_size_with_padding()
             video_process = set_background_filter(
-                width_with_padding,
-                height_with_padding,
+                width=width_with_padding,
+                height=height_with_padding,
                 background_color=style.background_color,
                 video_process=video_process,
                 position_x=style.padding_left,

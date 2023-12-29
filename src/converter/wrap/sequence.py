@@ -1,6 +1,5 @@
 from content import WrapContent
-from converter.schemas import Process
-from converter.style_to_filter import (
+from converter.ffmpeg import (
     adjust_fit_sequence,
     concat_filter,
     get_background_color_code,
@@ -8,6 +7,7 @@ from converter.style_to_filter import (
     time_space_end_filter,
     time_space_start_filter,
 )
+from converter.schemas import Process
 from style import TimeUnit, TimeValue
 
 
@@ -52,8 +52,8 @@ def create_sequence_process(
         if child_process.video is not None:
             # concatのため解像度を合わせた透明背景を設定
             child_process.video = set_background_filter(
-                width_with_padding,
-                height_with_padding,
+                width=width_with_padding,
+                height=height_with_padding,
                 background_color=style.background_color,
                 video_process=child_process.video,
                 fit_video_process=True,

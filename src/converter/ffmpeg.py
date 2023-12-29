@@ -1,3 +1,4 @@
+# import time
 import math
 from typing import Any, Optional
 
@@ -11,6 +12,7 @@ from style import (
     TimeUnit,
     TimeValue,
 )
+from utils import VSMLManager
 
 from .utils import get_background_process
 
@@ -223,21 +225,27 @@ def adjust_fit_sequence(
 
 
 def set_background_filter(
-    width: GraphicValue,
-    height: GraphicValue,
-    background_color: Optional[Color],
+    width: Optional[GraphicValue] = None,
+    height: Optional[GraphicValue] = None,
+    background_color: Optional[Color] = None,
+    resolution_text: Optional[str] = None,
     video_process: Optional[Any] = None,
     fit_video_process: bool = False,
     position_x: Optional[GraphicValue] = None,
     position_y: Optional[GraphicValue] = None,
 ) -> Any:
-    background_process = get_background_process(
-        "{}x{}".format(
+    resolution = ""
+    if resolution_text is not None:
+        resolution = resolution_text
+    elif width is not None and height is not None:
+        resolution = "{}x{}".format(
             width.get_pixel(),
             height.get_pixel(),
-        ),
-        background_color,
-    )
+        )
+    else:
+        raise Exception()
+    background_process = get_background_process(resolution, background_color)
+
     return layering_filter(
         background_process,
         video_process,
@@ -272,3 +280,45 @@ def layering_filter(
             shortest=fit_shorter,
             **option,
         )
+
+
+def export_video(
+    video_process: Optional[Any],
+    audio_process: Optional[Any],
+    out_filename: str,
+    debug_mode: bool,
+    overwrite: bool,
+):
+    match (
+        video_process,
+        audio_process,
+    ):
+        case None, None:
+            raise Exception()
+        case _, None:
+            process = video_process
+        case None, _:
+            process = audio_process
+        case _:
+            process = ffmpeg.concat(
+                video_process,
+                audio_process,
+                v=1,
+                a=1,
+                n=1,
+            )
+    process = ffmpeg.output(
+        process,
+        out_filename,
+        r=VSMLManager.get_root_fps(),
+    )
+
+    if debug_mode:
+        # ffmpeg.view(process)
+        # time.sleep(0.1)
+        print("\n[[[command args]]]\n{}".format(ffmpeg.compile(process)))
+
+    ffmpeg.run(
+        process,
+        overwrite_output=overwrite,
+    )
