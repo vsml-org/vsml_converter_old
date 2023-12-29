@@ -86,7 +86,7 @@ def convert_vss_dict(
 
 def convert_prop_val_to_dict(prop_val_str: str) -> dict[str, str]:
     prop_val_pattern = re.compile(PROP_VAL_PATTERN, flags=re.S)
-    if prop_val_pattern.fullmatch(prop_val_str):
+    if prop_val_pattern.fullmatch(prop_val_str) is not None:
         prop_text = prop_val_str.strip()
         if len(prop_text) > 0:
             prop, value = [s.strip() for s in prop_text.split(":", 1)]

@@ -95,7 +95,7 @@ def create_sequence_process(
             break
 
     # 余った時間マージンを追加する
-    if video_process:
+    if video_process is not None:
         video_remain_time_margin = video_time_margin + previous_time_margin
         if video_remain_time_margin.is_zero_over():
             video_process, _ = time_space_end_filter(
@@ -103,7 +103,7 @@ def create_sequence_process(
                 background_color_code,
                 video_process=video_process,
             )
-    if audio_process:
+    if audio_process is not None:
         audio_remain_time_margin = audio_time_margin + previous_time_margin
         if audio_remain_time_margin.is_zero_over():
             _, audio_process = time_space_end_filter(

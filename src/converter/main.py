@@ -52,7 +52,7 @@ def convert_video(
 
     process = create_process(vsml_data.content, debug_mode)
     style = vsml_data.content.style
-    if process.video:
+    if process.video is not None:
         bg_process = get_background_process(
             VSMLManager.get_root_resolution().get_str()
         )

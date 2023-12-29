@@ -447,8 +447,14 @@ class Style:
         return str(vars(self))
 
     def get_size_with_padding(self) -> tuple[GraphicValue, GraphicValue]:
-        width = self.source_width if self.source_width else self.width
-        height = self.source_height if self.source_height else self.height
+        width = (
+            self.source_width if self.source_width is not None else self.width
+        )
+        height = (
+            self.source_height
+            if self.source_height is not None
+            else self.height
+        )
         width_with_padding = width + self.padding_left + self.padding_right
         height_with_padding = height + self.padding_top + self.padding_bottom
         return width_with_padding, height_with_padding
@@ -457,7 +463,7 @@ class Style:
         object_length = (
             self.source_object_length
             if (
-                self.source_object_length
+                self.source_object_length is not None
                 and self.object_length.unit != TimeUnit.FIT
             )
             else self.object_length

@@ -151,18 +151,18 @@ def element_to_content(
             child_style = child_content.style
             child_source_object_length = (
                 child_style.source_object_length.value
-                if child_style.source_object_length
+                if child_style.source_object_length is not None
                 and child_style.object_length.unit != TimeUnit.FIT
                 else 0.0
             )
             child_source_width = (
                 child_style.source_width.value
-                if child_style.source_width
+                if child_style.source_width is not None
                 else 0
             )
             child_source_height = (
                 child_style.source_height.value
-                if child_style.source_height
+                if child_style.source_height is not None
                 else 0
             )
 

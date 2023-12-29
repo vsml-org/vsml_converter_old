@@ -59,7 +59,7 @@ def create_parallel_process(
                 child_process.video,
                 child_process.audio,
             )
-        if child_process.video:
+        if child_process.video is not None:
             match style.layer_mode:
                 case LayerMode.SINGLE:
                     max_margin = max(
@@ -85,11 +85,11 @@ def create_parallel_process(
                     )
                 case _:
                     raise Exception()
-        if child_process.audio:
+        if child_process.audio is not None:
             audio_process = audio_merge_filter(
                 audio_process, child_process.audio
             )
-    if audio_process:
+    if audio_process is not None:
         audio_process = adjust_parallel_audio(
             style.object_length, audio_process
         )

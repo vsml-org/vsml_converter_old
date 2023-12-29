@@ -18,7 +18,11 @@ from .utils import get_background_process
 def get_background_color_code(
     background_color: Optional[Color],
 ) -> str:
-    return background_color.value if background_color else "0x00000000"
+    return (
+        background_color.value
+        if background_color is not None
+        else "0x00000000"
+    )
 
 
 def width_height_filter(
