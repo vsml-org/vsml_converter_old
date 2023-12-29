@@ -3,13 +3,13 @@ from converter.ffmpeg import (
     adjust_parallel_audio,
     audio_merge_filter,
     get_background_color_code,
+    get_background_process,
     layering_filter,
     object_length_filter,
     time_space_end_filter,
     time_space_start_filter,
 )
 from converter.schemas import Process
-from converter.utils import get_background_process
 from style import GraphicValue, LayerMode, TimeUnit
 
 

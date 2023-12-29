@@ -10,6 +10,8 @@ from .ffmpeg import (
     audio_system_filter,
     audio_volume_filter,
     get_background_color_code,
+    get_background_process,
+    get_source_process,
     object_length_filter,
     set_background_filter,
     time_space_end_filter,
@@ -17,7 +19,6 @@ from .ffmpeg import (
     width_height_filter,
 )
 from .schemas import Process
-from .utils import get_background_process, get_source_process
 
 
 def get_process_by_source(
