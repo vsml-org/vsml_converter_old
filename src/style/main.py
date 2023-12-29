@@ -38,41 +38,41 @@ from .types import (
 class Style:
     # style param
     # time param
-    object_length: TimeValue = TimeValue("fit")
-    time_margin_start: TimeValue = TimeValue("fit")
-    time_margin_end: TimeValue = TimeValue("fit")
-    time_padding_start: TimeValue = TimeValue("fit")
-    time_padding_end: TimeValue = TimeValue("fit")
-    order: Optional[Order] = None
+    object_length: TimeValue
+    time_margin_start: TimeValue
+    time_margin_end: TimeValue
+    time_padding_start: TimeValue
+    time_padding_end: TimeValue
+    order: Optional[Order]
     # visual param
-    width: GraphicValue = GraphicValue("auto")
-    height: GraphicValue = GraphicValue("auto")
-    layer_mode: Optional[LayerMode] = None
-    margin_top: GraphicValue = GraphicValue("auto")
-    margin_left: GraphicValue = GraphicValue("auto")
-    margin_right: GraphicValue = GraphicValue("auto")
-    margin_bottom: GraphicValue = GraphicValue("auto")
-    padding_top: GraphicValue = GraphicValue("auto")
-    padding_left: GraphicValue = GraphicValue("auto")
-    padding_right: GraphicValue = GraphicValue("auto")
-    padding_bottom: GraphicValue = GraphicValue("auto")
-    background_color: Optional[Color] = None
+    width: GraphicValue
+    height: GraphicValue
+    layer_mode: Optional[LayerMode]
+    margin_top: GraphicValue
+    margin_left: GraphicValue
+    margin_right: GraphicValue
+    margin_bottom: GraphicValue
+    padding_top: GraphicValue
+    padding_left: GraphicValue
+    padding_right: GraphicValue
+    padding_bottom: GraphicValue
+    background_color: Optional[Color]
     # audio param
-    audio_volume: float = 100  # inherit
-    audio_system: Optional[AudioSystem] = None  # inherit
+    audio_volume: float  # inherit
+    audio_system: Optional[AudioSystem]  # inherit
     # text tag param
-    font_color: Optional[Color] = None  # inherit
-    font_border_color: Optional[Color] = None  # inherit
-    font_border_width: Optional[int] = None  # inherit
-    font_family: Optional[str] = None  # inherit
-    font_size: Optional[GraphicValue] = None  # inherit
-    font_weight: Optional[bool] = None  # inherit
-    font_style: Optional[bool] = None  # inherit
+    font_color: Optional[Color]  # inherit
+    font_border_color: Optional[Color]  # inherit
+    font_border_width: Optional[int]  # inherit
+    font_family: Optional[str]  # inherit
+    font_size: Optional[GraphicValue]  # inherit
+    font_weight: Optional[bool]  # inherit
+    font_style: Optional[bool]  # inherit
     # source value
-    source_object_length: Optional[TimeValue] = None
-    source_width: Optional[GraphicValue] = None
-    source_height: Optional[GraphicValue] = None
-    source_audio_system: Optional[AudioSystem] = None
+    source_object_length: Optional[TimeValue]
+    source_width: Optional[GraphicValue]
+    source_height: Optional[GraphicValue]
+    source_audio_system: Optional[AudioSystem]
 
     # 各タグのデフォルトparam
     def __init__(
@@ -83,6 +83,39 @@ class Style:
         style_tree: dict[str, str],
         attrib: _Attrib,
     ) -> None:
+        # initializing
+        self.object_length = TimeValue("fit")
+        self.time_margin_start = TimeValue("fit")
+        self.time_margin_end = TimeValue("fit")
+        self.time_padding_start = TimeValue("fit")
+        self.time_padding_end = TimeValue("fit")
+        self.order = None
+        self.width = GraphicValue("auto")
+        self.height = GraphicValue("auto")
+        self.layer_mode = None
+        self.margin_top = GraphicValue("auto")
+        self.margin_left = GraphicValue("auto")
+        self.margin_right = GraphicValue("auto")
+        self.margin_bottom = GraphicValue("auto")
+        self.padding_top = GraphicValue("auto")
+        self.padding_left = GraphicValue("auto")
+        self.padding_right = GraphicValue("auto")
+        self.padding_bottom = GraphicValue("auto")
+        self.background_color = None
+        self.audio_volume = 100
+        self.audio_system = None
+        self.font_color = None
+        self.font_border_color = None
+        self.font_border_width = None
+        self.font_family = None
+        self.font_size = None
+        self.font_weight = None
+        self.font_style = None
+        self.source_object_length = None
+        self.source_width = None
+        self.source_height = None
+        self.source_audio_system = None
+
         # inheriting
         if parent_param is not None:
             if parent_param.audio_volume is not None:

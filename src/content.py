@@ -49,8 +49,8 @@ def get_source_value(
 class VSMLContent:
     tag_name: str
     style: Style
-    exist_video: bool = False
-    exist_audio: bool = False
+    exist_video: bool
+    exist_audio: bool
 
     def __init__(
         self,
@@ -59,6 +59,8 @@ class VSMLContent:
     ) -> None:
         self.tag_name = tag_name
         self.style = style
+        self.exist_video = False
+        self.exist_audio = False
 
     def __repr__(self) -> str:
         return str(vars(self))

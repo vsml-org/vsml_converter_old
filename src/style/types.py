@@ -273,9 +273,11 @@ class Color:
     r_value: int
     g_value: int
     b_value: int
-    a_value: int = 255
+    a_value: int
 
     def __init__(self, val: str) -> None:
+        self.a_value = 255
+
         if val in COLOR_LIST:
             self.value = val
             self.type = ColorType.PURE
