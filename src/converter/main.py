@@ -51,7 +51,6 @@ def convert_video(
     out_filename = "video.mp4" if out_filename is None else out_filename
 
     process = create_process(vsml_data.content, debug_mode)
-    fps = VSMLManager.get_root_fps()
     style = vsml_data.content.style
     if process.video:
         bg_process = get_background_process(
@@ -82,7 +81,7 @@ def convert_video(
                 process.audio,
                 "adelay",
                 all=1,
-                delays=int(style.time_margin_start.get_second(fps) * 1000),
+                delays=int(style.time_margin_start.get_second() * 1000),
             )
     if style.object_length.unit in [
         TimeUnit.FRAME,
@@ -95,14 +94,14 @@ def convert_video(
                 "stop": style.time_margin_end.value,
             }
             audio_option = {
-                "pad_dur": style.time_margin_end.get_second(fps),
+                "pad_dur": style.time_margin_end.get_second(),
             }
         elif style.time_margin_end.unit == TimeUnit.SECOND:
             video_option = {
-                "stop_duration": style.time_margin_end.get_second(fps),
+                "stop_duration": style.time_margin_end.get_second(),
             }
             audio_option = {
-                "pad_dur": style.time_margin_end.get_second(fps),
+                "pad_dur": style.time_margin_end.get_second(),
             }
         if process.video is not None:
             process.video = ffmpeg.filter(
@@ -143,7 +142,6 @@ def convert_video(
             .replace("True", "true")
             .replace("False", "false")
         )
-        print(content_str)
         content_str = json.dumps(
             (json.loads(content_str)), indent=2, ensure_ascii=False
         )

@@ -1,173 +1,114 @@
-import ffmpeg
-
 from content import WrapContent
 from converter.schemas import Process
-from converter.utils import get_background_process
-from style import TimeUnit
-from utils import VSMLManager
+from converter.style_to_filter import (
+    adjust_fit_sequence,
+    concat_filter,
+    get_background_color_code,
+    set_background_filter,
+    time_space_end_filter,
+    time_space_start_filter,
+)
+from style import TimeUnit, TimeValue
 
 
 def create_sequence_process(
-    processes: list[Process],
+    child_processes: list[Process],
     vsml_content: WrapContent,
     debug_mode: bool = False,
 ) -> Process:
     video_process = None
     audio_process = None
-    video_margin = 0
-    audio_margin = 0
 
-    fps = VSMLManager.get_root_fps()
+    video_time_margin = TimeValue("0")
+    audio_time_margin = TimeValue("0")
+    previous_time_margin = TimeValue("0")
 
     style = vsml_content.style
 
     (
-        width_px_with_padding,
-        height_px_with_padding,
+        width_with_padding,
+        height_with_padding,
     ) = style.get_size_with_padding()
-    background_color = (
-        style.background_color.value
-        if style.background_color
-        else "0x00000000"
-    )
-    remain_time_margin = 0
-    for child_process in processes:
+    background_color_code = get_background_color_code(style.background_color)
+
+    for child_process in child_processes:
         child_style = child_process.style
-        length_with_padding = (
-            child_style.time_padding_start.get_second(fps)
-            + child_style.time_padding_end.get_second(fps)
-            + child_style.object_length.get_second(fps)
+        length_with_padding = child_style.get_object_length_with_padding()
+
+        max_time_margin = max(
+            previous_time_margin,
+            child_style.time_margin_start,
+        )
+        # オブジェクトの始めの余白時間は1つ前のオブジェクトの終わりの余白時間との最大値を取り、その値で余白を付ける
+        child_process.video, child_process.audio = time_space_start_filter(
+            max_time_margin,
+            background_color_code,
+            child_process.video,
+            child_process.audio,
         )
 
-        if child_process.video is not None:
-            background_process = get_background_process(
-                "{}x{}".format(width_px_with_padding, height_px_with_padding),
-                style.background_color,
-            )
-            if child_style.object_length.unit in [
-                TimeUnit.FRAME,
-                TimeUnit.SECOND,
-            ]:
-                background_process = ffmpeg.trim(
-                    background_process, end=length_with_padding
-                )
-            child_process.video = ffmpeg.overlay(
-                background_process,
-                child_process.video,
-                eof_action="pass",
-            )
-
-        if child_style.time_margin_start.unit in [
-            TimeUnit.SECOND,
-            TimeUnit.FRAME,
-        ]:
-            if child_process.video is not None:
-                video_option = {}
-                if child_style.time_margin_start.unit == TimeUnit.SECOND:
-                    video_option = {
-                        "start_duration": max(
-                            child_style.time_margin_start.value,
-                            remain_time_margin,
-                        )
-                    }
-                if child_style.time_margin_start.unit == TimeUnit.FRAME:
-                    remain_frame = remain_time_margin * fps
-                    video_option = {
-                        "start": max(
-                            child_style.time_margin_start.value, remain_frame
-                        )
-                    }
-                child_process.video = ffmpeg.filter(
-                    child_process.video,
-                    "tpad",
-                    color=background_color,
-                    **video_option,
-                )
-            else:
-                delays = child_style.time_margin_start.get_second(fps)
-                video_margin += max(delays, remain_time_margin)
-            if child_process.audio is not None:
-                delays = child_style.time_margin_start.get_second(fps)
-                child_process.audio = ffmpeg.filter(
-                    child_process.audio,
-                    "adelay",
-                    all=1,
-                    delays=int(max(delays, remain_time_margin) * 1000),
-                )
-            else:
-                delays = child_style.time_margin_start.get_second(fps)
-                audio_margin += max(delays, remain_time_margin)
-
-        if child_style.time_margin_end.unit in [
-            TimeUnit.SECOND,
-            TimeUnit.FRAME,
-        ]:
-            remain_time_margin = child_style.time_margin_end.get_second(fps)
+        previous_time_margin = child_style.time_margin_end
 
         if child_process.video is not None:
-            if video_margin > 0:
-                child_process.video = ffmpeg.filter(
-                    child_process.video,
-                    "tpad",
-                    color=background_color,
-                    start_duration=video_margin,
-                )
-                video_margin = 0
-            if video_process is None:
-                video_process = child_process.video
-            else:
-                video_process = ffmpeg.concat(
-                    video_process, child_process.video, v=1, a=0
-                )
+            # concatのため解像度を合わせた透明背景を設定
+            child_process.video = set_background_filter(
+                width_with_padding,
+                height_with_padding,
+                background_color=style.background_color,
+                video_process=child_process.video,
+                fit_video_process=True,
+            )
+            child_process.video, _ = time_space_start_filter(
+                video_time_margin,
+                background_color_code,
+                video_process=child_process.video,
+            )
+            video_time_margin = TimeValue("0")
+            video_process = concat_filter(
+                video_process, child_process.video, is_video=True
+            )
         else:
-            video_margin += length_with_padding
+            # 映像が存在しない場合、余白時間を加算し、後で余白を付ける
+            video_time_margin += max_time_margin + length_with_padding
         if child_process.audio is not None:
-            if audio_margin > 0:
-                child_process.audio = ffmpeg.filter(
-                    child_process.audio,
-                    "adelay",
-                    all=1,
-                    delays=int(audio_margin * 1000),
-                )
-                audio_margin = 0
-            if audio_process is None:
-                audio_process = child_process.audio
-            else:
-                audio_process = ffmpeg.concat(
-                    audio_process, child_process.audio, v=0, a=1
-                )
+            _, child_process.audio = time_space_start_filter(
+                audio_time_margin,
+                background_color_code,
+                audio_process=child_process.audio,
+            )
+            audio_time_margin = TimeValue("0")
+            audio_process = concat_filter(
+                audio_process, child_process.audio, is_video=False
+            )
         else:
-            audio_margin += length_with_padding
-        if (
-            child_style.object_length.unit == TimeUnit.FIT
-            and child_style.source_object_length is None
-        ):
-            if video_process is not None and child_process.video is None:
-                video_process = ffmpeg.filter(
-                    video_process, "tpad", stop=-1, color=background_color
-                )
-            if audio_process is not None and child_process.audio is None:
-                audio_process = ffmpeg.filter(
-                    audio_process, "apad", pad_len=-1
-                )
-            video_margin = 0
-            audio_margin = 0
+            # 音声が存在しない場合、余白時間を加算し、後で余白を付ける
+            audio_time_margin += max_time_margin + length_with_padding
+
+        # FITな子要素があれば以降をこのオブジェクトで埋める
+        if child_style.object_length.unit == TimeUnit.FIT:
+            video_process, audio_process = adjust_fit_sequence(
+                background_color_code, video_process, audio_process
+            )
+            video_time_margin = TimeValue("0")
+            audio_time_margin = TimeValue("0")
+            previous_time_margin = TimeValue("0")
             break
 
     # 余った時間マージンを追加する
     if video_process:
-        if video_margin or remain_time_margin:
-            video_process = ffmpeg.filter(
-                video_process,
-                "tpad",
-                stop_duration=video_margin + remain_time_margin,
+        video_remain_time_margin = video_time_margin + previous_time_margin
+        if video_remain_time_margin.is_zero_over():
+            video_process, _ = time_space_end_filter(
+                video_remain_time_margin,
+                background_color_code,
+                video_process=video_process,
             )
     if audio_process:
-        if audio_margin or remain_time_margin:
-            audio_process = ffmpeg.filter(
-                audio_process,
-                "apad",
-                pad_dur=audio_margin + remain_time_margin,
+        audio_remain_time_margin = audio_time_margin + previous_time_margin
+        if audio_remain_time_margin.is_zero_over():
+            _, audio_process = time_space_end_filter(
+                audio_remain_time_margin,
+                audio_process=audio_process,
             )
 
     return Process(

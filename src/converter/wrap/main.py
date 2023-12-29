@@ -2,8 +2,8 @@ from content import WrapContent
 from converter.schemas import Process
 from converter.style_to_filter import (
     get_background_color_code,
-    time_padding_end_filter,
-    time_padding_start_filter,
+    time_space_end_filter,
+    time_space_start_filter,
 )
 from style import Order, TimeUnit
 
@@ -12,32 +12,32 @@ from .sequence import create_sequence_process
 
 
 def create_wrap_process(
-    processes: list[Process],
+    child_processes: list[Process],
     vsml_content: WrapContent,
     debug_mode: bool = False,
 ) -> Process:
     match vsml_content.style.order:
         case Order.SEQUENCE:
             process = create_sequence_process(
-                processes, vsml_content, debug_mode
+                child_processes, vsml_content, debug_mode
             )
         case Order.PARALLEL:
             process = create_parallel_process(
-                processes, vsml_content, debug_mode
+                child_processes, vsml_content, debug_mode
             )
         case _:
             raise Exception()
 
     style = vsml_content.style
     background_color_code = get_background_color_code(style.background_color)
-    process.video, process.audio = time_padding_start_filter(
+    process.video, process.audio = time_space_start_filter(
         style.time_padding_start,
         background_color_code,
         process.video,
         process.audio,
     )
     if style.object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
-        process.video, process.audio = time_padding_end_filter(
+        process.video, process.audio = time_space_end_filter(
             style.time_padding_end,
             background_color_code,
             process.video,

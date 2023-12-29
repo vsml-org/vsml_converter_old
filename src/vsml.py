@@ -124,7 +124,6 @@ def element_to_content(
             parent_info_tree,
         )
 
-        fps = VSMLManager.get_root_fps()
         children_object_length = 0.0
         child_object_length_is_fit = (
             style.order == Order.PARALLEL or len(vsml_element_children) == 0
@@ -178,30 +177,30 @@ def element_to_content(
                     if not child_object_length_is_fit:
                         children_object_length += (
                             max(
-                                child_style.time_margin_start.get_second(fps),
+                                child_style.time_margin_start.get_second(),
                                 last_time_margin,
                             )
-                            + child_style.time_padding_start.get_second(fps)
+                            + child_style.time_padding_start.get_second()
                             + child_style.object_length.get_second(
-                                fps, child_source_object_length
+                                child_source_object_length
                             )
-                            + child_style.time_padding_end.get_second(fps)
+                            + child_style.time_padding_end.get_second()
                         )
                         last_time_margin = (
-                            child_style.time_margin_end.get_second(fps)
+                            child_style.time_margin_end.get_second()
                         )
                 # パラレル(時間的並列)
                 elif style.order == Order.PARALLEL:
                     if child_style.object_length.unit != TimeUnit.FIT:
                         child_object_length_is_fit = False
                     child_object_length = (
-                        child_style.time_margin_start.get_second(fps)
-                        + child_style.time_padding_start.get_second(fps)
+                        child_style.time_margin_start.get_second()
+                        + child_style.time_padding_start.get_second()
                         + child_style.object_length.get_second(
-                            fps, child_source_object_length
+                            child_source_object_length
                         )
-                        + child_style.time_padding_end.get_second(fps)
-                        + child_style.time_margin_end.get_second(fps)
+                        + child_style.time_padding_end.get_second()
+                        + child_style.time_margin_end.get_second()
                     )
                     children_object_length = max(
                         children_object_length, child_object_length

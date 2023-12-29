@@ -11,7 +11,8 @@ from style import (
     TimeUnit,
     TimeValue,
 )
-from utils import VSMLManager
+
+from .utils import get_background_process
 
 
 def get_background_color_code(
@@ -85,7 +86,7 @@ def object_length_filter(
                 option = {"end": object_length.value}
             video_process = ffmpeg.trim(video_process, **option)
         if audio_process is not None:
-            audio_end = object_length.get_second(VSMLManager.get_root_fps())
+            audio_end = object_length.get_second()
             audio_process = ffmpeg.filter(
                 audio_process,
                 "atrim",
@@ -103,20 +104,20 @@ def object_length_filter(
     return video_process, audio_process
 
 
-def time_padding_start_filter(
-    time_padding_start: TimeValue,
+def time_space_start_filter(
+    time_space_start: TimeValue,
     background_color_code: Optional[str] = None,
     video_process: Optional[Any] = None,
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
-    if time_padding_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+    if time_space_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         if video_process is not None:
             option = {}
-            if time_padding_start.unit == TimeUnit.FRAME:
-                option = {"start": time_padding_start.value}
-            elif time_padding_start.unit == TimeUnit.SECOND:
+            if time_space_start.unit == TimeUnit.FRAME:
+                option = {"start": time_space_start.value}
+            elif time_space_start.unit == TimeUnit.SECOND:
                 option = {
-                    "start_duration": time_padding_start.value,
+                    "start_duration": time_space_start.value,
                 }
             video_process = ffmpeg.filter(
                 video_process,
@@ -125,10 +126,7 @@ def time_padding_start_filter(
                 **option,
             )
         if audio_process is not None:
-            delays = int(
-                time_padding_start.get_second(VSMLManager.get_root_fps())
-                * 1000
-            )
+            delays = int(time_space_start.get_second() * 1000)
             audio_process = ffmpeg.filter(
                 audio_process,
                 "adelay",
@@ -138,29 +136,135 @@ def time_padding_start_filter(
     return video_process, audio_process
 
 
-def time_padding_end_filter(
-    time_padding_end: TimeValue,
+def time_space_end_filter(
+    time_space_end: TimeValue,
     background_color_code: Optional[str] = None,
     video_process: Optional[Any] = None,
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
-    if time_padding_end.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+    if time_space_end.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
         if video_process is not None:
             option = {}
-            if time_padding_end.unit == TimeUnit.FRAME:
+            if time_space_end.unit == TimeUnit.FRAME:
                 option = {
-                    "stop": time_padding_end.value,
+                    "stop": time_space_end.value,
                 }
-            elif time_padding_end.unit == TimeUnit.SECOND:
+            elif time_space_end.unit == TimeUnit.SECOND:
                 option = {
-                    "stop_duration": time_padding_end.value,
+                    "stop_duration": time_space_end.value,
                 }
             video_process = ffmpeg.filter(
                 video_process, "tpad", color=background_color_code, **option
             )
         if audio_process is not None:
-            pad_dur = time_padding_end.get_second(VSMLManager.get_root_fps())
+            pad_dur = time_space_end.get_second()
             audio_process = ffmpeg.filter(
                 audio_process, "apad", pad_dur=pad_dur
             )
     return video_process, audio_process
+
+
+def concat_filter(
+    base_process: Optional[Any], merging_process: Any, is_video: bool = True
+) -> Any:
+    if base_process is None:
+        return merging_process
+    else:
+        return ffmpeg.concat(
+            base_process, merging_process, v=int(is_video), a=int(not is_video)
+        )
+
+
+def audio_merge_filter(
+    base_audio_process: Optional[Any],
+    merging_audio_process: Any,
+) -> Any:
+    if base_audio_process is None:
+        return merging_audio_process
+    else:
+        return ffmpeg.filter(
+            [base_audio_process, merging_audio_process],
+            "amix",
+            normalize=False,
+        )
+
+
+def adjust_parallel_audio(
+    object_length: TimeValue,
+    audio_process: Any,
+) -> Any:
+    option = {}
+    if object_length.unit == TimeUnit.FIT:
+        option = {"whole_len": -1.0}
+    else:
+        option = {"whole_dur": object_length.get_second()}
+
+    return ffmpeg.filter(
+        audio_process,
+        "apad",
+        **option,
+    )
+
+
+def adjust_fit_sequence(
+    background_color_code: str, video_process: Any, audio_process: Any
+) -> tuple[Any, Any]:
+    if video_process is not None:
+        video_process = ffmpeg.filter(
+            video_process, "tpad", stop=-1, color=background_color_code
+        )
+    if audio_process is not None:
+        audio_process = ffmpeg.filter(audio_process, "apad", pad_len=-1)
+    return video_process, audio_process
+
+
+def set_background_filter(
+    width: GraphicValue,
+    height: GraphicValue,
+    background_color: Optional[Color],
+    video_process: Optional[Any] = None,
+    fit_video_process: bool = False,
+    position_x: Optional[GraphicValue] = None,
+    position_y: Optional[GraphicValue] = None,
+) -> Any:
+    background_process = get_background_process(
+        "{}x{}".format(
+            width.get_pixel(),
+            height.get_pixel(),
+        ),
+        background_color,
+    )
+    return layering_filter(
+        background_process,
+        video_process,
+        position_x,
+        position_y,
+        fit_video_process,
+    )
+
+
+def layering_filter(
+    base_video_process: Optional[Any],
+    merging_video_process: Any,
+    position_x: Optional[GraphicValue] = None,
+    position_y: Optional[GraphicValue] = None,
+    fit_shorter: bool = False,
+) -> Any:
+    option = {}
+    if position_x is not None:
+        option |= {"x": position_x.get_pixel()}
+    if position_y is not None:
+        option |= {"y": position_y.get_pixel()}
+
+    if base_video_process is None:
+        return merging_video_process
+    elif merging_video_process is None:
+        return base_video_process
+    else:
+        return ffmpeg.overlay(
+            base_video_process,
+            merging_video_process,
+            eof_action="pass",
+            shortest=fit_shorter,
+            **option,
+        )

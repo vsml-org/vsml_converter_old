@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import re
 from enum import Enum, auto
 
 from definition import COLOR_LIST, COLOR_VALUE
+from utils import VSMLManager
 
 
 class Order(Enum):
@@ -135,8 +138,13 @@ class TimeValue:
     def __init__(self, val: str) -> None:
         if val == "fit":
             self.unit = TimeUnit.FIT
+            self.value = -1
         elif val == "source":
             self.unit = TimeUnit.SOURCE
+            self.value = -1
+        elif val == "0":
+            self.unit = TimeUnit.FRAME
+            self.value = 0
         else:
             match val[-1:]:
                 case "s":
@@ -163,13 +171,37 @@ class TimeValue:
             case _:
                 return "'{}{}'".format(self.value, self.unit)
 
-    def get_second(self, fps: float, default_value: float = 0) -> float:
+    def __lt__(self, other: TimeValue) -> bool:
+        return self.get_frame() < other.get_frame()
+
+    def __add__(self, other: TimeValue) -> TimeValue:
+        frame = self.get_frame() + other.get_frame()
+        return TimeValue(f"{frame}f")
+
+    def __iadd__(self, other: TimeValue) -> TimeValue:
+        return self + other
+
+    def get_second(self, default_value: float = 0) -> float:
         if self.unit == TimeUnit.SECOND:
             return self.value
         elif self.unit == TimeUnit.FRAME:
-            return self.value / fps
+            return self.value / VSMLManager.get_root_fps()
         else:
             return default_value
+
+    def get_frame(self, default_value: float = 0) -> float:
+        if self.unit == TimeUnit.FRAME:
+            return self.value
+        elif self.unit == TimeUnit.SECOND:
+            return self.value * VSMLManager.get_root_fps()
+        else:
+            return default_value
+
+    def is_zero_over(self) -> bool:
+        if self.unit in [TimeUnit.SECOND, TimeUnit.FRAME, TimeUnit.PERCENT]:
+            return self.value > 0
+        else:
+            return False
 
 
 class GraphicValue:
@@ -218,8 +250,21 @@ class GraphicValue:
             case _:
                 return "'{}{}'".format(self.value, self.unit)
 
+    def __lt__(self, other: GraphicValue) -> bool:
+        return self.get_pixel() < other.get_pixel()
+
+    def __add__(self, other: GraphicValue) -> GraphicValue:
+        pixel = self.get_pixel() + other.get_pixel()
+        return GraphicValue(f"{pixel}px")
+
     def get_pixel(self, default_value: int = 0) -> int:
         return self.value if self.unit == GraphicUnit.PIXEL else default_value
+
+    def is_zero_over(self) -> bool:
+        if self.unit in [GraphicUnit.PERCENT, GraphicUnit.PIXEL]:
+            return self.value > 0
+        else:
+            return False
 
 
 class Color:

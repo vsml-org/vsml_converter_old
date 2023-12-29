@@ -396,7 +396,7 @@ RESOLUTION_MAX_PATTERN = "{}rmax".format(regex.REAL_NUMBER_PATTERN)
 
 PERCENT_PATTERN = "{}%".format(regex.REAL_NUMBER_PATTERN)
 
-TIME_PATTERN = "({}|{}|{})".format(
+TIME_PATTERN = "({}|{}|{}|0)".format(
     SECOND_PATTERN, FRAME_PATTERN, PERCENT_PATTERN
 )
 GRAPHIC_PATTERN = "({}|{}|{}|{}|{}|{}|0)".format(

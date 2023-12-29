@@ -12,8 +12,9 @@ from .style_to_filter import (
     audio_volume_filter,
     get_background_color_code,
     object_length_filter,
-    time_padding_end_filter,
-    time_padding_start_filter,
+    set_background_filter,
+    time_space_end_filter,
+    time_space_start_filter,
     width_height_filter,
 )
 from .utils import get_background_process, get_graphical_process
@@ -35,19 +36,20 @@ def get_process_by_source(
         case SourceType.AUDIO:
             audio_process = ffmpeg.input(src_path).audio
         case SourceType.TEXT:
-            padding_left_px = style.padding_left.get_pixel()
-            padding_top_px = style.padding_top.get_pixel()
             (
                 width_with_padding,
                 height_with_padding,
             ) = style.get_size_with_padding()
             transparent_process = get_background_process(
-                "{}x{}".format(width_with_padding, height_with_padding),
+                "{}x{}".format(
+                    width_with_padding.get_pixel(),
+                    height_with_padding.get_pixel(),
+                ),
                 style.background_color,
             )
             option: dict = {
-                "x": padding_left_px,
-                "y": padding_top_px,
+                "x": style.padding_left.get_pixel(),
+                "y": style.padding_top.get_pixel(),
             }
             if style.font_family is not None:
                 option |= {
@@ -100,29 +102,22 @@ def create_source_process(
             style.width, style.height, video_process
         )
         # padding and background-color
-        padding_top_px = style.padding_top.get_pixel()
-        padding_left_px = style.padding_left.get_pixel()
-        padding_right_px = style.padding_right.get_pixel()
-        padding_bottom_px = style.padding_bottom.get_pixel()
         if (
-            padding_top_px != 0
-            or padding_left_px != 0
-            or padding_right_px != 0
-            or padding_bottom_px != 0
+            style.padding_top.is_zero_over()
+            or style.padding_left.is_zero_over()
         ):
             (
                 width_with_padding,
                 height_with_padding,
             ) = style.get_size_with_padding()
-            transparent_process = get_background_process(
-                "{}x{}".format(width_with_padding, height_with_padding),
-                style.background_color,
-            )
-            video_process = ffmpeg.overlay(
-                transparent_process,
-                video_process,
-                x=padding_left_px,
-                y=padding_top_px,
+            video_process = set_background_filter(
+                width_with_padding,
+                height_with_padding,
+                background_color=style.background_color,
+                video_process=video_process,
+                position_x=style.padding_left,
+                position_y=style.padding_top,
+                fit_video_process=True,
             )
 
     if audio_process is not None:
@@ -137,14 +132,14 @@ def create_source_process(
     video_process, audio_process = object_length_filter(
         style.object_length, video_process, audio_process
     )
-    video_process, audio_process = time_padding_start_filter(
+    video_process, audio_process = time_space_start_filter(
         style.time_padding_start,
         background_color_code,
         video_process,
         audio_process,
     )
     if style.object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
-        video_process, audio_process = time_padding_end_filter(
+        video_process, audio_process = time_space_end_filter(
             style.time_padding_end,
             background_color_code,
             video_process,

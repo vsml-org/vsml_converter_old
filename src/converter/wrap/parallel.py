@@ -1,19 +1,23 @@
-import ffmpeg
-
 from content import WrapContent
 from converter.schemas import Process
+from converter.style_to_filter import (
+    adjust_parallel_audio,
+    audio_merge_filter,
+    get_background_color_code,
+    layering_filter,
+    object_length_filter,
+    time_space_end_filter,
+    time_space_start_filter,
+)
 from converter.utils import get_background_process
-from style import LayerMode, TimeUnit
-from utils import VSMLManager
+from style import GraphicValue, LayerMode, TimeUnit
 
 
 def create_parallel_process(
-    processes: list[Process],
+    child_processes: list[Process],
     vsml_content: WrapContent,
     debug_mode: bool = False,
 ) -> Process:
-    fps = VSMLManager.get_root_fps()
-
     video_process = None
     audio_process = None
 
@@ -23,236 +27,72 @@ def create_parallel_process(
         height_px_with_padding,
     ) = style.get_size_with_padding()
 
-    background_color = (
-        style.background_color.value
-        if style.background_color
-        else "0x00000000"
-    )
+    background_color_code = get_background_color_code(style.background_color)
     if vsml_content.exist_video:
-        background_process = get_background_process(
-            "{}x{}".format(width_px_with_padding, height_px_with_padding),
+        video_process = get_background_process(
+            "{}x{}".format(
+                width_px_with_padding.get_pixel(),
+                height_px_with_padding.get_pixel(),
+            ),
             style.background_color,
         )
-        if style.object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
-            option = {}
-            if style.object_length.unit == TimeUnit.FRAME:
-                option = {"end_frame": style.object_length.value + 1}
-            elif style.object_length.unit == TimeUnit.SECOND:
-                option = {"end": style.object_length.value}
-            background_process = ffmpeg.trim(
-                background_process,
-                **option,
-            )
-        video_process = background_process
+        video_process, _ = object_length_filter(
+            style.object_length, video_process=video_process
+        )
 
-    left_width = 0
-    remain_margin = 0
-    option_x = style.padding_left.get_pixel()
-    # 時間的長さがある場合
-    if style.object_length.unit != TimeUnit.FIT:
-        for process in processes:
-            # 映像の合成
-            if process.video:
-                if process.style.time_margin_start.unit in [
-                    TimeUnit.FRAME,
-                    TimeUnit.SECOND,
-                ]:
-                    option = {}
-                    if process.style.time_margin_start.unit == TimeUnit.FRAME:
-                        option = {
-                            "start": process.style.time_margin_start.unit
-                        }
-                    elif (
-                        process.style.time_margin_start.unit == TimeUnit.SECOND
-                    ):
-                        second = process.style.time_margin_start.get_second(
-                            fps
-                        )
-                        option = {"start_duration": second}
-                    process.video = ffmpeg.filter(
-                        process.video,
-                        "tpad",
-                        color=background_color,
-                        **option,
-                    )
-                if process.style.time_margin_end.unit in [
-                    TimeUnit.FRAME,
-                    TimeUnit.SECOND,
-                ]:
-                    option = {}
-                    if process.style.time_margin_end.unit == TimeUnit.FRAME:
-                        option = {"stop": process.style.time_margin_end.unit}
-                    elif process.style.time_margin_end.unit == TimeUnit.SECOND:
-                        second = process.style.time_margin_end.get_second(fps)
-                        option = {"stop_duration": second}
-                    process.video = ffmpeg.filter(
-                        process.video,
-                        "tpad",
-                        color=background_color,
-                        **option,
-                    )
-                match style.layer_mode:
-                    case LayerMode.SINGLE:
-                        max_margin = max(
-                            process.style.margin_left.get_pixel(),
-                            remain_margin,
-                        )
-                        option_x = left_width + max_margin
-                        video_process = ffmpeg.overlay(
-                            video_process,
-                            process.video,
-                            eof_action="pass",
-                            x=option_x,
-                            y=style.padding_top.get_pixel()
-                            + process.style.margin_top.get_pixel(),
-                        )
-                        child_width, _ = process.style.get_size_with_padding()
-                        left_width += max_margin + child_width
-                        remain_margin = process.style.margin_right.get_pixel()
-                    case LayerMode.MULTI:
-                        video_process = ffmpeg.overlay(
-                            video_process,
-                            process.video,
-                            eof_action="pass",
-                            x=style.padding_left.get_pixel()
-                            + process.style.margin_left.get_pixel(),
-                            y=style.padding_top.get_pixel()
-                            + process.style.margin_top.get_pixel(),
-                        )
-                    case _:
-                        raise Exception()
+    left_width = GraphicValue("0")
+    remain_margin = GraphicValue("0")
+    option_x = style.padding_left
 
-            # 音声の合成
-            if process.audio:
-                if process.style.time_margin_start.unit in [
-                    TimeUnit.FRAME,
-                    TimeUnit.SECOND,
-                ]:
-                    delays = int(
-                        process.style.time_margin_start.get_second(fps) * 1000
-                    )
-                    process.audio = ffmpeg.filter(
-                        process.audio,
-                        "adelay",
-                        all=1,
-                        delays=delays,
-                    )
-                if process.style.time_margin_end.unit in [
-                    TimeUnit.FRAME,
-                    TimeUnit.SECOND,
-                ]:
-                    second = process.style.time_margin_end.get_second(fps)
-                    process.audio = ffmpeg.filter(
-                        process.audio,
-                        "apad",
-                        pad_dur=second,
-                    )
-                if audio_process is None:
-                    audio_process = process.audio
-                else:
-                    audio_process = ffmpeg.filter(
-                        [audio_process, process.audio], "amix"
-                    )
-        if audio_process:
-            audio_process = ffmpeg.filter(
-                audio_process,
-                "apad",
-                whole_dur=style.object_length.get_second(fps),
+    for child_process in child_processes:
+        child_style = child_process.style
+        child_process.video, child_process.audio = time_space_start_filter(
+            child_style.time_margin_start,
+            background_color_code,
+            child_process.video,
+            child_process.audio,
+        )
+        if style.object_length.unit != TimeUnit.FIT:
+            child_process.video, child_process.audio = time_space_end_filter(
+                child_style.time_margin_end,
+                background_color_code,
+                child_process.video,
+                child_process.audio,
             )
-    # 時間的長さがない場合
-    else:
-        for process in processes:
-            # 映像の合成
-            if process.video:
-                if process.style.time_margin_start.unit in [
-                    TimeUnit.FRAME,
-                    TimeUnit.SECOND,
-                ]:
-                    option = {}
-                    if process.style.time_margin_start.unit == TimeUnit.FRAME:
-                        option = {
-                            "start": process.style.time_margin_start.unit
-                        }
-                    elif (
-                        process.style.time_margin_start.unit == TimeUnit.SECOND
-                    ):
-                        second = process.style.time_margin_start.get_second(
-                            fps
-                        )
-                        option = {"start_duration": second}
-                    process.video = ffmpeg.filter(
-                        process.video,
-                        "tpad",
-                        color=background_color,
-                        **option,
+        if child_process.video:
+            match style.layer_mode:
+                case LayerMode.SINGLE:
+                    max_margin = max(
+                        child_style.margin_left,
+                        remain_margin,
                     )
-                if (
-                    process.style.source_object_length is None
-                    and process.style.object_length.unit == TimeUnit.FIT
-                ):
-                    process.video = ffmpeg.filter(
-                        process.video,
-                        "tpad",
-                        stop_mode=1,
+                    option_x = left_width + max_margin
+                    video_process = layering_filter(
+                        video_process,
+                        child_process.video,
+                        option_x,
+                        style.padding_top + child_style.margin_top,
                     )
-
-                match style.layer_mode:
-                    case LayerMode.SINGLE:
-                        max_margin = max(
-                            process.style.margin_left.get_pixel(),
-                            remain_margin,
-                        )
-                        option_x = left_width + max_margin
-                        video_process = ffmpeg.overlay(
-                            video_process,
-                            process.video,
-                            eof_action="pass",
-                            x=option_x,
-                            y=style.padding_top.get_pixel()
-                            + process.style.margin_top.get_pixel(),
-                        )
-                        child_width, _ = process.style.get_size_with_padding()
-                        left_width += max_margin + child_width
-                        remain_margin = process.style.margin_right.get_pixel()
-                    case LayerMode.MULTI:
-                        video_process = ffmpeg.overlay(
-                            video_process,
-                            process.video,
-                            eof_action="pass",
-                            x=style.padding_left.get_pixel()
-                            + process.style.margin_left.get_pixel(),
-                            y=style.padding_top.get_pixel()
-                            + process.style.margin_top.get_pixel(),
-                        )
-                    case _:
-                        raise Exception()
-            # 音声の合成
-            if process.audio:
-                if process.style.time_margin_start.unit in [
-                    TimeUnit.FRAME,
-                    TimeUnit.SECOND,
-                ]:
-                    delays = int(
-                        process.style.time_margin_start.get_second(fps) * 1000
+                    child_width, _ = child_style.get_size_with_padding()
+                    left_width += max_margin + child_width
+                    remain_margin = child_style.margin_right
+                case LayerMode.MULTI:
+                    video_process = layering_filter(
+                        video_process,
+                        child_process.video,
+                        style.padding_left + child_style.margin_left,
+                        style.padding_top + child_style.margin_top,
                     )
-                    process.audio = ffmpeg.filter(
-                        process.audio,
-                        "adelay",
-                        all=1,
-                        delays=delays,
-                    )
-                if audio_process is None:
-                    audio_process = process.audio
-                else:
-                    audio_process = ffmpeg.filter(
-                        [audio_process, process.audio], "amix"
-                    )
-        if audio_process:
-            audio_process = ffmpeg.filter(
-                audio_process,
-                "apad",
-                whole_len=-1,
+                case _:
+                    raise Exception()
+        if child_process.audio:
+            audio_process = audio_merge_filter(
+                audio_process, child_process.audio
             )
+    if audio_process:
+        audio_process = adjust_parallel_audio(
+            style.object_length, audio_process
+        )
 
     return Process(
         video_process,
