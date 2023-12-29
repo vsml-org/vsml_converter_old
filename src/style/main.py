@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-import ffmpeg
+from ffmpeg import probe as ffprobe
 from lxml.etree import _Attrib
 
 from utils import TagInfoTree, VSMLManager
@@ -157,7 +157,7 @@ class Style:
                 self.order = Order.PARALLEL
                 self.layer_mode = LayerMode.SINGLE
             case "vid":
-                meta = ffmpeg.probe(source_value)
+                meta = ffprobe(source_value)
                 (
                     object_length,
                     meta_video,
@@ -183,7 +183,7 @@ class Style:
                     if self.audio_system == AudioSystem.STEREO:
                         self.audio_system = self.audio_system
             case "aud":
-                meta = ffmpeg.probe(source_value)
+                meta = ffprobe(source_value)
                 (
                     object_length,
                     meta_video,
@@ -204,7 +204,7 @@ class Style:
                 if self.audio_system == AudioSystem.STEREO:
                     self.audio_system = self.audio_system
             case "img":
-                meta = ffmpeg.probe(source_value)
+                meta = ffprobe(source_value)
                 (
                     object_length,
                     meta_video,
