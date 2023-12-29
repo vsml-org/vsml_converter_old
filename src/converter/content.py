@@ -1,7 +1,5 @@
 from typing import Any, Optional
 
-import ffmpeg
-
 from content import SourceContent
 from style import Style, TimeUnit
 from utils import SourceType
@@ -10,8 +8,8 @@ from .ffmpeg import (
     audio_system_filter,
     audio_volume_filter,
     get_background_color_code,
-    get_background_process,
     get_source_process,
+    get_text_process,
     object_length_filter,
     set_background_filter,
     time_space_end_filter,
@@ -41,42 +39,18 @@ def get_process_by_source(
                 width_with_padding,
                 height_with_padding,
             ) = style.get_size_with_padding()
-            transparent_process = get_background_process(
-                "{}x{}".format(
-                    width_with_padding.get_pixel(),
-                    height_with_padding.get_pixel(),
-                ),
+            video_process = get_text_process(
+                src_path,
+                width_with_padding,
+                height_with_padding,
+                style.padding_left,
+                style.padding_top,
                 style.background_color,
-            )
-            option: dict = {
-                "x": style.padding_left.get_pixel(),
-                "y": style.padding_top.get_pixel(),
-            }
-            if style.font_family is not None:
-                option |= {
-                    "font": style.font_family,
-                }
-            if style.font_size is not None:
-                option |= {
-                    "fontsize": style.font_size.get_pixel(),
-                }
-            if style.font_color is not None:
-                option |= {
-                    "fontcolor": style.font_color.value,
-                }
-            if style.font_border_color is not None:
-                option |= {
-                    "bordercolor": style.font_border_color.value,
-                }
-            if style.font_border_width is not None:
-                option |= {
-                    "borderw": style.font_border_width,
-                }
-
-            video_process = ffmpeg.drawtext(
-                transparent_process,
-                text=src_path,
-                **option,
+                style.font_family,
+                style.font_size,
+                style.font_color,
+                style.font_border_color,
+                style.font_border_width,
             )
         case _:
             raise Exception()

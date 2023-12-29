@@ -259,6 +259,58 @@ def audio_merge_filter(
         )
 
 
+def get_text_process(
+    sentence: str,
+    width: GraphicValue,
+    height: GraphicValue,
+    padding_left: GraphicValue,
+    padding_top: GraphicValue,
+    background_color: Optional[Color],
+    font_family: Optional[str],
+    font_size: Optional[GraphicValue],
+    font_color: Optional[Color],
+    font_border_color: Optional[Color],
+    font_border_width: Optional[int],
+) -> Any:
+    option: dict = {
+        "x": padding_left.get_pixel(),
+        "y": padding_top.get_pixel(),
+    }
+    transparent_process = get_background_process(
+        "{}x{}".format(
+            width.get_pixel(),
+            height.get_pixel(),
+        ),
+        background_color,
+    )
+    if font_family is not None:
+        option |= {
+            "font": font_family,
+        }
+    if font_size is not None:
+        option |= {
+            "fontsize": font_size.get_pixel(),
+        }
+    if font_color is not None:
+        option |= {
+            "fontcolor": font_color.value,
+        }
+    if font_border_color is not None:
+        option |= {
+            "bordercolor": font_border_color.value,
+        }
+    if font_border_width is not None:
+        option |= {
+            "borderw": font_border_width,
+        }
+
+    return ffmpeg.drawtext(
+        transparent_process,
+        text=sentence,
+        **option,
+    )
+
+
 def adjust_parallel_audio(
     object_length: TimeValue,
     audio_process: Any,
