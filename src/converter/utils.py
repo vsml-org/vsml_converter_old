@@ -10,7 +10,7 @@ origin_graphic_processes: dict[str, dict[str, Any]] = {}
 
 def get_background_process(
     resolution_text: str, background_color: Optional[Color] = None
-):
+) -> Any:
     global origin_background_process
     key = "{}/{}".format(
         resolution_text,
@@ -40,21 +40,32 @@ def get_background_process(
     return background_processes[0]
 
 
-def get_graphical_process(src_path: str, exist_audio: bool, **option):
+def get_source_process(
+    src_path: str, exist_video: bool, exist_audio: bool, **option
+) -> dict[str, Any]:
     global origin_graphic_processes
     origin_graphic_process = origin_graphic_processes.get(src_path)
     if origin_graphic_process is None:
         process = ffmpeg.input(src_path, **option)
         origin_graphic_process = {
-            "video": process.video,
+            "video": process.video if exist_video else None,
             "audio": process.audio if exist_audio else None,
         }
-    video_graphic_processes = origin_graphic_process["video"].split()
+    video_graphic_processes = (
+        origin_graphic_process["video"].split()
+        if origin_graphic_process["video"] is not None
+        else (None, None)
+    )
+    audio_graphic_processes = (
+        origin_graphic_process["audio"].asplit()
+        if origin_graphic_process["audio"] is not None
+        else (None, None)
+    )
     origin_graphic_processes[src_path] = {
         "video": video_graphic_processes[1],
-        "audio": origin_graphic_process["audio"],
+        "audio": audio_graphic_processes[1],
     }
     return {
         "video": video_graphic_processes[0],
-        "audio": origin_graphic_process["audio"],
+        "audio": audio_graphic_processes[0],
     }

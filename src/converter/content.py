@@ -17,7 +17,7 @@ from .style_to_filter import (
     time_space_start_filter,
     width_height_filter,
 )
-from .utils import get_background_process, get_graphical_process
+from .utils import get_background_process, get_source_process
 
 
 def get_process_by_source(
@@ -27,14 +27,14 @@ def get_process_by_source(
     audio_process = None
     match type:
         case SourceType.IMAGE:
-            source = get_graphical_process(src_path, False, loop=1)
+            source = get_source_process(src_path, True, False, loop=1)
             video_process = source["video"].filter("setsar", "1/1")
         case SourceType.VIDEO:
-            source = get_graphical_process(src_path, exist_audio)
+            source = get_source_process(src_path, True, exist_audio)
             video_process = source["video"]
             audio_process = source["audio"]
         case SourceType.AUDIO:
-            audio_process = ffmpeg.input(src_path).audio
+            audio_process = get_source_process(src_path, False, True)["audio"]
         case SourceType.TEXT:
             (
                 width_with_padding,
