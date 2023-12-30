@@ -81,6 +81,7 @@ def convert_video(
             .replace("'", '"')
             .replace("True", "true")
             .replace("False", "false")
+            .replace("None", "null")
         )
         content_str = json.dumps(
             (json.loads(content_str)), indent=2, ensure_ascii=False
