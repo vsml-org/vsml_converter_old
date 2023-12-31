@@ -80,10 +80,11 @@ def element_to_content(
     tag_name = vsml_element.tag
     classes_name = vsml_element.attrib.get("class", "").split(" ")
     id_name = vsml_element.attrib.get("id")
-
-    source_value = ""
-    if tag_name in definition.CONTENT_TAG:
-        source_value = get_source_value(vsml_element)
+    source_value = (
+        get_source_value(vsml_element)
+        if tag_name in definition.CONTENT_TAG
+        else ""
+    )
 
     # styleの取得
     picked_up_style_tree = pickup_style(
@@ -92,10 +93,7 @@ def element_to_content(
         classes_name,
         id_name,
         parent_info_tree,
-    )
-    picked_up_style_tree |= get_style_from_attribute(
-        vsml_element.attrib.get("style")
-    )
+    ) | get_style_from_attribute(vsml_element.attrib.get("style"))
     style = Style(
         tag_name,
         parent_param,
@@ -111,6 +109,7 @@ def element_to_content(
             source_value,
             style,
         )
+
     # vsml_elementがWrapContentの場合
     elif tag_name in definition.WRAP_TAG:
         # 子要素の取得
@@ -124,17 +123,18 @@ def element_to_content(
             parent_info_tree,
         )
 
-        children_object_length = 0.0
-        child_object_length_is_fit = (
+        children_is_fit = (
             style.order == Order.PARALLEL or len(vsml_element_children) == 0
         )
-        last_time_margin = 0.0
-        children_width = 0
-        last_margin_horizontal = 0
-        children_height = 0
-        last_margin_vertical = 0
+        whole_object_length = TimeValue("0")
+        last_time_margin = TimeValue("0")
+        whole_width = GraphicValue("0")
+        whole_height = GraphicValue("0")
+        last_margin_horizontal = GraphicValue("0")
+        last_margin_vertical = GraphicValue("0")
 
         for vsml_element_child in vsml_element_children:
+            # 子要素Elementの作成と配列への追加
             child_content = element_to_content(
                 vsml_element_child,
                 style_tree,
@@ -142,69 +142,80 @@ def element_to_content(
                 style,
                 count + 1,
             )
+            vsml_content.items.append(child_content)
+
+            # exist情報の更新
             vsml_content.exist_video = (
                 vsml_content.exist_video or child_content.exist_video
             )
             vsml_content.exist_audio = (
                 vsml_content.exist_audio or child_content.exist_audio
             )
+
             child_style = child_content.style
-            child_source_object_length = (
-                child_style.source_object_length.value
-                if child_style.source_object_length is not None
-                and child_style.object_length.unit != TimeUnit.FIT
-                else 0.0
-            )
-            child_source_width = (
-                child_style.source_width.value
-                if child_style.source_width is not None
-                else 0
-            )
-            child_source_height = (
-                child_style.source_height.value
-                if child_style.source_height is not None
-                else 0
-            )
 
             # 時間計算
+            if child_style.object_length.unit in [
+                TimeUnit.SECOND,
+                TimeUnit.FRAME,
+            ]:
+                child_object_length = child_style.object_length
+            elif (
+                child_style.source_object_length is not None
+                and child_style.object_length.unit != TimeUnit.FIT
+            ):
+                child_object_length = child_style.source_object_length
+            else:
+                child_object_length = TimeValue("0")
+
+            # 親要素に時間指定がないとき
             if style.object_length.unit == TimeUnit.FIT:
                 # シーケンス(時間的逐次)
                 if style.order == Order.SEQUENCE:
                     # 時間の制限がない(FIT)場合親もFITにする
                     if child_style.object_length.unit == TimeUnit.FIT:
-                        child_object_length_is_fit = True
+                        children_is_fit = True
                     # FITでないとき
-                    if not child_object_length_is_fit:
-                        children_object_length += (
+                    if not children_is_fit:
+                        whole_object_length += (
                             max(
-                                child_style.time_margin_start.get_second(),
+                                child_style.time_margin_start,
                                 last_time_margin,
                             )
-                            + child_style.time_padding_start.get_second()
-                            + child_style.object_length.get_second(
-                                child_source_object_length
-                            )
-                            + child_style.time_padding_end.get_second()
+                            + child_style.time_padding_start
+                            + child_object_length
+                            + child_style.time_padding_end
                         )
-                        last_time_margin = (
-                            child_style.time_margin_end.get_second()
-                        )
+                        last_time_margin = child_style.time_margin_end
                 # パラレル(時間的並列)
                 elif style.order == Order.PARALLEL:
+                    # 全てFITでない場合、FITなオブジェクトは最長な要素に長さを合わせる
                     if child_style.object_length.unit != TimeUnit.FIT:
-                        child_object_length_is_fit = False
-                    child_object_length = (
-                        child_style.time_margin_start.get_second()
-                        + child_style.time_padding_start.get_second()
-                        + child_style.object_length.get_second(
-                            child_source_object_length
-                        )
-                        + child_style.time_padding_end.get_second()
-                        + child_style.time_margin_end.get_second()
+                        children_is_fit = False
+                    child_object_length_with_space = (
+                        child_style.time_margin_start
+                        + child_style.time_padding_start
+                        + child_object_length
+                        + child_style.time_padding_end
+                        + child_style.time_margin_end
                     )
-                    children_object_length = max(
-                        children_object_length, child_object_length
+                    whole_object_length = max(
+                        whole_object_length, child_object_length_with_space
                     )
+
+            if child_style.width.unit == GraphicUnit.PIXEL:
+                child_width = child_style.width
+            elif child_style.source_width is not None:
+                child_width = child_style.source_width
+            else:
+                child_width = GraphicValue("0")
+
+            if child_style.height.unit == GraphicUnit.PIXEL:
+                child_height = child_style.height
+            elif child_style.source_height is not None:
+                child_height = child_style.source_height
+            else:
+                child_height = GraphicValue("0")
 
             if child_content.exist_video:
                 # シングルレイヤ(横並び)モード
@@ -213,86 +224,77 @@ def element_to_content(
                     and style.layer_mode == LayerMode.SINGLE
                 ):
                     # 幅計算
-                    children_width += (
+                    whole_width += (
                         max(
-                            child_style.margin_left.get_pixel(),
+                            child_style.margin_left,
                             last_margin_horizontal,
                         )
-                        + child_style.padding_left.get_pixel()
-                        + child_style.width.get_pixel(child_source_width)
-                        + child_style.padding_right.get_pixel()
+                        + child_style.padding_left
+                        + child_width
+                        + child_style.padding_right
                     )
-                    last_margin_horizontal = (
-                        child_style.margin_right.get_pixel()
-                    )
+                    last_margin_horizontal = child_style.margin_right
 
                     # 高さ計算
-                    child_height = (
+                    child_height_with_space = (
                         max(
-                            child_style.margin_top.get_pixel(),
+                            child_style.margin_top,
                             last_margin_vertical,
                         )
-                        + child_style.padding_top.get_pixel()
-                        + child_style.height.get_pixel(child_source_height)
-                        + child_style.padding_bottom.get_pixel()
-                        + child_style.margin_bottom.get_pixel()
+                        + child_style.padding_top
+                        + child_height
+                        + child_style.padding_bottom
+                        + child_style.margin_bottom
                     )
-                    children_height = max(children_height, child_height)
+                    whole_height = max(whole_height, child_height_with_space)
                 # マルチレイヤ(奥行き並び)モード
                 else:
                     # 幅計算
                     child_width = (
                         max(
-                            child_style.margin_left.get_pixel(),
+                            child_style.margin_left,
                             last_margin_horizontal,
                         )
-                        + child_style.padding_left.get_pixel()
-                        + child_style.width.get_pixel(child_source_width)
-                        + child_style.padding_right.get_pixel()
-                        + child_style.margin_right.get_pixel()
+                        + child_style.padding_left
+                        + child_width
+                        + child_style.padding_right
+                        + child_style.margin_right
                     )
-                    children_width = max(children_width, child_width)
+                    whole_width = max(whole_width, child_width)
 
                     # 高さ計算
                     child_height = (
                         max(
-                            child_style.margin_top.get_pixel(),
+                            child_style.margin_top,
                             last_margin_vertical,
                         )
-                        + child_style.padding_top.get_pixel()
-                        + child_style.height.get_pixel(child_source_height)
-                        + child_style.padding_bottom.get_pixel()
-                        + child_style.margin_bottom.get_pixel()
+                        + child_style.padding_top
+                        + child_height
+                        + child_style.padding_bottom
+                        + child_style.margin_bottom
                     )
-                    children_height = max(children_height, child_height)
-
-            vsml_content.items.append(child_content)
+                    whole_height = max(whole_height, child_height)
 
         # FITでないとき
-        if (
-            style.object_length.unit == TimeUnit.FIT
-            and not child_object_length_is_fit
-        ):
+        if style.object_length.unit == TimeUnit.FIT and not children_is_fit:
             # シーケンスのとき
             if style.order == Order.SEQUENCE:
-                children_object_length += last_time_margin
+                whole_object_length += last_time_margin
             # 親のobject_lengthを更新
-            style.object_length = TimeValue(
-                "{}s".format(children_object_length)
-            )
+            style.object_length = whole_object_length
         if vsml_content.exist_video:
             # シングルレイヤ(横並び)モード
             if (
                 style.order == Order.PARALLEL
                 and style.layer_mode == LayerMode.SINGLE
             ):
-                children_width += last_margin_horizontal
-                children_height += last_margin_vertical
+                whole_width += last_margin_horizontal
+                whole_height += last_margin_vertical
             # 親のwidth, heightを更新
             if style.width.unit == GraphicUnit.AUTO:
-                style.width = GraphicValue("{}px".format(children_width))
+                style.width = whole_width
             if style.height.unit == GraphicUnit.AUTO:
-                style.height = GraphicValue("{}px".format(children_height))
+                style.height = whole_height
 
     else:
         raise Exception()
