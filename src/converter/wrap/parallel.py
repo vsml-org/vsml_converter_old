@@ -42,7 +42,6 @@ def create_parallel_process(
 
     left_width = GraphicValue("0")
     remain_margin = GraphicValue("0")
-    option_x = style.padding_left
 
     for child_process in child_processes:
         child_style = child_process.style
@@ -62,19 +61,18 @@ def create_parallel_process(
         if child_process.video is not None:
             match style.layer_mode:
                 case LayerMode.SINGLE:
-                    max_margin = max(
+                    left_width += max(
                         child_style.margin_left,
                         remain_margin,
                     )
-                    option_x = left_width + max_margin
                     video_process = layering_filter(
                         video_process,
                         child_process.video,
-                        option_x,
+                        left_width,
                         style.padding_top + child_style.margin_top,
                     )
                     child_width, _ = child_style.get_size_with_padding()
-                    left_width += max_margin + child_width
+                    left_width += child_width
                     remain_margin = child_style.margin_right
                 case LayerMode.MULTI:
                     video_process = layering_filter(
