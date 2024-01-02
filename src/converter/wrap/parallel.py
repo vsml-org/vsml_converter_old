@@ -51,7 +51,7 @@ def create_parallel_process(
             child_process.video,
             child_process.audio,
         )
-        if style.object_length.unit != TimeUnit.FIT:
+        if child_style.object_length.unit != TimeUnit.FIT:
             child_process.video, child_process.audio = time_space_end_filter(
                 child_style.time_margin_end,
                 background_color_code,
