@@ -480,28 +480,18 @@ class Style:
         return str(vars(self))
 
     def get_size_with_padding(self) -> tuple[GraphicValue, GraphicValue]:
-        width = (
-            self.source_width
-            if (
-                self.width.unit == GraphicUnit.AUTO
-                and self.source_width is not None
-            )
-            else self.width
-        )
-        height = (
-            self.source_height
-            if (
-                self.height.unit == GraphicUnit.AUTO
-                and self.source_height is not None
-            )
-            else self.height
-        )
+        width = self.get_width()
+        height = self.get_height()
         width_with_padding = width + self.padding_left + self.padding_right
         height_with_padding = height + self.padding_top + self.padding_bottom
         return width_with_padding, height_with_padding
 
     def get_object_length_with_padding(self) -> TimeValue:
-        object_length = (
+        object_length = self.get_object_length()
+        return object_length + self.time_padding_start + self.time_padding_end
+
+    def get_object_length(self) -> TimeValue:
+        return (
             self.source_object_length
             if (
                 self.source_object_length is not None
@@ -509,7 +499,26 @@ class Style:
             )
             else self.object_length
         )
-        return object_length + self.time_padding_start + self.time_padding_end
+
+    def get_width(self) -> GraphicValue:
+        return (
+            self.source_width
+            if (
+                self.width.unit == GraphicUnit.AUTO
+                and self.source_width is not None
+            )
+            else self.width
+        )
+
+    def get_height(self) -> GraphicValue:
+        return (
+            self.source_height
+            if (
+                self.height.unit == GraphicUnit.AUTO
+                and self.source_height is not None
+            )
+            else self.height
+        )
 
 
 def pickup_style(

@@ -18,6 +18,41 @@ from utils import TagInfoTree, VSMLManager, WidthHeight
 from vss import convert_prop_val_to_dict, convert_vss_dict
 
 
+class WrapObjectTimeInfo:
+    children_is_fit: bool
+    whole_object_length: TimeValue
+    last_time_margin: TimeValue
+
+    def __init__(
+        self,
+        children_is_fit: bool,
+        whole_object_length: TimeValue,
+        last_time_margin: TimeValue,
+    ):
+        self.children_is_fit = children_is_fit
+        self.whole_object_length = whole_object_length
+        self.last_time_margin = last_time_margin
+
+    def include_last_margin(self):
+        self.whole_object_length += self.last_time_margin
+
+
+class WrapObjectGraphicInfo:
+    whole_length: GraphicValue
+    last_margin: GraphicValue
+
+    def __init__(
+        self,
+        whole_length: GraphicValue,
+        last_margin: GraphicValue,
+    ):
+        self.whole_length = whole_length
+        self.last_margin = last_margin
+
+    def include_last_margin(self):
+        self.whole_length += self.last_margin
+
+
 class VSML:
     content: VSMLContent
 
@@ -123,15 +158,44 @@ def element_to_content(
             parent_info_tree,
         )
 
-        children_is_fit = (
-            style.order == Order.PARALLEL or len(vsml_element_children) == 0
+        wrap_object_time_info = WrapObjectTimeInfo(
+            children_is_fit=(
+                style.order == Order.PARALLEL
+                or len(vsml_element_children) == 0
+            ),
+            whole_object_length=TimeValue("0"),
+            last_time_margin=TimeValue("0"),
         )
-        whole_object_length = TimeValue("0")
-        last_time_margin = TimeValue("0")
-        whole_width = GraphicValue("0")
-        whole_height = GraphicValue("0")
-        last_margin_horizontal = GraphicValue("0")
-        last_margin_vertical = GraphicValue("0")
+        calc_object_length = None
+        # 親要素に時間指定がないとき
+        if style.object_length.unit == TimeUnit.FIT:
+            # シーケンス(時間的逐次)
+            if style.order == Order.SEQUENCE:
+                calc_object_length = calc_catenating_object_length
+            # パラレル(時間的並列)
+            elif style.order == Order.PARALLEL:
+                calc_object_length = calc_piling_object_length
+        wrap_object_horizontal_info = WrapObjectGraphicInfo(
+            whole_length=GraphicValue("0"),
+            last_margin=GraphicValue("0"),
+        )
+        wrap_object_vertical_info = WrapObjectGraphicInfo(
+            whole_length=GraphicValue("0"),
+            last_margin=GraphicValue("0"),
+        )
+        calc_width = None
+        calc_height = None
+        # シングルレイヤ(横並び)モード
+        if (
+            style.order == Order.PARALLEL
+            and style.layer_mode == LayerMode.SINGLE
+        ):
+            calc_width = calc_catenating_graphic_length
+            calc_height = calc_piling_graphic_length
+        # マルチレイヤ(奥行き並び)モード
+        else:
+            calc_width = calc_piling_graphic_length
+            calc_height = calc_piling_graphic_length
 
         for vsml_element_child in vsml_element_children:
             # 子要素Elementの作成と配列への追加
@@ -153,150 +217,153 @@ def element_to_content(
             )
 
             child_style = child_content.style
-
             # 時間計算
-            if child_style.object_length.unit in [
-                TimeUnit.SECOND,
-                TimeUnit.FRAME,
-            ]:
-                child_object_length = child_style.object_length
-            elif (
-                child_style.source_object_length is not None
-                and child_style.object_length.unit != TimeUnit.FIT
-            ):
-                child_object_length = child_style.source_object_length
-            else:
-                child_object_length = TimeValue("0")
+            child_object_length = child_style.get_object_length()
+            if calc_object_length is not None:
+                calc_object_length(
+                    wrap_object_time_info,
+                    child_style.object_length.unit == TimeUnit.FIT,
+                    child_style.time_margin_start,
+                    child_style.time_padding_start,
+                    child_object_length,
+                    child_style.time_padding_end,
+                    child_style.time_margin_end,
+                )
 
-            # 親要素に時間指定がないとき
-            if style.object_length.unit == TimeUnit.FIT:
-                # シーケンス(時間的逐次)
-                if style.order == Order.SEQUENCE:
-                    # 時間の制限がない(FIT)場合親もFITにする
-                    if child_style.object_length.unit == TimeUnit.FIT:
-                        children_is_fit = True
-                    # FITでないとき
-                    if not children_is_fit:
-                        whole_object_length += (
-                            max(
-                                child_style.time_margin_start,
-                                last_time_margin,
-                            )
-                            + child_style.time_padding_start
-                            + child_object_length
-                            + child_style.time_padding_end
-                        )
-                        last_time_margin = child_style.time_margin_end
-                # パラレル(時間的並列)
-                elif style.order == Order.PARALLEL:
-                    # 全てFITでない場合、FITなオブジェクトは最長な要素に長さを合わせる
-                    if child_style.object_length.unit != TimeUnit.FIT:
-                        children_is_fit = False
-                    child_object_length_with_space = (
-                        child_style.time_margin_start
-                        + child_style.time_padding_start
-                        + child_object_length
-                        + child_style.time_padding_end
-                        + child_style.time_margin_end
-                    )
-                    whole_object_length = max(
-                        whole_object_length, child_object_length_with_space
-                    )
-
-            if child_style.width.unit == GraphicUnit.PIXEL:
-                child_width = child_style.width
-            elif child_style.source_width is not None:
-                child_width = child_style.source_width
-            else:
-                child_width = GraphicValue("0")
-
-            if child_style.height.unit == GraphicUnit.PIXEL:
-                child_height = child_style.height
-            elif child_style.source_height is not None:
-                child_height = child_style.source_height
-            else:
-                child_height = GraphicValue("0")
-
+            # 幅、高さ計算
+            child_width = child_style.get_width()
+            child_height = child_style.get_height()
             if child_content.exist_video:
-                # シングルレイヤ(横並び)モード
-                if (
-                    style.order == Order.PARALLEL
-                    and style.layer_mode == LayerMode.SINGLE
-                ):
-                    # 幅計算
-                    whole_width += (
-                        max(
-                            child_style.margin_left,
-                            last_margin_horizontal,
-                        )
-                        + child_style.padding_left
-                        + child_width
-                        + child_style.padding_right
+                if calc_width is not None:
+                    calc_width(
+                        wrap_object_horizontal_info,
+                        child_style.margin_left,
+                        child_style.padding_left,
+                        child_width,
+                        child_style.padding_right,
+                        child_style.margin_right,
                     )
-                    last_margin_horizontal = child_style.margin_right
+                if calc_height is not None:
+                    calc_height(
+                        wrap_object_vertical_info,
+                        child_style.margin_top,
+                        child_style.padding_top,
+                        child_height,
+                        child_style.padding_bottom,
+                        child_style.margin_bottom,
+                    )
 
-                    # 高さ計算
-                    child_height_with_space = (
-                        max(
-                            child_style.margin_top,
-                            last_margin_vertical,
-                        )
-                        + child_style.padding_top
-                        + child_height
-                        + child_style.padding_bottom
-                        + child_style.margin_bottom
-                    )
-                    whole_height = max(whole_height, child_height_with_space)
-                # マルチレイヤ(奥行き並び)モード
-                else:
-                    # 幅計算
-                    child_width = (
-                        max(
-                            child_style.margin_left,
-                            last_margin_horizontal,
-                        )
-                        + child_style.padding_left
-                        + child_width
-                        + child_style.padding_right
-                        + child_style.margin_right
-                    )
-                    whole_width = max(whole_width, child_width)
+        wrap_object_time_info.include_last_margin()
+        wrap_object_horizontal_info.include_last_margin()
+        wrap_object_vertical_info.include_last_margin()
 
-                    # 高さ計算
-                    child_height = (
-                        max(
-                            child_style.margin_top,
-                            last_margin_vertical,
-                        )
-                        + child_style.padding_top
-                        + child_height
-                        + child_style.padding_bottom
-                        + child_style.margin_bottom
-                    )
-                    whole_height = max(whole_height, child_height)
-
-        # FITでないとき
-        if style.object_length.unit == TimeUnit.FIT and not children_is_fit:
-            # シーケンスのとき
-            if style.order == Order.SEQUENCE:
-                whole_object_length += last_time_margin
+        # wrapのobject_lengthがデフォルト値(FIT)かつ、子要素全体が時間的長さを持つ場合
+        if (
+            style.object_length.unit == TimeUnit.FIT
+            and not wrap_object_time_info.children_is_fit
+        ):
             # 親のobject_lengthを更新
-            style.object_length = whole_object_length
+            style.object_length = wrap_object_time_info.whole_object_length
         if vsml_content.exist_video:
-            # シングルレイヤ(横並び)モード
-            if (
-                style.order == Order.PARALLEL
-                and style.layer_mode == LayerMode.SINGLE
-            ):
-                whole_width += last_margin_horizontal
-                whole_height += last_margin_vertical
             # 親のwidth, heightを更新
             if style.width.unit == GraphicUnit.AUTO:
-                style.width = whole_width
+                style.width = wrap_object_horizontal_info.whole_length
             if style.height.unit == GraphicUnit.AUTO:
-                style.height = whole_height
+                style.height = wrap_object_vertical_info.whole_length
 
     else:
         raise Exception()
 
     return vsml_content
+
+
+def calc_catenating_object_length(
+    wrap_object_info: WrapObjectTimeInfo,
+    child_is_fit: bool,
+    time_margin_start: TimeValue,
+    time_padding_start: TimeValue,
+    child_object_length: TimeValue,
+    time_padding_end: TimeValue,
+    time_margin_end: TimeValue,
+):
+    wrap_object_info.children_is_fit = (
+        wrap_object_info.children_is_fit or child_is_fit
+    )
+    wrap_object_info.whole_object_length += (
+        max(
+            time_margin_start,
+            wrap_object_info.last_time_margin,
+        )
+        + time_padding_start
+        + child_object_length
+        + time_padding_end
+    )
+    wrap_object_info.last_time_margin = time_margin_end
+
+
+def calc_piling_object_length(
+    wrap_object_info: WrapObjectTimeInfo,
+    child_is_fit: bool,
+    time_margin_start: TimeValue,
+    time_padding_start: TimeValue,
+    child_object_length: TimeValue,
+    time_padding_end: TimeValue,
+    time_margin_end: TimeValue,
+):
+    wrap_object_info.children_is_fit = (
+        wrap_object_info.children_is_fit and child_is_fit
+    )
+    wrap_object_info.whole_object_length = max(
+        wrap_object_info.whole_object_length,
+        (
+            time_margin_start
+            + time_padding_start
+            + child_object_length
+            + time_padding_end
+            + time_margin_end
+        ),
+    )
+
+
+def calc_catenating_graphic_length(
+    wrap_object_info: WrapObjectGraphicInfo,
+    margin_start: GraphicValue,
+    padding_start: GraphicValue,
+    child_graphic_length: GraphicValue,
+    padding_end: GraphicValue,
+    margin_end: GraphicValue,
+):
+    wrap_object_info.whole_length += (
+        max(
+            margin_start,
+            wrap_object_info.last_margin,
+        )
+        + padding_start
+        + child_graphic_length
+        + padding_end
+    )
+    wrap_object_info.last_margin = margin_end
+
+
+def calc_piling_graphic_length(
+    wrap_object_info: WrapObjectGraphicInfo,
+    margin_start: GraphicValue,
+    padding_start: GraphicValue,
+    child_graphic_length: GraphicValue,
+    padding_end: GraphicValue,
+    margin_end: GraphicValue,
+):
+    child_length_with_space = (
+        max(
+            margin_start,
+            wrap_object_info.last_margin,
+        )
+        + padding_start
+        + child_graphic_length
+        + padding_end
+        + margin_end
+    )
+    wrap_object_info.whole_length = max(
+        wrap_object_info.whole_length,
+        child_length_with_space,
+    )
