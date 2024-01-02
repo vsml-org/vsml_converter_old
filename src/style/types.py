@@ -172,11 +172,11 @@ class TimeValue:
                 return "'{}{}'".format(self.value, self.unit)
 
     def __lt__(self, other: TimeValue) -> bool:
-        return self.get_frame() < other.get_frame()
+        return self.get_second() < other.get_second()
 
     def __add__(self, other: TimeValue) -> TimeValue:
-        frame = self.get_frame() + other.get_frame()
-        return TimeValue(f"{frame}f")
+        second = self.get_second() + other.get_second()
+        return TimeValue(f"{second}s")
 
     def __iadd__(self, other: TimeValue) -> TimeValue:
         return self + other
@@ -186,14 +186,6 @@ class TimeValue:
             return self.value
         elif self.unit == TimeUnit.FRAME:
             return self.value / VSMLManager.get_root_fps()
-        else:
-            return default_value
-
-    def get_frame(self, default_value: float = 0) -> float:
-        if self.unit == TimeUnit.FRAME:
-            return self.value
-        elif self.unit == TimeUnit.SECOND:
-            return self.value * VSMLManager.get_root_fps()
         else:
             return default_value
 

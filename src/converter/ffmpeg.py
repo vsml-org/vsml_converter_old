@@ -148,19 +148,14 @@ def object_length_filter(
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
     if object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+        length_second = object_length.get_second()
         if video_process is not None:
-            option = {}
-            if object_length.unit == TimeUnit.FRAME:
-                option = {"end_frame": object_length.value + 1}
-            elif object_length.unit == TimeUnit.SECOND:
-                option = {"end": object_length.value}
-            video_process = ffmpeg.trim(video_process, **option)
+            video_process = ffmpeg.trim(video_process, end=length_second)
         if audio_process is not None:
-            audio_end = object_length.get_second()
             audio_process = ffmpeg.filter(
                 audio_process,
                 "atrim",
-                end=audio_end,
+                end=length_second,
             )
     elif object_length.unit == TimeUnit.FIT:
         if video_process is not None:
@@ -181,22 +176,21 @@ def time_space_start_filter(
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
     if time_space_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+        space_second = time_space_start.get_second()
         if video_process is not None:
-            option = {}
-            if time_space_start.unit == TimeUnit.FRAME:
-                option = {"start": time_space_start.value}
-            elif time_space_start.unit == TimeUnit.SECOND:
-                option = {
-                    "start_duration": time_space_start.value,
-                }
+            option = (
+                {"color": background_color_code}
+                if background_color_code is not None
+                else {}
+            )
             video_process = ffmpeg.filter(
                 video_process,
                 "tpad",
-                color=background_color_code,
+                start_duration=space_second,
                 **option,
             )
         if audio_process is not None:
-            delays = int(time_space_start.get_second() * 1000)
+            delays = int(space_second * 1000)
             audio_process = ffmpeg.filter(
                 audio_process,
                 "adelay",
@@ -213,23 +207,24 @@ def time_space_end_filter(
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
     if time_space_end.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+        space_second = time_space_end.get_second()
         if video_process is not None:
-            option = {}
-            if time_space_end.unit == TimeUnit.FRAME:
-                option = {
-                    "stop": time_space_end.value,
-                }
-            elif time_space_end.unit == TimeUnit.SECOND:
-                option = {
-                    "stop_duration": time_space_end.value,
-                }
+            option = (
+                {"color": background_color_code}
+                if background_color_code is not None
+                else {}
+            )
             video_process = ffmpeg.filter(
-                video_process, "tpad", color=background_color_code, **option
+                video_process,
+                "tpad",
+                stop_duration=space_second,
+                **option,
             )
         if audio_process is not None:
-            pad_dur = time_space_end.get_second()
             audio_process = ffmpeg.filter(
-                audio_process, "apad", pad_dur=pad_dur
+                audio_process,
+                "apad",
+                pad_dur=space_second,
             )
     return video_process, audio_process
 
