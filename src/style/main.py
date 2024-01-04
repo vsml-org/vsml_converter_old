@@ -7,7 +7,7 @@ from lxml.etree import _Attrib
 
 from utils import TagInfoTree, VSMLManager
 
-from .calculator import graphic_calculator
+from .calculator import graphic_calculator, time_calculator
 from .styling_parser import (
     audio_system_parser,
     color_and_pixel_parser,
@@ -29,7 +29,6 @@ from .types import (
     GraphicValue,
     LayerMode,
     Order,
-    TimeUnit,
     TimeValue,
 )
 
@@ -401,36 +400,54 @@ class Style:
                 pass
 
         # calculate param
-        if self.object_length.unit == TimeUnit.PERCENT:
+        parent_object_length = (
+            parent_param.object_length
             if (
                 parent_param is not None
-                and parent_param.object_length is not None
                 and parent_param.object_length.has_specific_value()
-            ):
-                self.object_length.value = (
-                    parent_param.object_length.value
-                    * self.object_length.value
-                    / 100
-                )
-                self.object_length.unit = parent_param.object_length.unit
+            )
+            else None
+        )
+        self.object_length = time_calculator(
+            self.object_length,
+            parent_object_length,
+            self.source_object_length,
+        )
+        self.time_margin_start = time_calculator(
+            self.time_margin_start,
+            parent_object_length,
+        )
+        self.time_margin_end = time_calculator(
+            self.time_margin_end,
+            parent_object_length,
+        )
+        self.time_padding_start = time_calculator(
+            self.time_padding_start,
+            parent_object_length,
+        )
+        self.time_padding_end = time_calculator(
+            self.time_padding_end,
+            parent_object_length,
+        )
 
-        parent_width = None
-        if parent_param is None:
-            parent_width = VSMLManager.get_root_resolution().width
-        elif (
-            parent_param.width is not None
-            and parent_param.width.has_specific_value()
-        ):
-            parent_width = parent_param.width.value
-        parent_height = None
-        if parent_param is None:
-            parent_height = VSMLManager.get_root_resolution().height
-        elif (
-            parent_param.height is not None
-            and parent_param.height.has_specific_value()
-        ):
-            parent_height = parent_param.height.value
-
+        parent_width = (
+            VSMLManager.get_root_resolution().width
+            if parent_param is None
+            else (
+                parent_param.width.value
+                if parent_param.width.has_specific_value()
+                else None
+            )
+        )
+        parent_height = (
+            VSMLManager.get_root_resolution().height
+            if parent_param is None
+            else (
+                parent_param.height.value
+                if parent_param.height.has_specific_value()
+                else None
+            )
+        )
         self.width = graphic_calculator(
             self.width, parent_width, self.source_width
         )
