@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 from content import SourceContent
-from style import Style, TimeUnit
+from style import Style
 from utils import SourceType
 
 from .ffmpeg import (
@@ -113,7 +113,7 @@ def create_source_process(
         video_process,
         audio_process,
     )
-    if style.object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+    if style.object_length.has_specific_value():
         video_process, audio_process = time_space_end_filter(
             style.time_padding_end,
             background_color_code,

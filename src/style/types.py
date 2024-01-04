@@ -195,6 +195,12 @@ class TimeValue:
         else:
             return False
 
+    def is_fit(self) -> bool:
+        return self.unit == TimeUnit.FIT
+
+    def has_specific_value(self) -> bool:
+        return self.unit in [TimeUnit.SECOND, TimeUnit.FRAME]
+
 
 class GraphicValue:
     value: int
@@ -257,6 +263,12 @@ class GraphicValue:
             return self.value > 0
         else:
             return False
+
+    def is_auto(self) -> bool:
+        return self.unit == GraphicUnit.AUTO
+
+    def has_specific_value(self) -> bool:
+        return self.unit == GraphicUnit.PIXEL
 
 
 class Color:

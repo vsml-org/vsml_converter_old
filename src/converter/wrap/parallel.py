@@ -10,7 +10,7 @@ from converter.ffmpeg import (
     time_space_start_filter,
 )
 from converter.schemas import Process
-from style import GraphicValue, LayerMode, TimeUnit
+from style import GraphicValue, LayerMode
 
 
 def create_parallel_process(
@@ -51,7 +51,7 @@ def create_parallel_process(
             child_process.video,
             child_process.audio,
         )
-        if child_style.object_length.unit != TimeUnit.FIT:
+        if not child_style.object_length.is_fit():
             child_process.video, child_process.audio = time_space_end_filter(
                 child_style.time_margin_end,
                 background_color_code,

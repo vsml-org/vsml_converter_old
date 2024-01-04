@@ -26,7 +26,6 @@ from .styling_parser import (
 from .types import (
     AudioSystem,
     Color,
-    GraphicUnit,
     GraphicValue,
     LayerMode,
     Order,
@@ -406,8 +405,7 @@ class Style:
             if (
                 parent_param is not None
                 and parent_param.object_length is not None
-                and parent_param.object_length.unit
-                in [TimeUnit.SECOND, TimeUnit.FRAME]
+                and parent_param.object_length.has_specific_value()
             ):
                 self.object_length.value = (
                     parent_param.object_length.value
@@ -421,7 +419,7 @@ class Style:
             parent_width = VSMLManager.get_root_resolution().width
         elif (
             parent_param.width is not None
-            and parent_param.width.unit == GraphicUnit.PIXEL
+            and parent_param.width.has_specific_value()
         ):
             parent_width = parent_param.width.value
         parent_height = None
@@ -429,7 +427,7 @@ class Style:
             parent_height = VSMLManager.get_root_resolution().height
         elif (
             parent_param.height is not None
-            and parent_param.height.unit == GraphicUnit.PIXEL
+            and parent_param.height.has_specific_value()
         ):
             parent_height = parent_param.height.value
 
@@ -495,7 +493,7 @@ class Style:
             self.source_object_length
             if (
                 self.source_object_length is not None
-                and self.object_length.unit != TimeUnit.FIT
+                and not self.object_length.is_fit()
             )
             else self.object_length
         )
@@ -503,20 +501,14 @@ class Style:
     def get_width(self) -> GraphicValue:
         return (
             self.source_width
-            if (
-                self.width.unit == GraphicUnit.AUTO
-                and self.source_width is not None
-            )
+            if (self.width.is_auto() and self.source_width is not None)
             else self.width
         )
 
     def get_height(self) -> GraphicValue:
         return (
             self.source_height
-            if (
-                self.height.unit == GraphicUnit.AUTO
-                and self.source_height is not None
-            )
+            if (self.height.is_auto() and self.source_height is not None)
             else self.height
         )
 

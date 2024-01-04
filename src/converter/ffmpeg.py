@@ -4,14 +4,7 @@ from typing import Any, Optional
 
 import ffmpeg
 
-from style import (
-    AudioSystem,
-    Color,
-    GraphicUnit,
-    GraphicValue,
-    TimeUnit,
-    TimeValue,
-)
+from style import AudioSystem, Color, GraphicValue, TimeValue
 from utils import VSMLManager
 
 origin_background_processes = {}
@@ -97,7 +90,7 @@ def width_height_filter(
     video_process: Any,
 ) -> Any:
     if video_process is not None:
-        if width.unit != GraphicUnit.AUTO or height.unit != GraphicUnit.AUTO:
+        if not (width.is_auto() and height.is_auto()):
             video_process = ffmpeg.filter(
                 video_process,
                 "scale",
@@ -147,7 +140,7 @@ def object_length_filter(
     video_process: Optional[Any] = None,
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
-    if object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+    if object_length.has_specific_value():
         length_second = object_length.get_second()
         if video_process is not None:
             video_process = ffmpeg.trim(video_process, end=length_second)
@@ -157,7 +150,7 @@ def object_length_filter(
                 "atrim",
                 end=length_second,
             )
-    elif object_length.unit == TimeUnit.FIT:
+    elif object_length.is_fit():
         if video_process is not None:
             video_process = ffmpeg.filter(
                 video_process, "loop", loop=-1, size=32767, start=0
@@ -175,7 +168,7 @@ def time_space_start_filter(
     video_process: Optional[Any] = None,
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
-    if time_space_start.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+    if time_space_start.has_specific_value():
         space_second = time_space_start.get_second()
         if video_process is not None:
             option = (
@@ -206,7 +199,7 @@ def time_space_end_filter(
     video_process: Optional[Any] = None,
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
-    if time_space_end.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+    if time_space_end.has_specific_value():
         space_second = time_space_end.get_second()
         if video_process is not None:
             option = (
@@ -311,7 +304,7 @@ def adjust_parallel_audio(
     audio_process: Any,
 ) -> Any:
     option = {}
-    if object_length.unit == TimeUnit.FIT:
+    if object_length.is_fit():
         option = {"whole_len": -1.0}
     else:
         option = {"whole_dur": object_length.get_second()}

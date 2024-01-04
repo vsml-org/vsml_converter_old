@@ -2,7 +2,6 @@ import json
 from typing import Optional
 
 from content import SourceContent, VSMLContent, WrapContent
-from style import TimeUnit
 from utils import VSMLManager
 from vsml import VSML
 
@@ -65,10 +64,7 @@ def convert_video(
         video_process=process.video,
         audio_process=process.audio,
     )
-    if style.object_length.unit in [
-        TimeUnit.FRAME,
-        TimeUnit.SECOND,
-    ]:
+    if style.object_length.has_specific_value():
         process.video, process.audio = time_space_end_filter(
             style.time_margin_end,
             video_process=process.video,

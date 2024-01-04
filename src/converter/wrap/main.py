@@ -5,7 +5,7 @@ from converter.ffmpeg import (
     time_space_start_filter,
 )
 from converter.schemas import Process
-from style import Order, TimeUnit
+from style import Order
 
 from .parallel import create_parallel_process
 from .sequence import create_sequence_process
@@ -36,7 +36,7 @@ def create_wrap_process(
         process.video,
         process.audio,
     )
-    if style.object_length.unit in [TimeUnit.FRAME, TimeUnit.SECOND]:
+    if style.object_length.has_specific_value():
         process.video, process.audio = time_space_end_filter(
             style.time_padding_end,
             background_color_code,

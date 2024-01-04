@@ -8,7 +8,7 @@ from converter.ffmpeg import (
     time_space_start_filter,
 )
 from converter.schemas import Process
-from style import TimeUnit, TimeValue
+from style import TimeValue
 
 
 def create_sequence_process(
@@ -85,7 +85,7 @@ def create_sequence_process(
             audio_time_margin += max_time_margin + length_with_padding
 
         # FITな子要素があれば以降をこのオブジェクトで埋める
-        if child_style.object_length.unit == TimeUnit.FIT:
+        if child_style.object_length.is_fit():
             video_process, audio_process = adjust_fit_sequence(
                 background_color_code, video_process, audio_process
             )

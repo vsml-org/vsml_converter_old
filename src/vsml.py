@@ -5,12 +5,10 @@ from lxml.etree import _Element
 import definition
 from content import SourceContent, VSMLContent, WrapContent, get_source_value
 from style import (
-    GraphicUnit,
     GraphicValue,
     LayerMode,
     Order,
     Style,
-    TimeUnit,
     TimeValue,
     pickup_style,
 )
@@ -168,7 +166,7 @@ def element_to_content(
         )
         calc_object_length = None
         # 親要素に時間指定がないとき
-        if style.object_length.unit == TimeUnit.FIT:
+        if style.object_length.is_fit():
             # シーケンス(時間的逐次)
             if style.order == Order.SEQUENCE:
                 calc_object_length = calc_catenating_object_length
@@ -222,7 +220,7 @@ def element_to_content(
             if calc_object_length is not None:
                 calc_object_length(
                     wrap_object_time_info,
-                    child_style.object_length.unit == TimeUnit.FIT,
+                    child_style.object_length.is_fit(),
                     child_style.time_margin_start,
                     child_style.time_padding_start,
                     child_object_length,
@@ -259,16 +257,16 @@ def element_to_content(
 
         # wrapのobject_lengthがデフォルト値(FIT)かつ、子要素全体が時間的長さを持つ場合
         if (
-            style.object_length.unit == TimeUnit.FIT
+            style.object_length.is_fit()
             and not wrap_object_time_info.children_is_fit
         ):
             # 親のobject_lengthを更新
             style.object_length = wrap_object_time_info.whole_object_length
         if vsml_content.exist_video:
             # 親のwidth, heightを更新
-            if style.width.unit == GraphicUnit.AUTO:
+            if style.width.is_auto():
                 style.width = wrap_object_horizontal_info.whole_length
-            if style.height.unit == GraphicUnit.AUTO:
+            if style.height.is_auto():
                 style.height = wrap_object_vertical_info.whole_length
 
     else:
