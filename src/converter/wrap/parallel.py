@@ -91,6 +91,11 @@ def create_parallel_process(
         audio_process = adjust_parallel_audio(
             style.object_length, audio_process
         )
+    video_process, audio_process = object_length_filter(
+        style.object_length,
+        video_process=video_process,
+        audio_process=audio_process,
+    )
 
     return Process(
         video_process,

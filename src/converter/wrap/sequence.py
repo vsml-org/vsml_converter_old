@@ -3,6 +3,7 @@ from converter.ffmpeg import (
     adjust_fit_sequence,
     concat_filter,
     get_background_color_code,
+    object_length_filter,
     set_background_filter,
     time_space_end_filter,
     time_space_start_filter,
@@ -110,6 +111,11 @@ def create_sequence_process(
                 audio_remain_time_margin,
                 audio_process=audio_process,
             )
+    video_process, audio_process = object_length_filter(
+        style.object_length,
+        video_process=video_process,
+        audio_process=audio_process,
+    )
 
     return Process(
         video_process,
