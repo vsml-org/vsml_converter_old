@@ -4,6 +4,7 @@ from typing import Optional
 from .types import (
     AudioSystem,
     Color,
+    DirectionInfo,
     GraphicValue,
     LayerMode,
     Order,
@@ -149,6 +150,15 @@ def order_parser(
             return Order.SEQUENCE
         case "parallel":
             return Order.PARALLEL
+
+
+def direction_parser(
+    value: str,
+) -> Optional[DirectionInfo]:
+    try:
+        return DirectionInfo(value)
+    except ValueError:
+        return
 
 
 def layer_mode_parser(

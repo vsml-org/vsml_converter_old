@@ -437,6 +437,7 @@ STYLE_VALUE_PATTERN = {
     "time-padding-end": TIME_PATTERN,
     "order": "(sequence|parallel)",
     "layer-mode": "(single|multi)",
+    "direction": "(row|column|row-reverse|column-reverse)",
     "opacity": "({}|{})".format(regex.REAL_NUMBER_PATTERN, PERCENT_PATTERN),
     "width": GRAPHIC_PATTERN,
     "min-width": "",

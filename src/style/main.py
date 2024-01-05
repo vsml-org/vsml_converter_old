@@ -12,6 +12,7 @@ from .styling_parser import (
     audio_system_parser,
     color_and_pixel_parser,
     color_parser,
+    direction_parser,
     double_time_parser,
     font_style_parser,
     font_weight_parser,
@@ -26,6 +27,7 @@ from .styling_parser import (
 from .types import (
     AudioSystem,
     Color,
+    DirectionInfo,
     GraphicValue,
     LayerMode,
     Order,
@@ -46,6 +48,7 @@ class Style:
     width: GraphicValue
     height: GraphicValue
     layer_mode: Optional[LayerMode]
+    direction: Optional[DirectionInfo]
     margin_top: GraphicValue
     margin_left: GraphicValue
     margin_right: GraphicValue
@@ -91,6 +94,7 @@ class Style:
         self.width = GraphicValue("auto")
         self.height = GraphicValue("auto")
         self.layer_mode = None
+        self.direction = None
         self.margin_top = GraphicValue("auto")
         self.margin_left = GraphicValue("auto")
         self.margin_right = GraphicValue("auto")
@@ -139,21 +143,27 @@ class Style:
             case "cont":
                 self.order = Order.SEQUENCE
                 self.layer_mode = LayerMode.MULTI
+                self.direction = DirectionInfo("row")
             case "wrp":
                 self.order = Order.SEQUENCE
                 self.layer_mode = LayerMode.MULTI
+                self.direction = DirectionInfo("row")
             case "seq":
                 self.order = Order.SEQUENCE
                 self.layer_mode = LayerMode.MULTI
+                self.direction = DirectionInfo("row")
             case "rect":
                 self.order = Order.SEQUENCE
                 self.layer_mode = LayerMode.MULTI
+                self.direction = DirectionInfo("row")
             case "prl":
                 self.order = Order.PARALLEL
                 self.layer_mode = LayerMode.MULTI
+                self.direction = DirectionInfo("row")
             case "layer":
                 self.order = Order.PARALLEL
                 self.layer_mode = LayerMode.SINGLE
+                self.direction = DirectionInfo("row")
             case "vid":
                 meta = ffprobe(source_value)
                 (
@@ -266,6 +276,10 @@ class Style:
                     parse_value = order_parser(value)
                     if parse_value is not None:
                         self.order = parse_value
+                case "direction":
+                    parse_value = direction_parser(value)
+                    if parse_value is not None:
+                        self.direction = parse_value
                 case "width":
                     parse_value = graphic_parser(value)
                     if parse_value is not None:

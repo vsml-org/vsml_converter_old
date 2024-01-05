@@ -255,6 +255,14 @@ class GraphicValue:
         pixel = self.get_pixel() + other.get_pixel()
         return GraphicValue(f"{pixel}px")
 
+    def __sub__(self, other: GraphicValue) -> GraphicValue:
+        pixel = self.get_pixel() - other.get_pixel()
+        return GraphicValue(f"{pixel}px")
+
+    def __neg__(self) -> GraphicValue:
+        self.value *= -1
+        return self
+
     def get_pixel(self, default_value: int = 0) -> int:
         return self.value if self.unit == GraphicUnit.PIXEL else default_value
 
@@ -354,3 +362,61 @@ class Color:
 
     def __repr__(self) -> str:
         return "'{}'".format(self.value)
+
+
+class Direction(Enum):
+    ROW = auto()
+    COLUMN = auto()
+
+    def __str__(self) -> str:
+        match self:
+            case self.ROW:
+                return "ROW"
+            case self.COLUMN:
+                return "COLUMN"
+            case _:
+                return ""
+
+    def __repr__(self) -> str:
+        match self:
+            case self.ROW:
+                return "ROW"
+            case self.COLUMN:
+                return "COLUMN"
+            case _:
+                return ""
+
+
+class DirectionInfo:
+    direction: Direction
+    is_reverse: bool
+
+    def __init__(self, val: str) -> None:
+        match val:
+            case "row":
+                self.direction = Direction.ROW
+                self.is_reverse = False
+            case "column":
+                self.direction = Direction.COLUMN
+                self.is_reverse = False
+            case "row-reverse":
+                self.direction = Direction.ROW
+                self.is_reverse = True
+            case "column-reverse":
+                self.direction = Direction.COLUMN
+                self.is_reverse = True
+            case _:
+                raise ValueError()
+
+    def is_row(self) -> bool:
+        return self.direction == Direction.ROW
+
+    def __str__(self) -> str:
+        if self.is_reverse:
+            return "'{}_REVERSE'".format(self.direction)
+        return "'{}'".format(self.direction)
+
+    def __repr__(self) -> str:
+        if self.is_reverse:
+            return "'{}_REVERSE'".format(self.direction)
+        return "'{}'".format(self.direction)

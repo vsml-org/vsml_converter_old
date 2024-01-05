@@ -40,7 +40,18 @@ def create_parallel_process(
             style.object_length, video_process=video_process
         )
 
-    left_width = GraphicValue("0")
+    is_row = style.direction is None or style.direction.is_row()
+    is_reverse = style.direction is None or style.direction.is_reverse
+    current_graphic_length = (
+        (
+            width_px_with_padding - style.padding_right
+            if is_row
+            else height_px_with_padding - style.padding_bottom
+        )
+        if is_reverse
+        else (style.padding_left if is_row else style.padding_top)
+    )
+
     remain_margin = GraphicValue("0")
 
     for child_process in child_processes:
@@ -61,19 +72,59 @@ def create_parallel_process(
         if child_process.video is not None:
             match style.layer_mode:
                 case LayerMode.SINGLE:
-                    left_width += max(
-                        child_style.margin_left,
-                        remain_margin,
+                    (
+                        child_width_with_padding,
+                        child_height_with_padding,
+                    ) = child_style.get_size_with_padding()
+                    child_graphic_length = (
+                        child_width_with_padding
+                        if is_row
+                        else child_height_with_padding
                     )
+                    if is_reverse:
+                        current_graphic_length -= child_graphic_length
+                    else:
+                        current_graphic_length += (
+                            max(
+                                child_style.margin_left,
+                                remain_margin,
+                            )
+                            if is_row
+                            else max(
+                                child_style.margin_top,
+                                remain_margin,
+                            )
+                        )
                     video_process = layering_filter(
                         video_process,
                         child_process.video,
-                        left_width,
-                        style.padding_top + child_style.margin_top,
+                        current_graphic_length
+                        if is_row
+                        else style.padding_left + child_style.margin_left,
+                        current_graphic_length
+                        if not is_row
+                        else style.padding_top + child_style.margin_top,
                     )
-                    child_width, _ = child_style.get_size_with_padding()
-                    left_width += child_width
-                    remain_margin = child_style.margin_right
+                    if is_reverse:
+                        current_graphic_length -= (
+                            max(
+                                child_style.margin_left,
+                                remain_margin,
+                            )
+                            if is_row
+                            else max(
+                                child_style.margin_top,
+                                remain_margin,
+                            )
+                        )
+                    else:
+                        current_graphic_length += child_graphic_length
+
+                    remain_margin = (
+                        child_style.margin_right
+                        if is_row
+                        else child_style.margin_bottom
+                    )
                 case LayerMode.MULTI:
                     video_process = layering_filter(
                         video_process,

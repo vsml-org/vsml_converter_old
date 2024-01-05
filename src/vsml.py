@@ -181,19 +181,24 @@ def element_to_content(
             whole_length=GraphicValue("0"),
             last_margin=GraphicValue("0"),
         )
-        calc_width = None
-        calc_height = None
-        # シングルレイヤ(横並び)モード
-        if (
+        is_single_layer = (
             style.order == Order.PARALLEL
             and style.layer_mode == LayerMode.SINGLE
-        ):
-            calc_width = calc_catenating_graphic_length
-            calc_height = calc_piling_graphic_length
-        # マルチレイヤ(奥行き並び)モード
-        else:
-            calc_width = calc_piling_graphic_length
-            calc_height = calc_piling_graphic_length
+        )
+        calc_width = (
+            calc_catenating_graphic_length
+            if is_single_layer
+            and style.direction is not None
+            and style.direction.is_row()
+            else calc_piling_graphic_length
+        )
+        calc_height = (
+            calc_catenating_graphic_length
+            if is_single_layer
+            and style.direction is not None
+            and not style.direction.is_row()
+            else calc_piling_graphic_length
+        )
 
         for vsml_element_child in vsml_element_children:
             # 子要素Elementの作成と配列への追加
@@ -216,40 +221,35 @@ def element_to_content(
 
             child_style = child_content.style
             # 時間計算
-            child_object_length = child_style.get_object_length()
             if calc_object_length is not None:
                 calc_object_length(
                     wrap_object_time_info,
                     child_style.object_length.is_fit(),
                     child_style.time_margin_start,
                     child_style.time_padding_start,
-                    child_object_length,
+                    child_style.get_object_length(),
                     child_style.time_padding_end,
                     child_style.time_margin_end,
                 )
 
             # 幅、高さ計算
-            child_width = child_style.get_width()
-            child_height = child_style.get_height()
             if child_content.exist_video:
-                if calc_width is not None:
-                    calc_width(
-                        wrap_object_horizontal_info,
-                        child_style.margin_left,
-                        child_style.padding_left,
-                        child_width,
-                        child_style.padding_right,
-                        child_style.margin_right,
-                    )
-                if calc_height is not None:
-                    calc_height(
-                        wrap_object_vertical_info,
-                        child_style.margin_top,
-                        child_style.padding_top,
-                        child_height,
-                        child_style.padding_bottom,
-                        child_style.margin_bottom,
-                    )
+                calc_width(
+                    wrap_object_horizontal_info,
+                    child_style.margin_left,
+                    child_style.padding_left,
+                    child_style.get_width(),
+                    child_style.padding_right,
+                    child_style.margin_right,
+                )
+                calc_height(
+                    wrap_object_vertical_info,
+                    child_style.margin_top,
+                    child_style.padding_top,
+                    child_style.get_height(),
+                    child_style.padding_bottom,
+                    child_style.margin_bottom,
+                )
 
         wrap_object_time_info.include_last_margin()
         wrap_object_horizontal_info.include_last_margin()
