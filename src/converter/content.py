@@ -35,14 +35,10 @@ def get_process_by_source(
         case SourceType.AUDIO:
             audio_process = get_source_process(src_path, False, True)["audio"]
         case SourceType.TEXT:
-            (
-                width_with_padding,
-                height_with_padding,
-            ) = style.get_size_with_padding()
             video_process = get_text_process(
                 src_path,
-                width_with_padding,
-                height_with_padding,
+                style.get_width_with_padding(),
+                style.get_height_with_padding(),
                 style.padding_left,
                 style.padding_top,
                 style.background_color,
@@ -81,13 +77,9 @@ def create_source_process(
             style.padding_top.is_zero_over()
             or style.padding_left.is_zero_over()
         ):
-            (
-                width_with_padding,
-                height_with_padding,
-            ) = style.get_size_with_padding()
             video_process = set_background_filter(
-                width=width_with_padding,
-                height=height_with_padding,
+                width=style.get_width_with_padding(),
+                height=style.get_height_with_padding(),
                 background_color=style.background_color,
                 video_process=video_process,
                 position_x=style.padding_left,

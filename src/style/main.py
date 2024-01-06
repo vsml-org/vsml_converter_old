@@ -508,12 +508,13 @@ class Style:
     def __repr__(self) -> str:
         return str(vars(self))
 
-    def get_size_with_padding(self) -> tuple[GraphicValue, GraphicValue]:
+    def get_width_with_padding(self) -> GraphicValue:
         width = self.get_width()
+        return width + self.padding_left + self.padding_right
+
+    def get_height_with_padding(self) -> GraphicValue:
         height = self.get_height()
-        width_with_padding = width + self.padding_left + self.padding_right
-        height_with_padding = height + self.padding_top + self.padding_bottom
-        return width_with_padding, height_with_padding
+        return height + self.padding_top + self.padding_bottom
 
     def get_object_length_with_padding(self) -> TimeValue:
         object_length = self.get_object_length()

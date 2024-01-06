@@ -26,10 +26,6 @@ def create_sequence_process(
 
     style = vsml_content.style
 
-    (
-        width_with_padding,
-        height_with_padding,
-    ) = style.get_size_with_padding()
     background_color_code = get_background_color_code(style.background_color)
 
     for child_process in child_processes:
@@ -53,8 +49,8 @@ def create_sequence_process(
         if child_process.video is not None:
             # concatのため解像度を合わせた透明背景を設定
             child_process.video = set_background_filter(
-                width=width_with_padding,
-                height=height_with_padding,
+                width=style.get_width_with_padding(),
+                height=style.get_height_with_padding(),
                 background_color=style.background_color,
                 video_process=child_process.video,
                 fit_video_process=True,
