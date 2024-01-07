@@ -398,6 +398,16 @@ class Style:
                     self.background_color = Color(background_color)
             case "txt":
                 if self.font_size is not None:
+                    parent_font_size = (
+                        parent_param.font_size.value
+                        if parent_param is not None
+                        and parent_param.font_size is not None
+                        and parent_param.font_size.has_specific_value()
+                        else None
+                    )
+                    self.font_size = graphic_calculator(
+                        self.font_size, parent_font_size
+                    )
                     text_lines = source_value.split(r"\n")
                     self.source_width = graphic_parser(
                         "{}px".format(
