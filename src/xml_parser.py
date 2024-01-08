@@ -136,4 +136,4 @@ def parsing_vsml(filename: str, is_offline: bool) -> VSML:
         root_path = root_path + "/"
     VSMLManager.set_root_path(root_path)
 
-    return VSML(vsml_element)
+    return VSML(vsml_element, is_offline)

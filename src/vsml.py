@@ -54,7 +54,7 @@ class WrapObjectGraphicInfo:
 class VSML:
     content: VSMLContent
 
-    def __init__(self, vsml: _Element):
+    def __init__(self, vsml: _Element, is_offline: bool):
         # meta, contentの取得
         children = list(vsml)
         metaElement, contentElement = (
@@ -71,7 +71,7 @@ class VSML:
             WidthHeight.from_str(contentElement.attrib["resolution"])
         )
         VSMLManager.set_root_fps(float(contentElement.attrib["fps"]))
-        content = element_to_content(contentElement, style_tree)
+        content = element_to_content(contentElement, style_tree, is_offline)
         if content is None:
             raise Exception()
         self.content = content
@@ -106,9 +106,9 @@ def get_style_from_attribute(style_str: Optional[str]) -> dict[str, str]:
 def element_to_content(
     vsml_element: _Element,
     style_tree: dict[str, dict[str, str]],
+    is_offline: bool,
     parent_info_tree: Optional[TagInfoTree] = None,
     parent_param: Optional[Style] = None,
-    count: int = 0,
 ) -> VSMLContent:
     tag_name = vsml_element.tag
     classes_name = vsml_element.attrib.get("class", "").split(" ")
@@ -118,6 +118,8 @@ def element_to_content(
         if tag_name in definition.CONTENT_TAG
         else ""
     )
+    if source_value[:4] == "http" and tag_name != "txt":
+        raise Exception("please turn off offline mode or don't use URL file")
 
     # styleの取得
     picked_up_style_tree = pickup_style(
@@ -205,9 +207,9 @@ def element_to_content(
             child_content = element_to_content(
                 vsml_element_child,
                 style_tree,
+                is_offline,
                 tag_info_tree,
                 style,
-                count + 1,
             )
             vsml_content.items.append(child_content)
 
