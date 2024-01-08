@@ -118,7 +118,7 @@ def element_to_content(
         if tag_name in definition.CONTENT_TAG
         else ""
     )
-    if source_value[:4] == "http" and tag_name != "txt":
+    if is_offline and source_value[:4] == "http" and tag_name != "txt":
         raise Exception("please turn off offline mode or don't use URL file")
 
     # styleの取得
