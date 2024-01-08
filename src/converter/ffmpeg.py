@@ -256,7 +256,7 @@ def get_text_process(
     padding_left: GraphicValue,
     padding_top: GraphicValue,
     background_color: Optional[Color],
-    font_family: Optional[str],
+    font_family: list[str],
     font_weight: Optional[bool],
     font_style: Optional[bool],
     font_size: Optional[GraphicValue],

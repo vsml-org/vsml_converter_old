@@ -14,6 +14,7 @@ from .styling_parser import (
     color_parser,
     direction_parser,
     double_time_parser,
+    font_family_parser,
     font_style_parser,
     font_weight_parser,
     graphic_parser,
@@ -65,7 +66,7 @@ class Style:
     font_color: Optional[Color]  # inherit
     font_border_color: Optional[Color]  # inherit
     font_border_width: Optional[int]  # inherit
-    font_family: Optional[str]  # inherit
+    font_family: list[str]  # inherit
     font_size: Optional[GraphicValue]  # inherit
     font_weight: Optional[bool]  # inherit
     font_style: Optional[bool]  # inherit
@@ -109,7 +110,7 @@ class Style:
         self.font_color = None
         self.font_border_color = None
         self.font_border_width = None
-        self.font_family = None
+        self.font_family = []
         self.font_size = None
         self.font_weight = None
         self.font_style = None
@@ -131,7 +132,7 @@ class Style:
             if parent_param.font_border_width is not None:
                 self.font_border_width = parent_param.font_border_width
             if parent_param.font_family is not None:
-                self.font_family = parent_param.font_family
+                self.font_family = parent_param.font_family[:]
             if parent_param.font_size is not None:
                 self.font_size = parent_param.font_size
             if parent_param.font_weight is not None:
@@ -374,7 +375,9 @@ class Style:
                     if parse_value is not None:
                         self.font_border_width = parse_value
                 case "font-family":
-                    self.font_family = value
+                    self.font_family = (
+                        font_family_parser(value) + self.font_family
+                    )
                 case "font-size":
                     parse_value = graphic_parser(value)
                     if parse_value is not None:

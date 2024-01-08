@@ -122,6 +122,13 @@ def pixel_parser(
         return int(value[:-2])
 
 
+def font_family_parser(value: str) -> list[str]:
+    font_families = [
+        item.strip().replace('"', "") for item in value.split(",")
+    ]
+    return font_families
+
+
 def font_weight_parser(
     value: str,
 ) -> Optional[bool]:

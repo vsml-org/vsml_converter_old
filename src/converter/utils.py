@@ -86,20 +86,22 @@ def get_regular_font(font_dict: dict[str, str]) -> Optional[str]:
 
 
 def find_font_files(
-    font_name: str, bold: bool = False, italic: bool = False
+    font_names: list[str], bold: bool = False, italic: bool = False
 ) -> Optional[str]:
-    font_name_dict = font_dict.get(font_name)
-    if font_name_dict is None:
-        return ""
-    values = list(font_name_dict.values())
-    if len(values) == 1:
-        return values[0]
-    match bold, italic:
-        case True, True:
-            return get_bi_font(font_name_dict)
-        case True, False:
-            return get_bold_font(font_name_dict)
-        case False, True:
-            return get_italic_font(font_name_dict)
-        case False, False:
-            return get_regular_font(font_name_dict)
+    for font_name in font_names:
+        print(font_name)
+        font_name_dict = font_dict.get(font_name)
+        if font_name_dict is None:
+            continue
+        values = list(font_name_dict.values())
+        if len(values) == 1:
+            return values[0]
+        match bold, italic:
+            case True, True:
+                return get_bi_font(font_name_dict)
+            case True, False:
+                return get_bold_font(font_name_dict)
+            case False, True:
+                return get_italic_font(font_name_dict)
+            case False, False:
+                return get_regular_font(font_name_dict)

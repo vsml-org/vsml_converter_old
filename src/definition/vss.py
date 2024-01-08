@@ -268,7 +268,10 @@ STYLE_VALUE_PATTERN = {
     "font-border-color": COLOR_PATTERN,
     "font-border-width": PIXEL_PATTERN,
     "font": "",
-    "font-family": ".+",
+    "font-family": (
+        r"^(\s*(\"[^\"]*\"|[a-za-z0-9-]+)\s*,)*"
+        r"\s*(\"[^\"]*\"|[a-za-z0-9-]+)\s*$"
+    ),
     "font-size": GRAPHIC_PATTERN,
     "font-stretch": "",
     "font-style": "(normal|italic)",
