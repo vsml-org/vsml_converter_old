@@ -15,7 +15,9 @@ def get_source_value(
             src_path = vsml_element.get("src", None)
             if src_path is None:
                 raise Exception()
-            return VSMLManager.get_root_path() + src_path
+            if src_path[0] != "/" and src_path[:4] != "http":
+                src_path = VSMLManager.get_root_path() + src_path
+            return src_path
         case "txt":
             txt_child = tostring(
                 vsml_element,
