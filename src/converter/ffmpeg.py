@@ -7,6 +7,8 @@ import ffmpeg
 from style import AudioSystem, Color, GraphicValue, TimeValue
 from utils import VSMLManager
 
+from .utils import find_font_files
+
 origin_background_processes = {}
 origin_graphic_processes: dict[str, dict[str, Any]] = {}
 
@@ -255,6 +257,8 @@ def get_text_process(
     padding_top: GraphicValue,
     background_color: Optional[Color],
     font_family: Optional[str],
+    font_weight: Optional[bool],
+    font_style: Optional[bool],
     font_size: Optional[GraphicValue],
     font_color: Optional[Color],
     font_border_color: Optional[Color],
@@ -272,9 +276,13 @@ def get_text_process(
         background_color,
     )
     if font_family is not None:
-        option |= {
-            "font": font_family,
-        }
+        is_bold = font_weight if font_weight is not None else False
+        is_italic = font_style if font_style is not None else False
+        font_file_path = find_font_files(font_family, is_bold, is_italic)
+        if font_file_path is not None:
+            option |= {
+                "fontfile": font_file_path,
+            }
     if font_size is not None:
         option |= {
             "fontsize": font_size.get_pixel(),

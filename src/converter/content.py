@@ -43,6 +43,8 @@ def get_process_by_source(
                 style.padding_top,
                 style.background_color,
                 style.font_family,
+                style.font_weight,
+                style.font_style,
                 style.font_size,
                 style.font_color,
                 style.font_border_color,

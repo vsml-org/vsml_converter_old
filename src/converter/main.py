@@ -13,6 +13,7 @@ from .ffmpeg import (
     time_space_start_filter,
 )
 from .schemas import Process
+from .utils import init_font_dict
 from .wrap import create_wrap_process
 
 
@@ -50,6 +51,7 @@ def convert_video(
 ):
     out_filename = "video.mp4" if out_filename is None else out_filename
 
+    init_font_dict()
     process = create_process(vsml_data.content, debug_mode)
     style = vsml_data.content.style
     if process.video is not None:

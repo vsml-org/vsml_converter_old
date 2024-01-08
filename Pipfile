@@ -12,6 +12,7 @@ isort = "*"
 flake8 = "*"
 requests = "*"
 chardet = "*"
+matplotlib = "*"
 
 [dev-packages]
 pre-commit = "*"
