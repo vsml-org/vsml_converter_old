@@ -2,20 +2,17 @@ import re
 from typing import Optional
 
 from matplotlib import font_manager
+from PIL import ImageFont
 
 font_dict: dict[str, dict[str, str]] = {}
-
-
-def init_font_dict():
-    global font_dict
-    font_files = font_manager.findSystemFonts(fontpaths=None, fontext="ttf")
-    for font_file in font_files:
-        font_info = font_manager.get_font(font_file)
-        if not font_dict.get(font_info.family_name):
-            font_dict[font_info.family_name] = {}
-        font_dict[font_info.family_name] |= {
-            font_info.style_name.lower().strip(): font_file
-        }
+font_files = font_manager.findSystemFonts(fontpaths=None, fontext="ttf")
+for font_file in font_files:
+    font_info = font_manager.get_font(font_file)
+    if not font_dict.get(font_info.family_name):
+        font_dict[font_info.family_name] = {}
+    font_dict[font_info.family_name] |= {
+        font_info.style_name.lower().strip(): font_file
+    }
 
 
 def get_bi_font(
@@ -89,7 +86,6 @@ def find_font_files(
     font_names: list[str], bold: bool = False, italic: bool = False
 ) -> Optional[str]:
     for font_name in font_names:
-        print(font_name)
         font_name_dict = font_dict.get(font_name)
         if font_name_dict is None:
             continue
@@ -105,3 +101,42 @@ def find_font_files(
                 return get_italic_font(font_name_dict)
             case False, False:
                 return get_regular_font(font_name_dict)
+
+
+def calculate_text_size(
+    font_path: Optional[str],
+    text: str,
+    font_size: int,
+    font_border_width: Optional[int],
+):
+    text_lines = text.split("\n")
+    if font_path is None:
+        max_width = max(map(len, text_lines)) * font_size
+        one_line_height = font_size
+        if font_border_width is not None:
+            max_width += font_border_width * 2
+            one_line_height += font_border_width * 2
+        return (
+            max_width,
+            len(text_lines) * one_line_height,
+        )
+    else:
+        font = ImageFont.truetype(font_path, font_size)
+
+        text_widths: list[int] = []
+        text_heights: list[int] = []
+        for text_line in text_lines:
+            offset_x, offset_y, text_width, text_height = font.getbbox(
+                text_line
+            )
+            text_widths.append(text_width - offset_x)
+            text_heights.append(text_height - offset_y)
+
+        width = max(text_widths)
+        height = sum(text_heights)
+
+        if font_border_width is not None:
+            width += font_border_width * 2
+            height += font_border_width * 2 * len(text_lines)
+
+        return width, height

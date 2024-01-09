@@ -34,6 +34,7 @@ from .types import (
     Order,
     TimeValue,
 )
+from .utils import calculate_text_size, find_font_files
 
 
 class Style:
@@ -70,11 +71,12 @@ class Style:
     font_size: Optional[GraphicValue]  # inherit
     font_weight: Optional[bool]  # inherit
     font_style: Optional[bool]  # inherit
-    # source value
+    # other value
     source_object_length: Optional[TimeValue]
     source_width: Optional[GraphicValue]
     source_height: Optional[GraphicValue]
     source_audio_system: Optional[AudioSystem]
+    using_font_path: Optional[str]
 
     # 各タグのデフォルトparam
     def __init__(
@@ -411,18 +413,27 @@ class Style:
                     self.font_size = graphic_calculator(
                         self.font_size, parent_font_size
                     )
-                    text_lines = source_value.split(r"\n")
-                    self.source_width = graphic_parser(
-                        "{}px".format(
-                            max(map(len, text_lines))
-                            * self.font_size.get_pixel()
-                        )
+                    self.using_font_path = find_font_files(
+                        self.font_family,
+                        (
+                            self.font_weight
+                            if self.font_weight is not None
+                            else False
+                        ),
+                        (
+                            self.font_style
+                            if self.font_style is not None
+                            else False
+                        ),
                     )
-                    self.source_height = graphic_parser(
-                        "{}px".format(
-                            len(text_lines) * self.font_size.get_pixel()
-                        )
+                    width, height = calculate_text_size(
+                        self.using_font_path,
+                        source_value,
+                        self.font_size.get_pixel(),
+                        self.font_border_width,
                     )
+                    self.source_width = graphic_parser("{}px".format(width))
+                    self.source_height = graphic_parser("{}px".format(height))
             case _:
                 pass
 
