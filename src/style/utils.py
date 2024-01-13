@@ -7,7 +7,10 @@ from PIL import ImageFont
 font_dict: dict[str, dict[str, str]] = {}
 font_files = font_manager.findSystemFonts(fontpaths=None, fontext="ttf")
 for font_file in font_files:
-    font_info = font_manager.get_font(font_file)
+    try:
+        font_info = font_manager.get_font(font_file)
+    except Exception:
+        continue
     if not font_dict.get(font_info.family_name):
         font_dict[font_info.family_name] = {}
     font_dict[font_info.family_name] |= {
