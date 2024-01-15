@@ -53,6 +53,7 @@ class VSMLContent:
     style: Style
     exist_video: bool
     exist_audio: bool
+    _second: float
 
     def __init__(
         self,

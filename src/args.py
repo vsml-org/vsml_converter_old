@@ -19,6 +19,13 @@ def init_parser():
         help="path to output video",
     )
     parser.add_argument(
+        "-f",
+        "--frame",
+        metavar="preview_frame",
+        type=int,
+        help="frame for preview",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="debug mode",

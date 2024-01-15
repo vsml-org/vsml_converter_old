@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 from content import SourceContent, VSMLContent, WrapContent
@@ -70,20 +69,6 @@ def convert_video(
             video_process=process.video,
             audio_process=process.audio,
         )
-
-    if debug_mode:
-        content_str = (
-            str(vsml_data.content)
-            .replace("'", '"')
-            .replace("True", "true")
-            .replace("False", "false")
-            .replace("None", "null")
-        )
-        content_str = json.dumps(
-            (json.loads(content_str)), indent=2, ensure_ascii=False
-        )
-        with open("./debug.json", "w") as f:
-            f.write(content_str)
 
     export_video(
         process.video, process.audio, out_filename, debug_mode, overwrite
