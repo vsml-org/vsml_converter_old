@@ -371,7 +371,7 @@ class Style:
                 case "font-border-color":
                     parse_value = color_parser(value)
                     if parse_value is not None:
-                        self.background_color = parse_value
+                        self.font_border_color = parse_value
                 case "font-border-width":
                     parse_value = pixel_parser(value)
                     if parse_value is not None:
