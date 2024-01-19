@@ -18,6 +18,10 @@ for font_file in font_files:
     }
 
 
+def get_font_list():
+    return list(font_dict.keys())
+
+
 def get_bi_font(
     font_dict: dict[str, str], compromising: bool = True
 ) -> Optional[str]:

@@ -1,4 +1,35 @@
-from argparse import ArgumentParser, Namespace
+import json
+from argparse import Action, ArgumentParser, Namespace
+from collections.abc import Sequence
+
+from style.utils import get_font_list
+
+
+class FontFamilyAction(Action):
+    def __init__(
+        self,
+        option_strings: Sequence[str],
+        dest: str,
+        default: str | None = None,
+        help: str | None = None,
+    ) -> None:
+        super().__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help=help,
+        )
+
+    def __call__(
+        self,
+        parser: ArgumentParser,
+        namespace,
+        values,
+        option_string,
+    ) -> None:
+        print(json.dumps(get_font_list(), indent=2))
+        parser.exit()
 
 
 def init_parser():
@@ -39,6 +70,11 @@ def init_parser():
         "--offline",
         action="store_true",
         help="offline mode",
+    )
+    parser.add_argument(
+        "--font-family-list",
+        action=FontFamilyAction,
+        help="get font family list",
     )
     return parser
 
