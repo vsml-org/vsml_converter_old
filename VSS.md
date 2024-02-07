@@ -7,12 +7,6 @@
 - [x] object-length
     - タイムラインオブジェクトの長さの指定
     - `fit|source|<time[s]>|<frame[f]>|<percent[%]>`
-- [ ] source-loop
-    - 長さを持つソースをループするか否か
-    - `true|false`
-- [ ] playback-speed
-    - 再生速度
-    - `<percent[%]>`
 - [x] time-margin
     - タイムラインオブジェクトの外側の時間的余白の長さ指定
     - `(<time[s]>|<frame[f]>|<percent[%]>) (<time[s]>|<frame[f]>|<percent[%]>)?`
@@ -34,101 +28,25 @@
 - [x] order
     - sequence, parallelの指定
     - `sequence|parallel`
+- [ ] source-loop
+    - 長さを持つソースをループするか否か
+    - `true|false`
+- [ ] playback-speed
+    - 再生速度
+    - `<percent[%]>`
 
 ## 映像プロパティ
 
 画像や動画、テキストなどのグラフィック関連の操作をするプロパティ
 
-- [ ] layer-mode
+- [x] layer-mode
     - 子要素を1枚のレイヤーに横並びさせるか、各要素を1レイヤーとして重ねるか
     - `single|multi`
-- [ ] opacity
-    - 透明度
-    - ``
-- [x] width
-    - グラフィックオブジェクトの横幅
-- [ ] min-width
-    - グラフィックオブジェクトの最小の横幅
-- [ ] max-width
-    - グラフィックオブジェクトの最大の横幅
-- [x] height
-    - グラフィックオブジェクトの縦幅
-- [ ] min-height
-    - グラフィックオブジェクトの最小の縦幅
-- [ ] max-height
-    - グラフィックオブジェクトの最大の縦幅
+- [x] direction
+    - 子要素を並べる際の方向
+    - `row|column|row-reverse|column-reverse`
 - [x] background-color
     - 背景色
-- [ ] object-fit
-    - 映像や画像を親要素のwrp系の領域にどう収めるか
-- [ ] chroma-key
-    - クロマキー
-- [ ] magnification
-    - 拡大率
-- [ ] rotate
-    - 回転量
-- [ ] border
-    - 自要素の領域の縁取り指定
-- [ ] border-color
-    - 自要素の領域の縁取りの色指定
-- [ ] border-style
-    - 自要素の領域の縁取りの見た目指定
-- [ ] border-width
-    - 自要素の領域の縁取りの太さ指定
-- [ ] border-bottom
-    - 自要素の領域の下縁取り指定
-- [ ] border-bottom-color
-    - 自要素の領域の下縁取りの色指定
-- [ ] border-bottom-style
-    - 自要素の領域の下縁取りの見た目指定
-- [ ] border-bottom-width
-    - 自要素の領域の下縁取りの太さ指定
-- [ ] border-left
-    - 自要素の領域の左縁取り指定
-- [ ] border-left-color
-    - 自要素の領域の左縁取りの色指定
-- [ ] border-left-style
-    - 自要素の領域の左縁取りの見た目指定
-- [ ] border-left-width
-    - 自要素の領域の左縁取りの太さ指定
-- [ ] border-right
-    - 自要素の領域の右縁取り指定
-- [ ] border-right-color
-    - 自要素の領域の右縁取りの色指定
-- [ ] border-right-style
-    - 自要素の領域の右縁取りの見た目指定
-- [ ] border-right-width
-    - 自要素の領域の右縁取りの太さ指定
-- [ ] border-top
-    - 自要素の領域の上縁取り指定
-- [ ] border-top-color
-    - 自要素の領域の上縁取りの色指定
-- [ ] border-top-style
-    - 自要素の領域の上縁取りの見た目指定
-- [ ] border-top-width
-    - 自要素の領域の上縁取りの太さ指定
-- [ ] position
-    - 位置指定の種類を指定
-- [ ] display
-    - flexコンテナを使用するためにある
-- [ ] top
-    - 自要素の上辺の基準点からの座標指定
-- [ ] left
-    - 自要素の左辺の基準点からの座標指定
-- [ ] bottom
-    - 自要素の下辺の基準点からの座標指定
-- [ ] right
-    - 自要素の右辺の基準点からの座標指定
-- [ ] flex-direction
-    - flexコンテナの並ぶ向きの指定
-- [ ] flex-wrap
-    - flexコンテナ内、折り返すかはみ出すか
-- [ ] align-content
-    - flexコンテナ内の子要素に、整列の交差向きにどう整列させるか
-- [ ] justify-content
-    - flexコンテナ内の子要素に、整列の平行向きにどう整列させるか
-- [ ] align-items
-    - flexコンテナ内の各子要素を、各領域で整列の交差向きにどう整列させるか
 - [x] margin
     - 自要素領域の外側の余白
 - [x] margin-top
@@ -149,6 +67,56 @@
     - 自要素領域の内側の下の余白
 - [x] padding-right
     - 自要素領域の内側の右の余白
+- [x] width
+    - グラフィックオブジェクトの横幅
+- [x] height
+    - グラフィックオブジェクトの縦幅
+- [ ] min-width
+    - グラフィックオブジェクトの最小の横幅
+- [ ] max-width
+    - グラフィックオブジェクトの最大の横幅
+- [ ] min-height
+    - グラフィックオブジェクトの最小の縦幅
+- [ ] max-height
+    - グラフィックオブジェクトの最大の縦幅
+- [ ] opacity
+    - 透明度
+- [ ] chroma-key
+    - クロマキー
+- [ ] magnification
+    - 拡大率
+- [ ] rotate
+    - 回転量
+- [ ] border
+    - 自要素の領域の縁取り指定
+- [ ] border-color
+    - 自要素の領域の縁取りの色指定
+- [ ] border-width
+    - 自要素の領域の縁取りの太さ指定
+- [ ] border-bottom
+    - 自要素の領域の下縁取り指定
+- [ ] border-bottom-color
+    - 自要素の領域の下縁取りの色指定
+- [ ] border-bottom-width
+    - 自要素の領域の下縁取りの太さ指定
+- [ ] border-left
+    - 自要素の領域の左縁取り指定
+- [ ] border-left-color
+    - 自要素の領域の左縁取りの色指定
+- [ ] border-left-width
+    - 自要素の領域の左縁取りの太さ指定
+- [ ] border-right
+    - 自要素の領域の右縁取り指定
+- [ ] border-right-color
+    - 自要素の領域の右縁取りの色指定
+- [ ] border-right-width
+    - 自要素の領域の右縁取りの太さ指定
+- [ ] border-top
+    - 自要素の領域の上縁取り指定
+- [ ] border-top-color
+    - 自要素の領域の上縁取りの色指定
+- [ ] border-top-width
+    - 自要素の領域の上縁取りの太さ指定
 - [ ] border-radius
     - 自要素領域の境界線の角丸
 - [ ] border-bottom-left-radius
@@ -159,10 +127,6 @@
     - 自要素領域の左上境界線の角丸
 - [ ] border-top-right-radius
     - 自要素領域の右上境界線の角丸
-- [ ] visibility
-    - 表示するかどうか
-- [ ] box-shadow
-    - 自要素領域のシャドウ
 
 ## 音声プロパティ
 
@@ -185,39 +149,11 @@
     - 字幕の縁取りの色
 - [x] font-border-width
     - 字幕の縁取りの太さ
-- [ ] font
-    - フォント情報
 - [x] font-family
     - 使用フォントの指定
 - [x] font-size
     - フォントのサイズ
-- [ ] font-stretch
-    - 字幕の横伸び率
 - [x] font-style
     - Italicの指定
 - [x] font-weight
     - Boldの指定
-- [ ] text-align
-    - 字幕の位置揃え
-- [ ] text-decoration
-    - 字幕の飾り情報指定
-- [ ] text-decoration-color
-    - 字幕の飾りの色指定
-- [ ] text-decoration-line
-    - 字幕の飾りの位置指定
-- [ ] text-decoration-style
-    - 字幕の飾りの指定
-- [ ] text-decoration-thickness
-    - 字幕の飾り太さ指定
-- [ ] text-orientation
-    - 字幕の向き
-- [ ] text-overflow
-    - 字幕がはみ出たときの見た目指定
-- [ ] text-shadow
-    - 字幕のシャドウ指定
-- [ ] line-height
-    - 字幕の1行の高さを指定
-- [ ] letter-spacing
-    - 1文字1文字の字間の指定
-- [ ] word-break
-    - 折り返すかはみ出すか
