@@ -98,7 +98,9 @@
   </cont>
 </vsml>
 ```
-<video width=400 height=225 controls src="examples/txt.mp4"></video>
+[txt.mp4](examples/txt.mp4)
+
+https://github.com/PigeonsHouse/VSML/assets/65777862/f5374be0-629c-4e37-a5fd-a0a30d24003c
 
 ### img
 ```xml
@@ -108,7 +110,9 @@
   </cont>
 </vsml>
 ```
-<video width=400 height=225 controls src="examples/img.mp4"></video>
+[img.mp4](examples/img.mp4)
+
+https://github.com/PigeonsHouse/VSML/assets/65777862/0b9415d7-4ec7-4aeb-bcde-e32e58b68636
 
 ### aud
 ```xml
@@ -118,7 +122,9 @@
   </cont>
 </vsml>
 ```
-<video width=400 height=225 controls src="examples/aud.mp4"></video>
+[aud.mp4](examples/aud.mp4)
+
+https://github.com/PigeonsHouse/VSML/assets/65777862/61172352-9d48-4191-9652-1c88cd47fde4
 
 ### seq
 ```xml
@@ -141,7 +147,9 @@
   </cont>
 </vsml>
 ```
-<video width=400 height=225 controls src="examples/seq.mp4"></video>
+[seq.mp4](examples/seq.mp4)
+
+https://github.com/PigeonsHouse/VSML/assets/65777862/4a0f2923-cbd3-46c5-9d85-6dd710bacc36
 
 ### prl
 ```xml
@@ -163,7 +171,9 @@
   </cont>
 </vsml>
 ```
-<video width=400 height=225 controls src="examples/prl.mp4"></video>
+[prl.mp4](examples/prl.mp4)
+
+https://github.com/PigeonsHouse/VSML/assets/65777862/22dddae6-1dd8-46a9-b1ce-2196035f92f2
 
 ```xml
 <vsml>
@@ -185,7 +195,9 @@
   </cont>
 </vsml>
 ```
-<video width=400 height=225 controls src="examples/prl2.mp4"></video>
+[prl2.mp4](examples/prl2.mp4)
+
+https://github.com/PigeonsHouse/VSML/assets/65777862/46003953-8444-4e5e-b52a-25e56da666a5
 
 ### layer
 ```xml
@@ -207,4 +219,6 @@
   </cont>
 </vsml>
 ```
-<video width=400 height=225 controls src="examples/layer.mp4"></video>
+[layer.mp4](examples/layer.mp4)
+
+https://github.com/PigeonsHouse/VSML/assets/65777862/f47402d6-fffe-43e6-aa3f-3e16180c6e7b
