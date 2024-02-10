@@ -5,3 +5,4 @@ __pycache__/
 debug.json
 *.mp4
 *.png
+!examples/**/*.mp4
