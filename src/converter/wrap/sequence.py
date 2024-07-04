@@ -3,7 +3,7 @@ from converter.ffmpeg import (
     adjust_fit_sequence,
     concat_filter,
     get_background_color_code,
-    object_length_filter,
+    duration_filter,
     set_background_filter,
     time_space_end_filter,
     time_space_start_filter,
@@ -30,7 +30,7 @@ def create_sequence_process(
 
     for child_process in child_processes:
         child_style = child_process.style
-        length_with_padding = child_style.get_object_length_with_padding()
+        length_with_padding = child_style.get_duration_with_padding()
 
         max_time_margin = max(
             previous_time_margin,
@@ -82,7 +82,7 @@ def create_sequence_process(
             audio_time_margin += max_time_margin + length_with_padding
 
         # FITな子要素があれば以降をこのオブジェクトで埋める
-        if child_style.object_length.is_fit():
+        if child_style.duration.is_fit():
             video_process, audio_process = adjust_fit_sequence(
                 background_color_code, video_process, audio_process
             )
@@ -107,8 +107,8 @@ def create_sequence_process(
                 audio_remain_time_margin,
                 audio_process=audio_process,
             )
-    video_process, audio_process = object_length_filter(
-        style.object_length,
+    video_process, audio_process = duration_filter(
+        style.duration,
         video_process=video_process,
         audio_process=audio_process,
     )

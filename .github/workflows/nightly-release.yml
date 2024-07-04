@@ -92,6 +92,8 @@ jobs:
         path: dist/main.exe
 
   release:
+    permissions:
+      contents: write
     needs: [build_linux, build_macintosh, build_windows]
     runs-on: ubuntu-latest
 

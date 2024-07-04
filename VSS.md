@@ -2,7 +2,7 @@
 ## 共通プロパティ
 全てのタグに適用されるプロパティ
 
-- [x] object-length
+- [x] duration
     - タイムラインオブジェクトの長さの指定
     - `fit|source|<time[s]>|<frame[f]>|<percent[%]>`
 - [x] time-margin

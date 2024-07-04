@@ -94,7 +94,7 @@
     </style>
   </meta>
   <cont resolution="1920x1080" fps="30">
-    <txt style="object-length: 1s;">1つ目の文章</txt>
+    <txt style="duration: 1s;">1つ目の文章</txt>
   </cont>
 </vsml>
 ```
@@ -106,7 +106,7 @@ https://github.com/PigeonsHouse/VSML/assets/65777862/f5374be0-629c-4e37-a5fd-a0a
 ```xml
 <vsml>
   <cont>
-    <img style="object-length: 1s;" src="キリン.png" />
+    <img style="duration: 1s;" src="キリン.png" />
   </cont>
 </vsml>
 ```
@@ -141,8 +141,8 @@ https://github.com/PigeonsHouse/VSML/assets/65777862/61172352-9d48-4191-9652-1c8
   <cont>
     <seq>
       <aud src="ピロッ.mp3" />
-      <txt style="object-length: 1s;">1つ目の文章</txt>
-      <img style="object-length: 1s;" src="キリン.png" />
+      <txt style="duration: 1s;">1つ目の文章</txt>
+      <img style="duration: 1s;" src="キリン.png" />
     </seq>
   </cont>
 </vsml>
@@ -165,8 +165,8 @@ https://github.com/PigeonsHouse/VSML/assets/65777862/4a0f2923-cbd3-46c5-9d85-6dd
   </meta>
   <cont>
     <prl>
-      <txt style="object-length: 1s;">1つ目の文章</txt>
-      <img style="object-length: 1s;" src="キリン.png" />
+      <txt style="duration: 1s;">1つ目の文章</txt>
+      <img style="duration: 1s;" src="キリン.png" />
     </prl>
   </cont>
 </vsml>
@@ -213,8 +213,8 @@ https://github.com/PigeonsHouse/VSML/assets/65777862/46003953-8444-4e5e-b52a-25e
   </meta>
   <cont>
     <layer>
-      <txt style="object-length: 1s;">1つ目の文章</txt>
-      <img style="object-length: 1s;" src="キリン.png" />
+      <txt style="duration: 1s;">1つ目の文章</txt>
+      <img style="duration: 1s;" src="キリン.png" />
     </layer>
   </cont>
 </vsml>

@@ -187,7 +187,7 @@ COLOR_PATTERN = "({}|{}|{}|{})".format(
 )
 
 STYLE_VALUE_PATTERN = {
-    "object-length": "(fit|source|{})".format(TIME_PATTERN),
+    "duration": "(fit|source|{})".format(TIME_PATTERN),
     "source-loop": "(true|false)",
     "playback-speed": PERCENT_PATTERN,
     "time-margin": r"{0}(\s+{0})?".format(TIME_PATTERN),

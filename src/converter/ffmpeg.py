@@ -135,13 +135,13 @@ def audio_volume_filter(
     return audio_process
 
 
-def object_length_filter(
-    object_length: TimeValue,
+def duration_filter(
+    duration: TimeValue,
     video_process: Optional[Any] = None,
     audio_process: Optional[Any] = None,
 ) -> tuple[Any, Any]:
-    if object_length.has_specific_value():
-        length_second = object_length.get_second()
+    if duration.has_specific_value():
+        length_second = duration.get_second()
         if video_process is not None:
             video_process = ffmpeg.trim(video_process, end=length_second)
         if audio_process is not None:
@@ -150,7 +150,7 @@ def object_length_filter(
                 "atrim",
                 end=length_second,
             )
-    elif object_length.is_fit():
+    elif duration.is_fit():
         if video_process is not None:
             video_process = ffmpeg.filter(
                 video_process, "loop", loop=-1, size=32767, start=0
@@ -303,14 +303,14 @@ def get_text_process(
 
 
 def adjust_parallel_audio(
-    object_length: TimeValue,
+    duration: TimeValue,
     audio_process: Any,
 ) -> Any:
     option = {}
-    if object_length.is_fit():
+    if duration.is_fit():
         option = {"whole_len": -1.0}
     else:
-        option = {"whole_dur": object_length.get_second()}
+        option = {"whole_dur": duration.get_second()}
 
     return ffmpeg.filter(
         audio_process,
