@@ -15,7 +15,7 @@ def convert_image_from_frame(
 ) -> None:
     output_path = "preview.png" if output_path is None else output_path
     second = frame / VSMLManager.get_root_fps()
-    if second > vsml_data.content.style.object_length.get_second():
+    if second > vsml_data.content.style.duration.get_second():
         raise Exception()
     vsml_content_for_pick = None
     vsml_content = vsml_data.content

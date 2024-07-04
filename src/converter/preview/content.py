@@ -27,15 +27,15 @@ def pick_data(
                     item._second = -1
                     vsml_content.items = [item]
                     return vsml_content
-                whole_second_with_object_length = (
-                    whole_second + item.style.object_length.get_second()
+                whole_second_with_duration = (
+                    whole_second + item.style.duration.get_second()
                 )
-                if second < whole_second_with_object_length:
+                if second < whole_second_with_duration:
                     child = pick_data(item, second - whole_second)
                     if child is not None:
                         vsml_content.items = [child]
                     return vsml_content
-                whole_second = whole_second_with_object_length
+                whole_second = whole_second_with_duration
                 whole_second += item.style.time_padding_end.get_second()
                 if second < whole_second:
                     item._second = -1
@@ -56,18 +56,18 @@ def pick_data(
                     item._second = -1
                     vsml_content.items.append(item)
                     continue
-                whole_second_with_object_length = (
-                    whole_second + item.style.object_length.get_second()
+                whole_second_with_duration = (
+                    whole_second + item.style.duration.get_second()
                 )
                 if (
-                    second < whole_second_with_object_length
-                    or item.style.object_length.is_fit()
+                    second < whole_second_with_duration
+                    or item.style.duration.is_fit()
                 ):
                     child = pick_data(item, second - whole_second)
                     if child is not None:
                         vsml_content.items.append(child)
                     continue
-                whole_second = whole_second_with_object_length
+                whole_second = whole_second_with_duration
                 whole_second += item.style.time_padding_end.get_second()
                 if second < whole_second:
                     item._second = -1

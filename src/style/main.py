@@ -40,7 +40,7 @@ from .utils import calculate_text_size, find_font_files
 class Style:
     # style param
     # time param
-    object_length: TimeValue
+    duration: TimeValue
     time_margin_start: TimeValue
     time_margin_end: TimeValue
     time_padding_start: TimeValue
@@ -72,7 +72,7 @@ class Style:
     font_weight: Optional[bool]  # inherit
     font_style: Optional[bool]  # inherit
     # other value
-    source_object_length: Optional[TimeValue]
+    source_duration: Optional[TimeValue]
     source_width: Optional[GraphicValue]
     source_height: Optional[GraphicValue]
     source_audio_system: Optional[AudioSystem]
@@ -88,7 +88,7 @@ class Style:
         attrib: _Attrib,
     ) -> None:
         # initializing
-        self.object_length = TimeValue("fit")
+        self.duration = TimeValue("fit")
         self.time_margin_start = TimeValue("fit")
         self.time_margin_end = TimeValue("fit")
         self.time_padding_start = TimeValue("fit")
@@ -116,7 +116,7 @@ class Style:
         self.font_size = None
         self.font_weight = None
         self.font_style = None
-        self.source_object_length = None
+        self.source_duration = None
         self.source_width = None
         self.source_height = None
         self.source_audio_system = None
@@ -170,15 +170,15 @@ class Style:
             case "vid":
                 meta = ffprobe(source_value)
                 (
-                    object_length,
+                    duration,
                     meta_video,
                     meta_audio,
                 ) = self._get_info_from_meta(meta)
-                if object_length is None or meta_video is None:
+                if duration is None or meta_video is None:
                     raise Exception()
-                self.object_length = TimeValue("source")
-                self.source_object_length = TimeValue(
-                    "{}s".format(object_length)
+                self.duration = TimeValue("source")
+                self.source_duration = TimeValue(
+                    "{}s".format(duration)
                 )
                 width = meta_video["width"]
                 height = meta_video["height"]
@@ -196,15 +196,15 @@ class Style:
             case "aud":
                 meta = ffprobe(source_value)
                 (
-                    object_length,
+                    duration,
                     meta_video,
                     meta_audio,
                 ) = self._get_info_from_meta(meta)
-                if object_length is None or meta_audio is None:
+                if duration is None or meta_audio is None:
                     raise Exception()
-                self.object_length = TimeValue("source")
-                self.source_object_length = TimeValue(
-                    "{}s".format(object_length)
+                self.duration = TimeValue("source")
+                self.source_duration = TimeValue(
+                    "{}s".format(duration)
                 )
                 channel_layout = meta_audio.get("channel_layout")
                 match channel_layout:
@@ -217,7 +217,7 @@ class Style:
             case "img":
                 meta = ffprobe(source_value)
                 (
-                    object_length,
+                    duration,
                     meta_video,
                     meta_audio,
                 ) = self._get_info_from_meta(meta)
@@ -241,10 +241,10 @@ class Style:
             value,
         ) in style_tree.items():
             match param:
-                case "object-length":
+                case "duration":
                     parse_value = time_parser(value)
                     if parse_value is not None:
-                        self.object_length = parse_value
+                        self.duration = parse_value
                 case "time-margin":
                     parse_value = double_time_parser(value)
                     if parse_value is not None:
@@ -438,34 +438,34 @@ class Style:
                 pass
 
         # calculate param
-        parent_object_length = (
-            parent_param.object_length
+        parent_duration = (
+            parent_param.duration
             if (
                 parent_param is not None
-                and parent_param.object_length.has_specific_value()
+                and parent_param.duration.has_specific_value()
             )
             else None
         )
-        self.object_length = time_calculator(
-            self.object_length,
-            parent_object_length,
-            self.source_object_length,
+        self.duration = time_calculator(
+            self.duration,
+            parent_duration,
+            self.source_duration,
         )
         self.time_margin_start = time_calculator(
             self.time_margin_start,
-            parent_object_length,
+            parent_duration,
         )
         self.time_margin_end = time_calculator(
             self.time_margin_end,
-            parent_object_length,
+            parent_duration,
         )
         self.time_padding_start = time_calculator(
             self.time_padding_start,
-            parent_object_length,
+            parent_duration,
         )
         self.time_padding_end = time_calculator(
             self.time_padding_end,
-            parent_object_length,
+            parent_duration,
         )
 
         parent_width = (
@@ -540,18 +540,18 @@ class Style:
         height = self.get_height()
         return height + self.padding_top + self.padding_bottom
 
-    def get_object_length_with_padding(self) -> TimeValue:
-        object_length = self.get_object_length()
-        return object_length + self.time_padding_start + self.time_padding_end
+    def get_duration_with_padding(self) -> TimeValue:
+        duration = self.get_duration()
+        return duration + self.time_padding_start + self.time_padding_end
 
-    def get_object_length(self) -> TimeValue:
+    def get_duration(self) -> TimeValue:
         return (
-            self.source_object_length
+            self.source_duration
             if (
-                self.source_object_length is not None
-                and not self.object_length.is_fit()
+                self.source_duration is not None
+                and not self.duration.is_fit()
             )
-            else self.object_length
+            else self.duration
         )
 
     def get_width(self) -> GraphicValue:

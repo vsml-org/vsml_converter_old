@@ -18,21 +18,21 @@ from vss import convert_prop_val_to_dict, convert_vss_dict
 
 class WrapObjectTimeInfo:
     children_is_fit: bool
-    whole_object_length: TimeValue
+    whole_duration: TimeValue
     last_time_margin: TimeValue
 
     def __init__(
         self,
         children_is_fit: bool,
-        whole_object_length: TimeValue,
+        whole_duration: TimeValue,
         last_time_margin: TimeValue,
     ):
         self.children_is_fit = children_is_fit
-        self.whole_object_length = whole_object_length
+        self.whole_duration = whole_duration
         self.last_time_margin = last_time_margin
 
     def include_last_margin(self):
-        self.whole_object_length += self.last_time_margin
+        self.whole_duration += self.last_time_margin
 
 
 class WrapObjectGraphicInfo:
@@ -163,18 +163,18 @@ def element_to_content(
                 style.order == Order.PARALLEL
                 or len(vsml_element_children) == 0
             ),
-            whole_object_length=TimeValue("0"),
+            whole_duration=TimeValue("0"),
             last_time_margin=TimeValue("0"),
         )
-        calc_object_length = None
+        calc_duration = None
         # 親要素に時間指定がないとき
-        if style.object_length.is_fit():
+        if style.duration.is_fit():
             # シーケンス(時間的逐次)
             if style.order == Order.SEQUENCE:
-                calc_object_length = calc_catenating_object_length
+                calc_duration = calc_catenating_duration
             # パラレル(時間的並列)
             elif style.order == Order.PARALLEL:
-                calc_object_length = calc_piling_object_length
+                calc_duration = calc_piling_duration
         wrap_object_horizontal_info = WrapObjectGraphicInfo(
             whole_length=GraphicValue("0"),
             last_margin=GraphicValue("0"),
@@ -223,13 +223,13 @@ def element_to_content(
 
             child_style = child_content.style
             # 時間計算
-            if calc_object_length is not None:
-                calc_object_length(
+            if calc_duration is not None:
+                calc_duration(
                     wrap_object_time_info,
-                    child_style.object_length.is_fit(),
+                    child_style.duration.is_fit(),
                     child_style.time_margin_start,
                     child_style.time_padding_start,
-                    child_style.get_object_length(),
+                    child_style.get_duration(),
                     child_style.time_padding_end,
                     child_style.time_margin_end,
                 )
@@ -257,13 +257,13 @@ def element_to_content(
         wrap_object_horizontal_info.include_last_margin()
         wrap_object_vertical_info.include_last_margin()
 
-        # wrapのobject_lengthがデフォルト値(FIT)かつ、子要素全体が時間的長さを持つ場合
+        # wrapのdurationがデフォルト値(FIT)かつ、子要素全体が時間的長さを持つ場合
         if (
-            style.object_length.is_fit()
+            style.duration.is_fit()
             and not wrap_object_time_info.children_is_fit
         ):
-            # 親のobject_lengthを更新
-            style.object_length = wrap_object_time_info.whole_object_length
+            # 親のdurationを更新
+            style.duration = wrap_object_time_info.whole_duration
         if vsml_content.exist_video:
             # 親のwidth, heightを更新
             if style.width.is_auto():
@@ -277,48 +277,48 @@ def element_to_content(
     return vsml_content
 
 
-def calc_catenating_object_length(
+def calc_catenating_duration(
     wrap_object_info: WrapObjectTimeInfo,
     child_is_fit: bool,
     time_margin_start: TimeValue,
     time_padding_start: TimeValue,
-    child_object_length: TimeValue,
+    child_duration: TimeValue,
     time_padding_end: TimeValue,
     time_margin_end: TimeValue,
 ):
     wrap_object_info.children_is_fit = (
         wrap_object_info.children_is_fit or child_is_fit
     )
-    wrap_object_info.whole_object_length += (
+    wrap_object_info.whole_duration += (
         max(
             time_margin_start,
             wrap_object_info.last_time_margin,
         )
         + time_padding_start
-        + child_object_length
+        + child_duration
         + time_padding_end
     )
     wrap_object_info.last_time_margin = time_margin_end
 
 
-def calc_piling_object_length(
+def calc_piling_duration(
     wrap_object_info: WrapObjectTimeInfo,
     child_is_fit: bool,
     time_margin_start: TimeValue,
     time_padding_start: TimeValue,
-    child_object_length: TimeValue,
+    child_duration: TimeValue,
     time_padding_end: TimeValue,
     time_margin_end: TimeValue,
 ):
     wrap_object_info.children_is_fit = (
         wrap_object_info.children_is_fit and child_is_fit
     )
-    wrap_object_info.whole_object_length = max(
-        wrap_object_info.whole_object_length,
+    wrap_object_info.whole_duration = max(
+        wrap_object_info.whole_duration,
         (
             time_margin_start
             + time_padding_start
-            + child_object_length
+            + child_duration
             + time_padding_end
             + time_margin_end
         ),

@@ -10,7 +10,7 @@ from .ffmpeg import (
     get_background_color_code,
     get_source_process,
     get_text_process,
-    object_length_filter,
+    duration_filter,
     set_background_filter,
     time_space_end_filter,
     time_space_start_filter,
@@ -96,8 +96,8 @@ def create_source_process(
 
     # timeのstyle対応
     background_color_code = get_background_color_code(style.background_color)
-    video_process, audio_process = object_length_filter(
-        style.object_length, video_process, audio_process
+    video_process, audio_process = duration_filter(
+        style.duration, video_process, audio_process
     )
     video_process, audio_process = time_space_start_filter(
         style.time_padding_start,
@@ -105,7 +105,7 @@ def create_source_process(
         video_process,
         audio_process,
     )
-    if style.object_length.has_specific_value():
+    if style.duration.has_specific_value():
         video_process, audio_process = time_space_end_filter(
             style.time_padding_end,
             background_color_code,

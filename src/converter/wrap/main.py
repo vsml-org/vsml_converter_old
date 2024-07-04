@@ -36,7 +36,7 @@ def create_wrap_process(
         process.video,
         process.audio,
     )
-    if style.object_length.has_specific_value():
+    if style.duration.has_specific_value():
         process.video, process.audio = time_space_end_filter(
             style.time_padding_end,
             background_color_code,

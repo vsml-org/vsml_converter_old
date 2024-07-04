@@ -5,7 +5,7 @@ from converter.ffmpeg import (
     get_background_color_code,
     get_background_process,
     layering_filter,
-    object_length_filter,
+    duration_filter,
     time_space_end_filter,
     time_space_start_filter,
 )
@@ -34,8 +34,8 @@ def create_parallel_process(
             ),
             style.background_color,
         )
-        video_process, _ = object_length_filter(
-            style.object_length, video_process=video_process
+        video_process, _ = duration_filter(
+            style.duration, video_process=video_process
         )
 
     is_single = style.layer_mode == LayerMode.SINGLE
@@ -61,7 +61,7 @@ def create_parallel_process(
             child_process.video,
             child_process.audio,
         )
-        if not child_style.object_length.is_fit():
+        if not child_style.duration.is_fit():
             child_process.video, child_process.audio = time_space_end_filter(
                 child_style.time_margin_end,
                 background_color_code,
@@ -120,10 +120,10 @@ def create_parallel_process(
             )
     if audio_process is not None:
         audio_process = adjust_parallel_audio(
-            style.object_length, audio_process
+            style.duration, audio_process
         )
-    video_process, audio_process = object_length_filter(
-        style.object_length,
+    video_process, audio_process = duration_filter(
+        style.duration,
         video_process=video_process,
         audio_process=audio_process,
     )
