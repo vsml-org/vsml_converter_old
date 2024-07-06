@@ -418,6 +418,8 @@ def export_video(
         process,
         out_filename,
         r=VSMLManager.get_root_fps(),
+        vcodec='libx264',
+        acodec='aac'
     )
 
     if debug_mode:
