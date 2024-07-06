@@ -7,6 +7,8 @@ from vsml import VSML
 from .content import create_source_process
 from .ffmpeg import (
     export_video,
+    get_background_process,
+    duration_filter,
     set_background_filter,
     time_space_end_filter,
     time_space_start_filter,
@@ -51,7 +53,10 @@ def convert_video(
 
     process = create_process(vsml_data.content, debug_mode)
     style = vsml_data.content.style
-    if process.video is not None:
+    if process.video is None:
+        black_video_process = get_background_process(VSMLManager.get_root_resolution().get_str())
+        process.video, _ = duration_filter(style.duration, black_video_process, None)
+    else:
         process.video = set_background_filter(
             background_color=style.background_color,
             resolution_text=VSMLManager.get_root_resolution().get_str(),
